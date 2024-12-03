@@ -15,5 +15,13 @@
 			"Name": "GameplayAbilities",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Android",
+		"IOS",
+		"Linux",
+		"LinuxArm64",
+		"Mac",
+		"Windows"
 	]
 }
