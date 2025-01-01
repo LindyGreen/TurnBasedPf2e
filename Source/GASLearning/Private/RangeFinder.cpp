@@ -19,7 +19,7 @@ URangeFinder::URangeFinder()
 void URangeFinder::BeginPlay()
 {
 	Super::BeginPlay();
-	GeneratePossibleArray((10, 10), (10, 10), 10, EAE_SpellPattern_Cone);
+	GeneratePossibleArray((10, 10), (10, 10), 10, EAE_SpellPattern_Invalid);
 	// ...
 }
 
@@ -42,7 +42,7 @@ TArray<FIntPoint> URangeFinder::GeneratePossibleArray(FIntPoint OriginPoint, FIn
 	case EAE_SpellPattern_Burst:
 		break;
 	case EAE_SPellPattern_Line:
-		break;
+		return TArray<FIntPoint>(GenerateLine(CasterLocation, OriginPoint, Range));
 	case EAE_SpellPattern_Cone:
 		return TArray<FIntPoint>(GenerateCone(OriginPoint, CasterLocation, Range));
 	case EAE_SpellPattern_Emanation:
@@ -153,3 +153,43 @@ int32 URangeFinder::TotalCost(FIntPoint OriginPoint, FIntPoint CurrentTile)//MIN
 	return FMath::Max(abs(OriginPoint.X - CurrentTile.X), abs(OriginPoint.Y - CurrentTile.Y)) +
 						 FMath::Min(abs(OriginPoint.X - CurrentTile.X), abs(OriginPoint.Y - CurrentTile.Y)) / 2; 
 }//Min Cost calc
+TArray<FIntPoint> URangeFinder::GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, int32 Range)
+{
+	TArray<FIntPoint> ValidTiles;
+	if (TotalCost(CasterLocation, OriginPoint) > Range)//return empty array of total cost>range
+	{
+		return ValidTiles;
+	}
+	int32 dx = abs(OriginPoint.X - CasterLocation.X);
+	int32 dy = abs(OriginPoint.Y - CasterLocation.Y);
+	int32 x = CasterLocation.X;
+	int32 y = CasterLocation.Y;
+    
+	int32 stepX = (CasterLocation.X < OriginPoint.X) ? 1 : -1; //Up or Down
+	int32 stepY = (CasterLocation.Y < OriginPoint.Y) ? 1 : -1; //LeftOrRight
+    
+	int32 err = dx - dy;
+
+	while (x != OriginPoint.X || y != OriginPoint.Y)
+	{
+		ValidTiles.Add(FIntPoint(x, y));
+		int32 e2 = 2 * err;
+        
+		if (e2 > -dy)
+		{
+			err -= dy;
+			x += stepX;
+		}
+		if (e2 < dx)
+		{
+			err += dx;
+			y += stepY;
+		}
+	}
+	ValidTiles.AddUnique(OriginPoint);
+	ValidTiles.Remove(CasterLocation);
+
+	
+	return ValidTiles;
+}
+
