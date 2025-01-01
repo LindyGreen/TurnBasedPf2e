@@ -37,7 +37,6 @@ public:
 	FIntPoint Target;
 	
 	TArray<FIntPoint> PossibleArray;
-	
 	//Functions
 	UFUNCTION(BlueprintCallable)
 	TArray<FIntPoint> GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, int32 Range, EAE_SpellPattern Enum);
