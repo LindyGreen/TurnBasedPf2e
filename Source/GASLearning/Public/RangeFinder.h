@@ -39,13 +39,16 @@ public:
 	TArray<FIntPoint> PossibleArray;
 	//Functions
 	UFUNCTION(BlueprintCallable)
-	TArray<FIntPoint> GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, int32 Range, EAE_SpellPattern Enum);
+	TArray<FIntPoint> GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area, EAE_SpellPattern Enum, bool bIgnoreOrigin);
 	UFUNCTION(BlueprintCallable)//Emanation is callable because it is used in ability ranges.
-	TArray<FIntPoint> GenerateEmanation(FIntPoint OriginPoint, int32 Range);
+	TArray<FIntPoint> GenerateEmanation(FIntPoint OriginPoint, uint8 Area, bool bIgnoreOrigin);
 
-	TArray<FIntPoint> GenerateCone(FIntPoint OriginPoint, FIntPoint CasterLocation, int32 Range);
-
+	TArray<FIntPoint> GenerateCone(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 TotalCost(FIntPoint OriginPoint, FIntPoint CurrentTile);
-	TArray<FIntPoint> GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, int32 Range);
+
+	TArray<FIntPoint> GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, uint8 Area);
+	TArray<FIntPoint> GenerateBurst(FIntPoint OriginPoint, uint8 Area);
 	
 };
+

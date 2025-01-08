@@ -19,11 +19,8 @@ URangeFinder::URangeFinder()
 void URangeFinder::BeginPlay()
 {
 	Super::BeginPlay();
-	GeneratePossibleArray((10, 10), (10, 10), 10, EAE_SpellPattern_Invalid);
 	// ...
 }
-
-
 // Called every frame
 void URangeFinder::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -32,45 +29,48 @@ void URangeFinder::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	// ...
 }
 
-TArray<FIntPoint> URangeFinder::GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, int32 Range,
-                                                      EAE_SpellPattern Enum)
+TArray<FIntPoint> URangeFinder::GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area,
+                                                      EAE_SpellPattern Enum, bool bIgnoreOrigin)
 {
 	switch (Enum)
 	{
 	case EAE_SpellPattern_Invalid:
+		UE_LOG(LogTemp, Display, TEXT("URangeFinder::GeneratePossibleArray: Invalid Enum"));
 		break;
 	case EAE_SpellPattern_Burst:
-		break;
+		return TArray<FIntPoint>(GenerateBurst(OriginPoint, Area));
 	case EAE_SPellPattern_Line:
-		return TArray<FIntPoint>(GenerateLine(CasterLocation, OriginPoint, Range));
+		return TArray<FIntPoint>(GenerateLine(CasterLocation, OriginPoint, Area));
 	case EAE_SpellPattern_Cone:
-		return TArray<FIntPoint>(GenerateCone(OriginPoint, CasterLocation, Range));
+		return TArray<FIntPoint>(GenerateCone(OriginPoint, CasterLocation, Area));
 	case EAE_SpellPattern_Emanation:
-		return TArray<FIntPoint>(GenerateEmanation(OriginPoint, Range)); //SHOULD CHANGE TO CASTER LOCATION In DEV
+		return TArray<FIntPoint>(GenerateEmanation(OriginPoint, Area, bIgnoreOrigin)); //SHOULD CHANGE TO CASTER LOCATION In DEV
 	}
 	return TArray<FIntPoint>();
 }
 
-TArray<FIntPoint> URangeFinder::GenerateEmanation(FIntPoint OriginPoint, int32 Range)
+TArray<FIntPoint> URangeFinder::GenerateEmanation(FIntPoint OriginPoint, uint8 Area, bool bIgnoreOrigin)
 {
 	TArray<FIntPoint> ValidTiles;
-	for (int32 dx = -Range; dx <= Range; dx++)
+	for (int32 dx = -Area; dx <= Area; dx++)
 	{
-		for (int32 dy = -Range; dy <= Range; dy++)
+		for (int32 dy = -Area; dy <= Area; dy++)
 		{
 			FIntPoint CurrentTile(OriginPoint.X + dx, OriginPoint.Y + dy);
-			if (TotalCost(OriginPoint, CurrentTile) <= Range)
+			if (TotalCost(OriginPoint, CurrentTile) <= Area)
 			{
 				ValidTiles.Add(CurrentTile);
 			}
 		}
 	}
+	if (bIgnoreOrigin)
+		ValidTiles.Remove(OriginPoint);
 	return ValidTiles;
 }
 
-TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint CasterLocation, int32 Range)
+TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area)
 {
-	int32 ConeRange = Range-1;//to count in origin point.
+	int32 ConeRange = Area-1;//to count in origin point.
 	TArray<FIntPoint> ValidTiles;//init return
 	FIntPoint RelativePosition = OriginPoint - CasterLocation;//init RelativeToCaster
 	bool bIsOrthogonal = abs(RelativePosition.X + RelativePosition.Y) == 1;
@@ -115,7 +115,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint Ca
 			{
 				FIntPoint CurrentTile(OriginPoint.X + dx, OriginPoint.Y + dy);
 				FIntPoint RelativeTile(CurrentTile-OriginPoint);
-				if ((TotalCost(CasterLocation, CurrentTile) <= Range) && ((RelativePosition.X==0) ? abs(RelativeTile.X)<=abs(RelativeTile.Y): abs(RelativeTile.Y)<=abs(RelativeTile.X)))
+				if ((TotalCost(CasterLocation, CurrentTile) <= Area) && ((RelativePosition.X==0) ? abs(RelativeTile.X)<=abs(RelativeTile.Y): abs(RelativeTile.Y)<=abs(RelativeTile.X)))
 				{
 					ValidTiles.Add(CurrentTile);
 				}
@@ -138,7 +138,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint Ca
 			for (int32 dy = startY; dy <= endY; dy++)
 			{
 				FIntPoint CurrentTile(OriginPoint.X + dx, OriginPoint.Y + dy);
-				if (TotalCost(OriginPoint, CurrentTile) <= ConeRange)
+				if (TotalCost(CasterLocation, CurrentTile) <= Area)
 				{
 					ValidTiles.Add(CurrentTile);
 				}
@@ -153,10 +153,10 @@ int32 URangeFinder::TotalCost(FIntPoint OriginPoint, FIntPoint CurrentTile)//MIN
 	return FMath::Max(abs(OriginPoint.X - CurrentTile.X), abs(OriginPoint.Y - CurrentTile.Y)) +
 						 FMath::Min(abs(OriginPoint.X - CurrentTile.X), abs(OriginPoint.Y - CurrentTile.Y)) / 2; 
 }//Min Cost calc
-TArray<FIntPoint> URangeFinder::GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, int32 Range)
+TArray<FIntPoint> URangeFinder::GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, uint8 Area)
 {
 	TArray<FIntPoint> ValidTiles;
-	if (TotalCost(CasterLocation, OriginPoint) > Range)//return empty array of total cost>range
+	if (TotalCost(CasterLocation, OriginPoint) > Area)//return empty array of total cost>range
 	{
 		return ValidTiles;
 	}
@@ -193,3 +193,12 @@ TArray<FIntPoint> URangeFinder::GenerateLine(FIntPoint CasterLocation, FIntPoint
 	return ValidTiles;
 }
 
+TArray<FIntPoint> URangeFinder::GenerateBurst(FIntPoint OriginPoint, uint8 Area)
+{
+	TArray<FIntPoint> BurstArray;
+	BurstArray.Append(GenerateCone(OriginPoint, OriginPoint+FIntPoint(1,1), Area));
+	BurstArray.Append(GenerateCone(OriginPoint+FIntPoint(1,0), OriginPoint+FIntPoint(0,1), Area));
+	BurstArray.Append(GenerateCone(OriginPoint+FIntPoint(1,1), OriginPoint+FIntPoint(0,0), Area));
+	BurstArray.Append(GenerateCone(OriginPoint+FIntPoint(0,1), OriginPoint+FIntPoint(1,0), Area));
+	return BurstArray;
+}
