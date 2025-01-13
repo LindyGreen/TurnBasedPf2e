@@ -202,3 +202,39 @@ TArray<FIntPoint> URangeFinder::GenerateBurst(FIntPoint OriginPoint, uint8 Area)
 	BurstArray.Append(GenerateCone(OriginPoint+FIntPoint(0,1), OriginPoint+FIntPoint(1,0), Area));
 	return BurstArray;
 }
+
+TArray<FIntPoint> URangeFinder::GetNeighborIndexes(FIntPoint Index, bool bIncludeDiagonals)
+{
+		TArray<FIntPoint> Array;
+		Array = {
+			Index + FIntPoint(0, 1),
+			Index + FIntPoint(1, 0),
+			Index + FIntPoint(-1, 0),
+			Index + FIntPoint(0, -1)
+		};
+
+		if (bIncludeDiagonals)
+	{
+		TArray<FIntPoint> Diagonals ={
+			Index+FIntPoint(1,1),
+			Index+FIntPoint(1,-1),
+			Index+FIntPoint(-1,1),
+			Index+FIntPoint(-1,-1)};
+		Array.Append(Diagonals);
+	}
+		return Array;
+}
+
+bool URangeFinder::IsDiagonal(FIntPoint Index1, FIntPoint Index2)
+{
+	TArray<FIntPoint> Diagonals ={
+		Index1+FIntPoint(1,1),
+		Index1+FIntPoint(1,-1),
+		Index1+FIntPoint(-1,1),
+		Index1+FIntPoint(-1,-1)};
+	return Diagonals.Contains(Index2);
+}
+
+
+
+

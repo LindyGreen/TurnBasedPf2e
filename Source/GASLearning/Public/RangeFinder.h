@@ -33,14 +33,15 @@ public:
 	 */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FIntPoint Origin;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)  
 	FIntPoint Target;
-	
+
 	TArray<FIntPoint> PossibleArray;
 	//Functions
 	UFUNCTION(BlueprintCallable)
-	TArray<FIntPoint> GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area, EAE_SpellPattern Enum, bool bIgnoreOrigin);
-	UFUNCTION(BlueprintCallable)//Emanation is callable because it is used in ability ranges.
+	TArray<FIntPoint> GeneratePossibleArray(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area,
+	                                        EAE_SpellPattern Enum, bool bIgnoreOrigin);
+	UFUNCTION(BlueprintCallable) //Emanation is callable because it is used in ability ranges.
 	TArray<FIntPoint> GenerateEmanation(FIntPoint OriginPoint, uint8 Area, bool bIgnoreOrigin);
 
 	TArray<FIntPoint> GenerateCone(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area);
@@ -49,6 +50,9 @@ public:
 
 	TArray<FIntPoint> GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, uint8 Area);
 	TArray<FIntPoint> GenerateBurst(FIntPoint OriginPoint, uint8 Area);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<FIntPoint> GetNeighborIndexes(FIntPoint Index, bool bIncludeDiagonals);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsDiagonal(FIntPoint Index1, FIntPoint Index2);
 	
 };
-
