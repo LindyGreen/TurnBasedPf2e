@@ -108,7 +108,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint Ca
 			endY = 0;
 		}
 
-		for (int32 dx = startX; dx <= endX; dx++)
+		for (int32 dx = startX; dx <= endX; dx++) //removing tiles too far away
 			
 		{
 			for (int32 dy = startY; dy <= endY; dy++)
@@ -121,9 +121,6 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint Ca
 				}
 			}
 		}
-		
-
-		
 		UE_LOG(LogTemp, Error, TEXT("URangeFinder::GenerateCone - OriginPoint is orthogonal"));
 	}
 	else //diagonals
@@ -148,7 +145,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint, FIntPoint Ca
 	return ValidTiles;
 }
 
-int32 URangeFinder::TotalCost(FIntPoint OriginPoint, FIntPoint CurrentTile)//MIN Distance Calculation
+int32 URangeFinder::TotalCost(FIntPoint OriginPoint, FIntPoint CurrentTile)//Min Distance Calculation
 {
 	return FMath::Max(abs(OriginPoint.X - CurrentTile.X), abs(OriginPoint.Y - CurrentTile.Y)) +
 						 FMath::Min(abs(OriginPoint.X - CurrentTile.X), abs(OriginPoint.Y - CurrentTile.Y)) / 2; 
