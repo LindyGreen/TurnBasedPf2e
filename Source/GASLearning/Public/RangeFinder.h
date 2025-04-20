@@ -50,8 +50,10 @@ public:
 
 	TArray<FIntPoint> GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, uint8 Area);
 	TArray<FIntPoint> GenerateBurst(FIntPoint OriginPoint, uint8 Area);
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<FIntPoint> GetNeighborIndexes(FIntPoint Index, bool bIncludeDiagonals);
+	UFUNCTION(BlueprintCallable) 
+	void RemoveInvalidNeighbors(FIntPoint CurrentArrayElement, TArray<FIntPoint>& NeighborsToRemove, FIntPoint Index); 
+	UFUNCTION(BlueprintCallable)
+	TArray<FIntPoint> GetNeighborIndexes(FIntPoint Index, bool bIncludeDiagonals, TArray<FIntPoint>& Diagonals);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsDiagonal(FIntPoint Index1, FIntPoint Index2);
 	
