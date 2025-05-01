@@ -62,7 +62,10 @@ UPROPERTY()
 	void DiscoverTile(FS_PathfindingData TilePathData);
 	UFUNCTION(BlueprintCallable)
 	FS_PathfindingData PullCheapestTileOutOfDiscoveredList();
-	
+	UFUNCTION(BlueprintCallable)
+	TArray<FIntPoint> GeneratePath();
+	/*UFUNCTION(BlueprintCallable)
+	bool AnalyzeNextDiscoveredTile(TArray<FS_PathfindingData> CurrentNeighbors);*/
 #pragma endregion Functions
 #pragma region input variables
 	UPROPERTY(BlueprintReadWrite, Category="Input")

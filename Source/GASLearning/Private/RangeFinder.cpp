@@ -2,7 +2,7 @@
 
 
 #include "RangeFinder.h"
-
+#include "Algo/Reverse.h"
 
 // Sets default values for this component's properties
 URangeFinder::URangeFinder()
@@ -347,5 +347,31 @@ if (!AnalizedTileIndexes.IsEmpty())
 	AnalizedTileIndexes.Add(TileIndex);
 	return PathfindingData.FindRef(TileIndex);
 }
+
+TArray<FIntPoint> URangeFinder::GeneratePath()
+{
+	FIntPoint Current= Target;
+		TArray<FIntPoint> Path;
+	while (Current!=Start)
+	{
+		Path.Add(Current);
+		Current=PathfindingData[Current].PreviousIndex;
+	}
+	Algo::Reverse(Path);
+		
+	return Path;
+}
+
+/*
+bool URangeFinder::AnalyzeNextDiscoveredTile(TArray<FS_PathfindingData> CurrentNeighbors)
+{
+	CurrentDiscoveredTile=PullCheapestTileOutOfDiscoveredList();
+	while (true)
+	{
+		
+	}	
+	return false;
+}
+*/
 
 
