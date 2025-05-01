@@ -48,12 +48,21 @@ UPROPERTY()
 	TArray<FIntPoint> GenerateLine(FIntPoint CasterLocation, FIntPoint OriginPoint, uint8 Area);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TArray<FIntPoint> GenerateBurst(FIntPoint OriginPoint, uint8 Area);
+
 	UFUNCTION(BlueprintCallable) 
 	void RemoveInvalidNeighbors(FIntPoint CurrentArrayElement, TArray<FIntPoint>& NeighborsToRemove, FIntPoint Index); 
+
 	UFUNCTION(BlueprintCallable)
 	TArray<FIntPoint> GetNeighborIndexes(FIntPoint Index, bool bIncludeDiagonals, TArray<FIntPoint>& Diagonals);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsDiagonal(FIntPoint Index1, FIntPoint Index2);
+	UFUNCTION(BlueprintCallable)
+	void InsertTileInDiscoveredArray(FS_PathfindingData CurrentTileData);
+	UFUNCTION(BlueprintCallable)
+	void DiscoverTile(FS_PathfindingData TilePathData);
+	UFUNCTION(BlueprintCallable)
+	FS_PathfindingData PullCheapestTileOutOfDiscoveredList();
+	
 #pragma endregion Functions
 #pragma region input variables
 	UPROPERTY(BlueprintReadWrite, Category="Input")
@@ -62,11 +71,12 @@ UPROPERTY()
 	bool Reachable;
 	UPROPERTY(BlueprintReadWrite, Category="Input")
 	int32 MaxPathLength;
-	//Structures
-	
-	
 #pragma endregion	
 #pragma region Tiles
+	UPROPERTY(BlueprintReadWrite, Category="Tiles")
+	TArray<FIntPoint> DiscoveredTileIndexes;
+	UPROPERTY(BlueprintReadWrite, Category="Tiles")
+	TArray<int32> DiscoveredTileSortedCost;
 	UPROPERTY(BlueprintReadWrite, Category="Tiles")
 TArray<FIntPoint> AnalizedTileIndexes;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")
@@ -84,4 +94,5 @@ TArray<FIntPoint> AnalizedTileIndexes;
 //	UPROPERTY(BlueprintReadWrite, Category="Tiles")
 	
 #pragma endregion 
+
 };

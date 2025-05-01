@@ -22,25 +22,20 @@ struct FS_PathfindingData
 {
 	GENERATED_BODY()
 public:
-	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="Index", MakeStructureDefaultValue="(X=-999,Y=-999)"))
-	FIntPoint Index;
+	FIntPoint Index=FIntPoint(-999,-999);
 
-	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="CostToEnterTile", MakeStructureDefaultValue="0"))
-	int32 CostToEnterTile;
+	int32 CostToEnterTile=0;
 
-	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="CostFromStart", MakeStructureDefaultValue="0"))
-	int32 CostFromStart;
+	int32 CostFromStart=0;
 
-	/** Please add a variable description */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="MinimumCostToTarget"))
-	int32 MinimumCostToTarget;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="MinimumCostToTarget", MakeStructureDefaultValue="0"))
+	int32 MinimumCostToTarget=0;
 
-	/** Please add a variable description */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="PreviousIndex", MakeStructureDefaultValue="(X=-999,Y=-999)"))
-	FIntPoint PreviousIndex;
+	FIntPoint PreviousIndex=FIntPoint(-999,-999);
 };
 
 /**

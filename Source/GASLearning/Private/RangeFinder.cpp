@@ -226,30 +226,30 @@ TArray<FIntPoint> URangeFinder::GenerateBurst(FIntPoint OriginPoint, uint8 Area)
 }
 
 void URangeFinder::RemoveInvalidNeighbors(FIntPoint CurrentArrayElement,
-                                          TArray<FIntPoint>& Neighborstoremove, FIntPoint Index) //removes extra points protecting from walking through walls
+                                          TArray<FIntPoint>& NeighborsToRemove, FIntPoint Index) //removes extra points protecting from walking through walls
 {
 	UE_LOG(LogTemp, Error, TEXT("%d" "%d"),CurrentArrayElement.X, CurrentArrayElement.Y );
 	FIntPoint TempElement = CurrentArrayElement-Index;
 	if (TempElement.X == -1)
 	{
 				
-		Neighborstoremove={FIntPoint(Index.X=-1, Index.Y-1), FIntPoint(-1, +1)};
+		NeighborsToRemove={FIntPoint(Index.X=-1, Index.Y-1), FIntPoint(-1, +1)};
 		return;
 	}
 	if (TempElement.X == 1)
 	{
 		
-		Neighborstoremove={FIntPoint(Index.X+1, Index.Y+1), FIntPoint(Index.X+1, Index.Y-1)};
+		NeighborsToRemove={FIntPoint(Index.X+1, Index.Y+1), FIntPoint(Index.X+1, Index.Y-1)};
 		return;
 	}
 	if (TempElement.Y == -1)
 	{
-		Neighborstoremove={FIntPoint(Index.X+1, Index.Y-1), FIntPoint(Index.X-1, Index.Y-1)};
+		NeighborsToRemove={FIntPoint(Index.X+1, Index.Y-1), FIntPoint(Index.X-1, Index.Y-1)};
 		return;
 	}
 	if (TempElement.Y == 1)
 	{
-		Neighborstoremove={FIntPoint(Index.X-1, Index.Y+1), FIntPoint(Index.X+1, Index.Y+1)};
+		NeighborsToRemove={FIntPoint(Index.X-1, Index.Y+1), FIntPoint(Index.X+1, Index.Y+1)};
 		// return;
 	}
 
@@ -290,3 +290,62 @@ bool URangeFinder::IsDiagonal(FIntPoint Index1, FIntPoint Index2)
 	};
 	return Diagonals.Contains(Index2);
 }
+
+void URangeFinder::InsertTileInDiscoveredArray(
+	FS_PathfindingData CurrentTileData)
+{
+	int32 SortingCost=CurrentTileData.CostFromStart+CurrentTileData.MinimumCostToTarget;
+	if (DiscoveredTileIndexes.IsEmpty())
+	{
+//if first just add
+		DiscoveredTileSortedCost.Add(SortingCost);
+		DiscoveredTileIndexes.Add(CurrentTileData.Index);
+	}
+	else
+	{
+		//not first so checking if last index has higher sorting cost
+		if (!DiscoveredTileSortedCost.IsEmpty())//i have no idea why I put this saveguard here, I added to it, it can't be empty
+		{
+			if (SortingCost >= DiscoveredTileSortedCost.Last())
+			{
+				DiscoveredTileSortedCost.Add(SortingCost);
+				DiscoveredTileIndexes.Add(CurrentTileData.Index);
+				//if faster path - just add 
+			}
+			else
+			{
+				if (!DiscoveredTileSortedCost.IsEmpty())
+					for (int32 i=0; i < DiscoveredTileSortedCost.Num(); i++)
+					{
+						if (SortingCost<=DiscoveredTileSortedCost[i])
+						{
+							DiscoveredTileSortedCost.Insert(SortingCost, i);
+							DiscoveredTileIndexes.Insert(CurrentTileData.Index, i);
+							break;
+							//if slower path - insert to the appropriate position
+						}
+					}
+			}
+		}
+		
+	}
+}
+
+void URangeFinder::DiscoverTile(FS_PathfindingData TilePathData)
+{
+	PathfindingData.Add(TilePathData.Index, TilePathData);
+InsertTileInDiscoveredArray(TilePathData);
+}
+
+FS_PathfindingData URangeFinder::PullCheapestTileOutOfDiscoveredList()
+{
+	FIntPoint TileIndex=DiscoveredTileIndexes[0];
+if (!DiscoveredTileSortedCost.IsEmpty())
+	DiscoveredTileSortedCost.RemoveAt(0);
+if (!AnalizedTileIndexes.IsEmpty())
+	DiscoveredTileIndexes.RemoveAt(0);
+	AnalizedTileIndexes.Add(TileIndex);
+	return PathfindingData.FindRef(TileIndex);
+}
+
+
