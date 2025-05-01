@@ -64,6 +64,8 @@ UPROPERTY()
 	FS_PathfindingData PullCheapestTileOutOfDiscoveredList();
 	UFUNCTION(BlueprintCallable)
 	TArray<FIntPoint> GeneratePath();
+	UFUNCTION(BlueprintCallable)
+	bool DiscoverNextNeighbor();
 	/*UFUNCTION(BlueprintCallable)
 	bool AnalyzeNextDiscoveredTile(TArray<FS_PathfindingData> CurrentNeighbors);*/
 #pragma endregion Functions

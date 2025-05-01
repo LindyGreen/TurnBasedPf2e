@@ -362,6 +362,38 @@ TArray<FIntPoint> URangeFinder::GeneratePath()
 	return Path;
 }
 
+bool URangeFinder::DiscoverNextNeighbor()
+{
+	CurrentNeighbor=CurrentNeighbors[0];
+	if (!CurrentNeighbors.IsEmpty())
+	CurrentNeighbors.RemoveAt(0);
+	int32 CostFromStart = CurrentDiscoveredTile.CostFromStart+CurrentNeighbor.CostToEnterTile;
+	
+if (AnalizedTileIndexes.Contains(CurrentNeighbor.Index))
+{
+	if (!Reachable) return false;
+	if (CostFromStart>PathfindingData[CurrentNeighbor.Index].CostFromStart) return false; 
+}
+	if (CostFromStart>MaxPathLength) return false;
+	int32 IndexInDiscovered=DiscoveredTileIndexes.Find(CurrentNeighbor.Index);
+if (!(IndexInDiscovered==-1))
+{
+	CurrentNeighbor=PathfindingData[CurrentNeighbor.Index];
+	if (CostFromStart>=CurrentNeighbor.CostFromStart) return false;
+	if (CurrentNeighbors.Num()>IndexInDiscovered)CurrentNeighbors.RemoveAt(IndexInDiscovered);
+	if (DiscoveredTileSortedCost.Num()>IndexInDiscovered)DiscoveredTileSortedCost.RemoveAt(IndexInDiscovered);
+}
+	FS_PathfindingData Temp;
+	Temp.Index=CurrentNeighbor.Index;
+	Temp.CostToEnterTile=CurrentNeighbor.CostToEnterTile;
+	Temp.CostFromStart=CostFromStart;
+	Temp.MinimumCostToTarget=TotalCost(CurrentNeighbor.Index,Target);
+	Temp.PreviousIndex=CurrentDiscoveredTile.Index;
+	DiscoverTile(Temp);
+	if (CurrentNeighbor.Index==Target)return true;
+	return false;
+}
+
 /*
 bool URangeFinder::AnalyzeNextDiscoveredTile(TArray<FS_PathfindingData> CurrentNeighbors)
 {
