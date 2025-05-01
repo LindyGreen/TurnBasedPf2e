@@ -394,16 +394,15 @@ if (!(IndexInDiscovered==-1))
 	return false;
 }
 
-/*
-bool URangeFinder::AnalyzeNextDiscoveredTile(TArray<FS_PathfindingData> CurrentNeighbors)
+bool URangeFinder::LoopThroughNeighbors()
 {
-	CurrentDiscoveredTile=PullCheapestTileOutOfDiscoveredList();
-	while (true)
+	while (CurrentNeighbors.Num()>0)
 	{
-		
+		bool Result = DiscoverNextNeighbor();
+		if (Result) return true;
 	}	
 	return false;
 }
-*/
+
 
 

@@ -66,8 +66,8 @@ UPROPERTY()
 	TArray<FIntPoint> GeneratePath();
 	UFUNCTION(BlueprintCallable)
 	bool DiscoverNextNeighbor();
-	/*UFUNCTION(BlueprintCallable)
-	bool AnalyzeNextDiscoveredTile(TArray<FS_PathfindingData> CurrentNeighbors);*/
+	UFUNCTION(BlueprintCallable)
+	bool LoopThroughNeighbors();
 #pragma endregion Functions
 #pragma region input variables
 	UPROPERTY(BlueprintReadWrite, Category="Input")
