@@ -62,6 +62,9 @@ UPROPERTY()
 	bool Reachable;
 	UPROPERTY(BlueprintReadWrite, Category="Input")
 	int32 MaxPathLength;
+	//Structures
+	
+	
 #pragma endregion	
 #pragma region Tiles
 	UPROPERTY(BlueprintReadWrite, Category="Tiles")
@@ -70,6 +73,14 @@ TArray<FIntPoint> AnalizedTileIndexes;
 	FIntPoint Origin;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")  
 	FIntPoint Target;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")
+	FS_PathfindingData CurrentDiscoveredTile;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")
+	FS_PathfindingData CurrentNeighbor;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")
+	TArray<FS_PathfindingData> CurrentNeighbors;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")
+	TMap<FIntPoint, FS_PathfindingData> PathfindingData;
 //	UPROPERTY(BlueprintReadWrite, Category="Tiles")
 	
 #pragma endregion 
