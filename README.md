@@ -1,3 +1,3 @@
-# GASLearning 
-1 month learning prokect for GAS and turn based combat. To use later for PF2e.
+# PF2e Implementation project.
+Should be private, but I need a portfolio code example.
 
