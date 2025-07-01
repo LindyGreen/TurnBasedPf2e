@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.5",
+	"EngineAssociation": "{E786C2A3-21C9-4F07-896D-1B1FB7BCB1D1}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -24,14 +24,32 @@
 		{
 			"Name": "GameplayAbilities",
 			"Enabled": true
+		},
+		{
+			"Name": "FastBuildController",
+			"Enabled": true
+		},
+		{
+			"Name": "UbaController",
+			"Enabled": false
+		},
+		{
+			"Name": "PlatformCrypto",
+			"Enabled": false
+		},
+		{
+			"Name": "PerforceSourceControl",
+			"Enabled": false
+		},
+		{
+			"Name": "PlasticSourceControl",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [
 		"Android",
 		"IOS",
 		"Linux",
-		"LinuxArm64",
-		"Mac",
 		"Windows"
 	]
 }

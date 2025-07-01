@@ -21,9 +21,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
 	//Functions and Variables I need.
 	/*1. Origin Intpoint
 	 *2. Target Intpoint
@@ -83,7 +80,7 @@ UPROPERTY()
 	UPROPERTY(BlueprintReadWrite, Category="Tiles")
 	TArray<int32> DiscoveredTileSortedCost;
 	UPROPERTY(BlueprintReadWrite, Category="Tiles")
-TArray<FIntPoint> AnalizedTileIndexes;
+	TArray<FIntPoint> AnalizedTileIndexes;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")
 	FIntPoint Origin;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Tiles")  

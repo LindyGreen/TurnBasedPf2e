@@ -22,14 +22,7 @@ void URangeFinder::BeginPlay()
 	// ...
 }
 
-// Called every frame
-void URangeFinder::TickComponent(float DeltaTime, ELevelTick TickType,
-                                 FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
-}
 
 TArray<FIntPoint> URangeFinder::GeneratePossibleArray(
 	FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Area,
@@ -136,7 +129,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint,
 				}
 			}
 		}
-		UE_LOG(LogTemp, Error,
+		UE_LOG(LogTemp, Warning,
 		       TEXT("URangeFinder::GenerateCone - OriginPoint is orthogonal"));
 	}
 	else //diagonals
@@ -233,7 +226,7 @@ void URangeFinder::RemoveInvalidNeighbors(FIntPoint CurrentArrayElement,
 	if (TempElement.X == -1)
 	{
 				
-		NeighborsToRemove={FIntPoint(Index.X=-1, Index.Y-1), FIntPoint(-1, +1)};
+		NeighborsToRemove={FIntPoint(Index.X-1, Index.Y-1), FIntPoint(-1, +1)};
 		return;
 	}
 	if (TempElement.X == 1)
@@ -344,8 +337,9 @@ if (!DiscoveredTileSortedCost.IsEmpty())
 	DiscoveredTileSortedCost.RemoveAt(0);
 if (!AnalizedTileIndexes.IsEmpty())
 	DiscoveredTileIndexes.RemoveAt(0);
-	AnalizedTileIndexes.Add(TileIndex);
-	return PathfindingData.FindRef(TileIndex);
+
+AnalizedTileIndexes.Add(TileIndex);
+return PathfindingData.FindRef(TileIndex);
 }
 
 TArray<FIntPoint> URangeFinder::GeneratePath()
