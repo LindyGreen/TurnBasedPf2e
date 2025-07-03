@@ -2,6 +2,9 @@
 
 
 #include "Grid.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GASLearning/Public/GridModifier.h"
 
 // Sets default values
 AGrid::AGrid()
@@ -72,4 +75,69 @@ void AGrid::CalculateStartingPosition()
 	// Update GridStartingPosition with snapped values
 	GridStartingPosition = CenterVar;
 }
+
+FVector AGrid::TraceForGround(FVector PotentialLocation, ETileType& OutTileType)
+{
+	FVector TraceStart = PotentialLocation + FVector(0, 0, 1000);
+	FVector TraceEnd = PotentialLocation + FVector(0, 0, -1000);
+	FCollisionQueryParams TraceParams;
+	TraceParams.bTraceComplex = false;
+	
+	// Hit result to store the outcome of the trace
+	TArray<FHitResult> OutHit;
+	bool ReturnValue = GetWorld()->LineTraceMultiByChannel(OutHit, TraceStart, TraceEnd, ECC_GameTraceChannel1, TraceParams);
+	
+	if (!ReturnValue)
+	{
+		OutTileType = ETileType::None; 
+		return PotentialLocation; // Return original location
+	}
+	
+	// Setting up defaults - like BP does
+	ETileType LocalTileType = ETileType::Normal;
+	bIsHeightFound = false; // Reset to false like BP does at start
+	
+	// Local Z variable for height calculation - start with BP's default
+	double LocalZ = 2.0; // Default LocalZ value from BP
+	
+	// Looping through OutHit
+	for (const FHitResult& HitResult : OutHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		if (AGridModifier* GridModifier = Cast<AGridModifier>(HitActor))
+		{
+			// Get tile type from GridModifier
+			LocalTileType = GridModifier->TileType;
+			
+			// Check if this modifier is used for tile height
+			if (GridModifier->bUseForTileHeight)
+			{
+				bIsHeightFound = true;
+				
+				// Get hit location and snap Z coordinate using TileSize.Z and GridOffsetFromGround
+				FVector HitLocation = HitResult.Location;
+				double SnappedZ = UKismetMathLibrary::GridSnap_Float(HitLocation.Z, TileSize.Z);
+				LocalZ = SnappedZ + GridOffsetFromGround;
+			}
+		}
+		else
+		{
+			// Not a GridModifier, check if height was found
+			if (!bIsHeightFound)
+			{
+				// Use the ground hit location
+				FVector HitLocation = HitResult.Location;
+				double SnappedZ = UKismetMathLibrary::GridSnap_Float(HitLocation.Z, TileSize.Z);
+				LocalZ = SnappedZ + GridOffsetFromGround;
+			}
+		}
+	}
+	
+	// Set the output tile type
+	OutTileType = LocalTileType;
+	
+	return FVector(PotentialLocation.X, PotentialLocation.Y, LocalZ);
+}
+
+
 

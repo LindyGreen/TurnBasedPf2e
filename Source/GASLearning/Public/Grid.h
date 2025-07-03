@@ -37,6 +37,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Grid")
 	FVector FinalTileSize;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GridTileCount")
+	FVector TileSize;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GridTileCount")
+	double GridOffsetFromGround = 2.0;
+	
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
 	TMap<FIntPoint, FS_TileData> GridTiles;
 	
@@ -61,5 +67,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void CalculateStartingPosition();
+
+	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
+	FVector TraceForGround(FVector PotentialLocation, ETileType& OutTileType);
 
 };
