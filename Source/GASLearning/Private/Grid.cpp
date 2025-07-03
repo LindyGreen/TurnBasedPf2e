@@ -22,19 +22,6 @@ AGrid::AGrid()
 
 }
 
-// Called when the game starts or when spawned
-void AGrid::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AGrid::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 bool AGrid::IsIndexValid(FIntPoint Index) const
 {
 	return GridTiles.Contains(Index);
