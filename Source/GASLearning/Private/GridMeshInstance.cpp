@@ -2,7 +2,7 @@
 
 
 #include "GridMeshInstance.h"
-
+#include "GASLearning/Public/StructsAndEnums/F_TileData.h"
 #include <Components/InstancedStaticMeshComponent.h>
 
 
@@ -18,12 +18,13 @@ UGridMeshInstance::UGridMeshInstance()
 	
 	// ...
 }
-
+#pragma region InstancedMesh
+//This code is about initializing grid mesh, clearing all instances, removing specific, and adding them (not coloring, coloring is done in BP) 
 
 void UGridMeshInstance::InitializeGridMeshInst(UStaticMesh* Mesh, UMaterialInterface* Material, 
                                               TEnumAsByte<ECollisionEnabled::Type> Collision, 
                                               bool ColorBasedOnTileType)
-{//Initializes the Grid Mesh instance
+{//Initializes the Grid Mesh instance (note: this function will be called in BP, as it uses GetShapeData from FL and connects to BP_Grid)
 	if (InstancedMeshComponent)
 	{
 		InstancedMeshComponent->SetStaticMesh(Mesh);
@@ -48,13 +49,28 @@ void UGridMeshInstance::RemoveInstance(FIntPoint IndexToRemove)
 	}
 }
 
-void UGridMeshInstance::AddInstance(FIntPoint IndexToAdd, FTransform Transform, int32& AddedIndex)
-{//this is only code part of adding instance, coloring is done in BP, Added index is used for later BP manipulatiosn
+void UGridMeshInstance::AddInstance(FS_TileData TileData, int32& AddedIndex)
+{//This is only code part of adding instance. Coloring is done in BP, Added index is used for later BP manipulation
 	
- if (InstanceIndexes.Contains(IndexToAdd)) RemoveInstance(IndexToAdd);
-InstancedMeshComponent->AddInstance(Transform);
-	InstanceIndexes.Add(IndexToAdd);
-	AddedIndex=InstanceIndexes.Find(IndexToAdd);
+ if (InstanceIndexes.Contains(TileData.Index)) RemoveInstance(TileData.Index);
+InstancedMeshComponent->AddInstance(TileData.Transform, AddedIndex);
+	InstanceIndexes.Add(TileData.Index);
+	AddedIndex=InstanceIndexes.Find(TileData.Index);
+		ColorTile(TileData, AddedIndex);
 }
+
+void UGridMeshInstance::UpdateTileVisual(FS_TileData DataInput)
+{
+	RemoveInstance(DataInput.Index);
+	if (DataInput.TileType!=ETileType::None && DataInput.TileType!=ETileType::Obstacle)
+	{
+		int32 AddedIndex;
+		AddInstance(DataInput, AddedIndex);
+	}
+}
+
+
+#pragma endregion InstancedMesh
+
 
 

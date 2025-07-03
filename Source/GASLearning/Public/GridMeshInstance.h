@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include <Components/SceneComponent.h>
 #include "GridMeshInstance.generated.h"
+struct FS_TileData;
 class UInstancedStaticMeshComponent;
 class UStaticMesh;
 class UMaterialInterface;
@@ -33,7 +34,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="InstancedStaticMesh")
 	void RemoveInstance(FIntPoint IndexToRemove);
 	UFUNCTION(BlueprintCallable, Category="InstancedStaticMesh")
-	void AddInstance(FIntPoint IndexToAdd, FTransform Transform, int32& AddedIndex);
-
+	void AddInstance(FS_TileData TileData, int32& AddedIndex);
+	UFUNCTION(BlueprintCallable, Category="InstancedStaticMesh")
+	void UpdateTileVisual(FS_TileData DataInput);
+	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="InstancedStaticMesh")
+	void ColorTile(FS_TileData TileData, int32 AddedIndex);
 
 };
