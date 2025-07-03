@@ -4,6 +4,7 @@
 #include "Grid.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "GASLearning/Public/GridModifier.h"
 
 // Sets default values
@@ -135,8 +136,83 @@ FVector AGrid::TraceForGround(FVector PotentialLocation, ETileType& OutTileType)
 	
 	// Set the output tile type
 	OutTileType = LocalTileType;
-	
 	return FVector(PotentialLocation.X, PotentialLocation.Y, LocalZ);
+}
+
+FVector AGrid::GetCursorLocationOnGrid()
+{
+	// Get player controller Default check if player contriller is there
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PlayerController)
+	{
+		return FVector(7014.0, 0.0, 0.0); // Default fallback location
+	}
+
+	// First attempt: Try GroundAndGridMod channel (TraceTypeQuery1)
+	FHitResult HitResult;
+	bool bHit = PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), false, HitResult);
+	
+	if (bHit)
+	{
+		FVector Result = HitResult.Location;
+		return Result;
+	}
+
+	// Second attempt: Try Grid channel (TraceTypeQuery2) 
+	bHit = PlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2), false, HitResult);
+	
+	if (bHit)
+	{
+		FVector Result = HitResult.Location;
+		return Result;
+	}
+
+	// Third attempt: Mathematical plane intersection fallback
+	FVector WorldLocation, WorldDirection;
+	bool bValidProjection = PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+	
+	if (bValidProjection)
+	{
+		// Create a horizontal plane at Z=0 with normal pointing up
+		FPlane GroundPlane = UKismetMathLibrary::MakePlaneFromPointAndNormal(FVector(0, 0, 0), FVector(0, 0, 1));
+		
+		// Create a long ray by multiplying direction
+		FVector LineEnd = WorldLocation + (WorldDirection * 99999999.0f);
+		
+		// Calculate line-plane intersection
+		float T;
+		FVector Intersection;
+		bool bIntersects = UKismetMathLibrary::LinePlaneIntersection(WorldLocation, LineEnd, GroundPlane, T, Intersection);
+		
+		if (bIntersects)
+		{
+			return Intersection;
+		}
+	}
+
+	// Final fallback
+	FVector FallbackResult = FVector(7014.0, 0.0, 0.0);
+	return FallbackResult;
+	
+}
+
+FIntPoint AGrid::GetIndexFromWorldLocation(FVector InputLocation)
+{
+	// Calculate LocationOnGrid
+	FVector LocationOnGrid = InputLocation - GridStartingPosition;
+	
+	// Direct conversion: divide by tile size and round to get grid index
+	FIntPoint Result = FIntPoint(
+		FMath::RoundToInt(LocationOnGrid.X / FinalTileSize.X),
+		FMath::RoundToInt(LocationOnGrid.Y / FinalTileSize.Y)
+	);
+	
+	return Result;
+}
+
+FIntPoint AGrid::GetTileIndexUnderCursor()
+{
+	return 	GetIndexFromWorldLocation(GetCursorLocationOnGrid());
 }
 
 

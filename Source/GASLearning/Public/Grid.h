@@ -71,4 +71,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
 	FVector TraceForGround(FVector PotentialLocation, ETileType& OutTileType);
 
+	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
+	FVector GetCursorLocationOnGrid();
+
+	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
+	FIntPoint GetIndexFromWorldLocation(FVector InputLocation);
+ 	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
+	FIntPoint GetTileIndexUnderCursor();
 };
