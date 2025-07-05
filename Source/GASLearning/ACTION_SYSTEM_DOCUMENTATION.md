@@ -84,7 +84,7 @@ None → ActionSelected → Execute/Cancel
 1. **Document current mess** ✓
 2. **Delete redundant actions** (90% of them)
 3. **Build simple 3-state system** 
-4. **Test with basic spell casting**
+4. **Test with basic spell casting** 
 5. **Add movement if needed**
 6. **Clean up any remaining complexity**
 
