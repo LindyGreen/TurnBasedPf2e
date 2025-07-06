@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GASLearning/Public/GridModifier.h"
 
+
 // Sets default values
 AGrid::AGrid()
 {

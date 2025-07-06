@@ -11,7 +11,6 @@ class GASLEARNING_API UTurnManagerComponent : public UActorComponent
 
 public:
 	UTurnManagerComponent();
-//TODO change al the unit references to a cpp class. - done
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	TArray<TObjectPtr<ACombatant>> CombatantArray;//holds the array of all combatants in fight before sorting them in initiative, and after sorting.
 
@@ -25,7 +24,7 @@ public:
 	int32 CurrentTurnActions = 0; //Number of actions combatant has this turn, we get if from CurrentCombatant->BeginTurn()
 
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
-	int32 CombatantTurn = 0; //The member of Combatant Array who's turn it is.
+	int32 CombatantTurn = 0; //The member of Combatant Array whose turn it is.
 
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	int32 UnitToRemoveIndex = -1; //This is just holder for NPC death in array form
@@ -47,4 +46,19 @@ public:
 	void SpendActions(int32 ActionsToSpend);
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurn();
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void EndCombat();
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void InitializeCombat(); //initialise combat
+	
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void RemoveCombatant(ACombatant* CombatantToRemove);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void IncapacitateCombatant(ACombatant* CombatantToRemove);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index, bool Force);
+	// Blueprint implementable event for enemy spawning
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void SpawnEnemies();
 };

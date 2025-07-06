@@ -10,8 +10,7 @@
 UGridMeshInstance::UGridMeshInstance()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 	InstancedMeshComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(this);
 	InstancedMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -44,7 +43,7 @@ void UGridMeshInstance::RemoveInstance(FIntPoint IndexToRemove)
 {//remove specific index
 	if (InstanceIndexes.Contains(IndexToRemove))
 	{//checks if the index is contained and removes the index
-		InstancedMeshComponent->RemoveInstance(InstanceIndexes.Find(IndexToRemove));
+		InstancedMeshComponent->RemoveInstance(InstanceIndexes.IndexOfByKey(IndexToRemove));
 		InstanceIndexes.Remove(IndexToRemove);
 	}
 }

@@ -1,0 +1,5 @@
+#include "LogTypes.h"
+
+DEFINE_LOG_CATEGORY(Log_Grid);
+DEFINE_LOG_CATEGORY(Log_TurnManager);
+DEFINE_LOG_CATEGORY(Log_Combat);
