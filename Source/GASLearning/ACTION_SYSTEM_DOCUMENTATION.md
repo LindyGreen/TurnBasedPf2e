@@ -3,6 +3,8 @@
 ## Current State: OVERCOMPLICATED MESS
 **Status:** Needs complete overhaul/simplification
 
+
+
 ## What We Currently Have (TO BE DELETED)
 
 ### Grid Operation Actions (REDUNDANT - Use Obstacles/GridModifiers instead)
@@ -64,9 +66,29 @@ None → ActionSelected → Execute/Cancel
 
 ## Integration Points
 
+### NEW: Combatant/TurnManager Action Architecture ✓
+**Implemented:** Clean separation of concerns for action management
+
+#### Combatant Responsibilities:
+- Track individual unit conditions (`FGameplayTagContainer Conditions`)
+- Calculate available actions based on conditions (`BeginTurn()`)
+- Manage personal action state (`bDoesHaveReaction`)
+- Handle condition-based action modifications:
+  - **Stunned.1/2/3:** Reduced actions (2/1/0) + auto-remove stunned
+  - **Slowed.1/2:** Reduced actions (2/1)
+  - **Quickened:** Extra actions (4)
+  - **Incapacitated:** Skip turn entirely
+  - **Dying:** No actions (0)
+
+#### TurnManager Responsibilities:
+- Receive calculated actions from Combatant (`CurrentTurnActions()`)
+- Track global turn state and initiative order
+- Manage turn flow and transitions
+- Control action economy validation
+
 ### TurnManager Integration
 - Handle unit spawning/despawning from database
-- Manage initiative order
+- Manage initiative order  
 - Control whose turn it is
 - **Expand to include:** Enemy spawning logic
 

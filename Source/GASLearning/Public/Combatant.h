@@ -75,4 +75,10 @@ public:
 	// Functions
 	UFUNCTION(BlueprintCallable, Category = "Initiative")
 	float RollInitiative();
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void SpendReaction();
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void BeginTurn();
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void EndTurnEffects();
 };
