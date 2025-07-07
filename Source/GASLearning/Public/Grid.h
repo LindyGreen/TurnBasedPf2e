@@ -72,4 +72,7 @@ public:
 	FIntPoint GetIndexFromWorldLocation(FVector InputLocation);
  	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
 	FIntPoint GetTileIndexUnderCursor();
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	FS_IntPointArray RemoveObstacleTiles(const FS_IntPointArray& InputArray);
 };

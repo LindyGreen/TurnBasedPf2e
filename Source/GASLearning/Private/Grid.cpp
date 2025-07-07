@@ -203,5 +203,26 @@ FIntPoint AGrid::GetTileIndexUnderCursor()
 	return 	GetIndexFromWorldLocation(GetCursorLocationOnGrid());
 }
 
+FS_IntPointArray AGrid::RemoveObstacleTiles(const FS_IntPointArray& InputArray)
+{
+	FS_IntPointArray TempArray; // Clear temp array at start
+	
+	// Loop through input array
+	for (const FIntPoint& TileIndex : InputArray.IntPointArray)
+	{
+		// Find tile in GridTiles map
+		if (const FS_TileData* TileData = GridTiles.Find(TileIndex))
+		{
+			// If tile type is NOT Obstacle or None, add to temp array
+			if (TileData->TileType != ETileType::Obstacle && TileData->TileType != ETileType::None)
+			{
+				TempArray.IntPointArray.Add(TileIndex);
+			}
+		}
+	}
+	
+	return TempArray;
+}
+
 
 

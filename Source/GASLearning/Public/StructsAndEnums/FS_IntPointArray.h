@@ -12,7 +12,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="IntPoint Array"))
 	TArray<FIntPoint> IntPointArray;
 
-	FS_IntPointArray()
+	FS_IntPointArray() //This is done so the int point array will be usable in blueprints. Some nesting bug.
 	{
 		IntPointArray = TArray<FIntPoint>();
 	}

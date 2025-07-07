@@ -20,7 +20,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="InstancedStaticMesh")
 	UInstancedStaticMeshComponent* InstancedMeshComponent;
 	UPROPERTY(BlueprintReadWrite, Category="InstancedStaticMesh")
-	TArray<FIntPoint> InstanceIndexes; 
+	TMap<FIntPoint, int32> InstanceIndexes; 
 	UPROPERTY(BlueprintReadWrite, Category="InstancedStaticMesh")
 	bool bIsColorBasedOnTileType;
 //FUNCTIONS
