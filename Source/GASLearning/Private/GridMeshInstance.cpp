@@ -13,6 +13,7 @@ UGridMeshInstance::UGridMeshInstance()
 		UInstancedStaticMeshComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(this);
 	InstancedMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	InstancedMeshComponent->SetNumCustomDataFloats(4); // For material useage
 
 	// ...
 }
