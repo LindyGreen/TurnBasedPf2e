@@ -103,6 +103,22 @@ TArray<FIntPoint> GetAllTilesWithState(ETileState State)
 - **Usage:** Movement range display, spell targeting, pathfinding results
 - **Performance:** Uses indexed lookup via TileStatesToIndexes for efficiency
 
+#### Add State to Tile
+```cpp
+void AddStateToTile(FIntPoint TileIndex, ETileState State)
+```
+- **Purpose:** Add a state to a specific tile and update visual representation
+- **Process:**
+  1. Validate tile exists in GridTiles
+  2. Get local copy of tile data
+  3. Add state to tile's TileStates array (unique only)
+  4. Update GridTiles with modified data
+  5. Update TileStatesToIndexes for efficient lookups
+  6. Call GridMeshInstance->UpdateTileVisual() for visual updates
+- **Usage:** Highlighting tiles, marking movement range, spell targeting
+- **Visual Integration:** Automatically triggers visual updates through GridMeshInstance
+- **Note:** Requires GridMeshInstance to be set for visual updates to work
+
 #### Calculate Spawn Positions
 ```cpp
 FVector CalculateSquaresSpawnLocation(FIntPoint GridIndex) const
@@ -128,6 +144,12 @@ void CalculateStartingPosition()
 - Grid works with AGridModifier actors for height and tile type modification
 - GridModifiers can override ground height calculation
 - Tile types (Normal, Difficult, Impassable) determined by modifiers
+
+### GridMeshInstance Integration
+- **`GridMeshInstance`** - Reference to UGridMeshInstance component for visual updates
+- Grid class calls GridMeshInstance->UpdateTileVisual() when tile states change
+- AddStateToTile() automatically triggers visual updates through this integration
+- GridMeshInstance handles instanced mesh rendering and tile coloring
 
 ### Collision Channels
 - **ECC_GameTraceChannel1:** GroundAndGridMod (primary mouse detection, as you hit mod first)

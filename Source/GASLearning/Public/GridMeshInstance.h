@@ -40,5 +40,5 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="InstancedStaticMesh")
 	void ColorTile(FS_TileData TileData, int32 AddedIndex);
-
+//todo Remove BP function after testing this one's functionality
 };

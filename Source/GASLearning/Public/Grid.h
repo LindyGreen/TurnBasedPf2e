@@ -9,6 +9,8 @@
 #include "StructsAndEnums/FS_IntPointArray.h"
 #include "Grid.generated.h"
 
+class UGridMeshInstance;
+
 UCLASS(BlueprintType, Blueprintable)
 class GASLEARNING_API AGrid : public AActor
 {
@@ -46,6 +48,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
 	TMap<ETileState, FS_IntPointArray> TileStatesToIndexes;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Grid")
+	UGridMeshInstance* GridMeshInstance;
+
 	// Functions
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Grid")
 	bool IsIndexValid(FIntPoint Index) const;
@@ -75,4 +80,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	FS_IntPointArray RemoveObstacleTiles(const FS_IntPointArray& InputArray);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void AddStateToTile(FIntPoint TileIndex, ETileState State);
 };

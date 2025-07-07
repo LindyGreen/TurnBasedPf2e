@@ -2,10 +2,14 @@
 
 
 #include "Grid.h"
+
+#include "LogTypes.h"
+
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "GASLearning/Public/GridModifier.h"
+#include "GASLearning/Public/GridMeshInstance.h"
 
 
 // Sets default values
@@ -45,7 +49,7 @@ TArray<FIntPoint> AGrid::GetAllTilesWithState(ETileState State)
 FVector AGrid::CalculateSquaresSpawnLocation(FIntPoint GridIndex) const
 {//Calculates where to put each grid index
 	return GridStartingPosition + FVector(GridIndex.X * FinalTileSize.X, GridIndex.Y * FinalTileSize.Y, 0.01f);
-}
+}//Works
 
 void AGrid::CalculateStartingPosition()
 { //Snaps the starting position into the correct place on a grid synced with the materials 
@@ -63,7 +67,7 @@ void AGrid::CalculateStartingPosition()
 	}
 	// Update GridStartingPosition with snapped values
 	GridStartingPosition = CenterVar;
-}
+}//Works
 
 FVector AGrid::TraceForGround(FVector PotentialLocation, ETileType& OutTileType)
 {
@@ -125,7 +129,7 @@ FVector AGrid::TraceForGround(FVector PotentialLocation, ETileType& OutTileType)
 	// Set the output tile type
 	OutTileType = LocalTileType;
 	return FVector(PotentialLocation.X, PotentialLocation.Y, LocalZ);
-}
+}//Tested Works
 
 FVector AGrid::GetCursorLocationOnGrid()
 {
@@ -182,7 +186,7 @@ FVector AGrid::GetCursorLocationOnGrid()
 	FVector FallbackResult = FVector(7014.0, 0.0, 0.0);
 	return FallbackResult;
 	
-}
+}//TestedWorks
 
 FIntPoint AGrid::GetIndexFromWorldLocation(FVector InputLocation)
 {
@@ -196,12 +200,12 @@ FIntPoint AGrid::GetIndexFromWorldLocation(FVector InputLocation)
 	);
 	
 	return Result;
-}
+}//TestedWorks
 
 FIntPoint AGrid::GetTileIndexUnderCursor()
 {
 	return 	GetIndexFromWorldLocation(GetCursorLocationOnGrid());
-}
+}//Tested, works
 
 FS_IntPointArray AGrid::RemoveObstacleTiles(const FS_IntPointArray& InputArray)
 {
@@ -222,6 +226,49 @@ FS_IntPointArray AGrid::RemoveObstacleTiles(const FS_IntPointArray& InputArray)
 	}
 	
 	return TempArray;
+}
+
+void AGrid::AddStateToTile(FIntPoint TileIndex, ETileState State)
+{
+	// First - Check if GridTiles.Index is valid
+	if (!GridTiles.Contains(TileIndex))
+	{
+		return;
+	}
+	
+	// Second - Set GridTiles.Index as local variable
+	FS_TileData LocalTile = GridTiles[TileIndex];
+	
+	// Third - Add unique state to tile states of local TileStates, there is no clear function, 
+	// because clear function should run prior to this 
+	// TODO add a clear state
+	LocalTile.TileStates.AddUnique(State);
+	
+	// Fourth - Check if TileStates >= 0, return otherwise
+	if (LocalTile.TileStates.Num() <= 0)
+	{
+		return;
+	}
+	
+	// Fifth - Add to GridTiles LocalTileData
+	GridTiles[TileIndex] = LocalTile;
+	
+	// Then run GetAllTilesWithState with input state and cache it
+	TArray<FIntPoint> CachedTiles = GetAllTilesWithState(State);
+	
+	// Add input index to it
+	CachedTiles.AddUnique(TileIndex);
+	
+	// Take TileStatesToIndexes and add FS_IntPointArray.IntPointArray to it
+	FS_IntPointArray StateArray;
+	StateArray.IntPointArray = CachedTiles;
+	TileStatesToIndexes.Add(State, StateArray);
+	
+	// After that run UpdateTileVisual on GridMeshInstance
+	if (GridMeshInstance)
+	{
+		GridMeshInstance->UpdateTileVisual(LocalTile);
+	}
 }
 
 
