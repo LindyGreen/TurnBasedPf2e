@@ -8,6 +8,8 @@
 #include "Combatant.generated.h"
 class UTurnManagerComponent;
 class AGrid;
+class UPointLightComponent;
+class UCapsuleComponent;
 UCLASS()
 class GASLEARNING_API ACombatant : public APawn
 {
@@ -55,6 +57,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Highlighter")
 	bool bIsSelected = false;
 
+	//PointLight for initiative turn
+	UPROPERTY(BlueprintReadWrite, Category = "Highlighter")
+	TObjectPtr<UPointLightComponent> InitiativeLight;
 	// Initiative
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
 	int32 Initiative = 0;
@@ -67,7 +72,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
 	FText CharacterName;
-
+	//Components
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<UCapsuleComponent> Capsule;
 	// Conditions
 	UPROPERTY(BlueprintReadWrite, Category = "Conditions")
 	FGameplayTagContainer Conditions;
@@ -81,4 +88,6 @@ public:
 	void BeginTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurnEffects();
+
+	
 };

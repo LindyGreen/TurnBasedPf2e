@@ -4,6 +4,10 @@
 #include "Combatant.h"
 #include "TurnManagerComponent.h"
 #include "Grid.h"
+
+#include "Components/CapsuleComponent.h"
+#include "Components/PointLightComponent.h"
+
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -11,6 +15,14 @@ ACombatant::ACombatant()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	//InitiativeLightForDebug
+	Capsule=CreateDefaultSubobject<UCapsuleComponent>("Capsule");
+	Capsule->SetupAttachment(RootComponent);
+	InitiativeLight=CreateDefaultSubobject<UPointLightComponent>("InitiativeLight");
+	InitiativeLight->SetupAttachment(Capsule);
+	InitiativeLight->LightColor = FColor(255, 0, 0);
+	InitiativeLight->SetRelativeLocation(FVector(0,0,200));
+	InitiativeLight->SetHiddenInGame(true);
 }
 
 // Called when the game starts or when spawned
@@ -54,7 +66,7 @@ void ACombatant::BeginTurn()
 		EndTurnEffects(); 
 		return;
 	}
-
+	InitiativeLight->SetHiddenInGame(false);//INITIATIVE LIGHT
 	// Default actions per turn
 	int32 ActionsToGive = 3;
 
@@ -115,6 +127,8 @@ void ACombatant::BeginTurn()
 
 void ACombatant::EndTurnEffects()
 {
+	InitiativeLight->SetHiddenInGame(true);
+	
 	// Define degrading condition tags
 	FGameplayTagContainer DegradingConditions;
 	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
