@@ -22,9 +22,9 @@ class GASLEARNING_API ACombatant : public APawn, public IAbilitySystemInterface
 public:
 	// Sets default values for this pawn's properties
 	ACombatant();
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;//returns my ability component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;//requied to use gas
 
 protected:
 	// Called when the game starts or when spawned
