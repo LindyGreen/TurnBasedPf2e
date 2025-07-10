@@ -5,19 +5,26 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GameplayTagContainer.h"
+#include "AbilitySystemInterface.h"
 #include "Combatant.generated.h"
 class UTurnManagerComponent;
 class AGrid;
 class UPointLightComponent;
 class UCapsuleComponent;
+class UAbilitySystemComponent;
+class UCombatAttributeSet;
+
 UCLASS()
-class GASLEARNING_API ACombatant : public APawn
+class GASLEARNING_API ACombatant : public APawn, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this pawn's properties
 	ACombatant();
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 protected:
 	// Called when the game starts or when spawned
@@ -62,12 +69,15 @@ public:
 	TObjectPtr<UPointLightComponent> InitiativeLight;
 	// Initiative
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
+	//TODO Change to use GAS's
 	int32 Initiative = 0;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
+	//TODO MOVE TO GAS? MAYBE
 	bool bDoesHaveReaction = false;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
+	//TODO MOVE TO GAS? MAYBE
 	int32 ActionsLeft = 0;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
@@ -75,6 +85,10 @@ public:
 	//Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UCapsuleComponent> Capsule;
+	//GAS component
+	UPROPERTY()
+	TObjectPtr<UCombatAttributeSet> CombatAttributes;
+
 	// Conditions
 	UPROPERTY(BlueprintReadWrite, Category = "Conditions")
 	FGameplayTagContainer Conditions;
@@ -88,6 +102,18 @@ public:
 	void BeginTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurnEffects();
-
-	
+#pragma region CombatAttributeSet handlers
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void HandleHealthChange(float Magnitude, float NewHealth);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void HandleACChange(float Magnitude, float NewAC);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void HandleFortitudeChange(float Magnitude, float
+	                           NewFortitude);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void HandleReflexChange(float Magnitude, float
+	                        NewReflex);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void HandleWillChange(float Magnitude, float NewWill);
+#pragma endregion CombatAttributeSet handlers
 };

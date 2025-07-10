@@ -7,6 +7,10 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
+#include "AbilitySystemComponent.h"
+
+#include "GAS/CombatAttributeSet.h"
+#include "LogTypes.h"
 
 #include "Kismet/KismetMathLibrary.h"
 
@@ -15,21 +19,51 @@ ACombatant::ACombatant()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	//InitiativeLightForDebug
-	Capsule=CreateDefaultSubobject<UCapsuleComponent>("Capsule");
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(
+		TEXT("AbilitySystemComponent"));
+	//Capsule
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
 	Capsule->SetupAttachment(RootComponent);
-	InitiativeLight=CreateDefaultSubobject<UPointLightComponent>("InitiativeLight");
+	//InitiativeLight
+	InitiativeLight = CreateDefaultSubobject<UPointLightComponent>(
+		"InitiativeLight");
 	InitiativeLight->SetupAttachment(Capsule);
 	InitiativeLight->LightColor = FColor(255, 0, 0);
-	InitiativeLight->SetRelativeLocation(FVector(0,0,200));
+	InitiativeLight->SetRelativeLocation(FVector(0, 0, 200));
 	InitiativeLight->SetHiddenInGame(true);
+	//GAS
+	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(
+		TEXT("CombatAttributeSet"));
 }
 
 // Called when the game starts or when spawned
 void ACombatant::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (AbilitySystemComponent) //Initialize Ability system Component - GAS.
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	}
+	if (CombatAttributes)
+	{
+		CombatAttributes->OnHealthChanged.AddDynamic(this,
+			&ACombatant::HandleHealthChange);
+		CombatAttributes->OnACChanged.AddDynamic(this,
+		                                         &ACombatant::HandleACChange);
+
+		CombatAttributes->OnFortitudeChanged.AddDynamic(this,
+			&ACombatant::HandleFortitudeChange);
+		CombatAttributes->OnReflexChanged.AddDynamic(this,
+			&ACombatant::HandleReflexChange);
+		CombatAttributes->OnWillChanged.AddDynamic(this,
+		                                           &ACombatant::
+		                                           HandleWillChange);
+	}
+}
+
+UAbilitySystemComponent* ACombatant::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 // Called every frame
@@ -56,17 +90,17 @@ void ACombatant::SpendReaction()
 }
 
 
-
 void ACombatant::BeginTurn()
 {
 	// Check if incapacitated - skip turn entirely
-	if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Incapacitated")))
+	if (Conditions.HasTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Incapacitated")))
 	{
 		//TODO Put Death Saving Throws Here, when those will be designed
-		EndTurnEffects(); 
+		EndTurnEffects();
 		return;
 	}
-	InitiativeLight->SetHiddenInGame(false);//INITIATIVE LIGHT
+	InitiativeLight->SetHiddenInGame(false); //INITIATIVE LIGHT
 	// Default actions per turn
 	int32 ActionsToGive = 3;
 
@@ -79,30 +113,39 @@ void ACombatant::BeginTurn()
 	if (Conditions.HasAny(ActionMods))
 	{
 		// Check specific conditions and modify actions
-		if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned.1")))
+		if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Stunned.1")))
 		{
 			ActionsToGive = 2;
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned.2")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Stunned.2")))
 		{
 			ActionsToGive = 1;
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned.3")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Stunned.3")))
 		{
 			ActionsToGive = 0;
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Slowed.1")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Slowed.1")))
 		{
 			ActionsToGive = 2;
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Slowed.2")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Slowed.2")))
 		{
 			ActionsToGive = 1;
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Quickened")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Quickened")))
 		{
 			ActionsToGive = 4;
 		}
@@ -111,11 +154,12 @@ void ACombatant::BeginTurn()
 	// Set actions and inform turn manager
 	if (TurnManagerRef)
 	{
-		TurnManagerRef->CurrentTurnActions=ActionsToGive;
+		TurnManagerRef->CurrentTurnActions = ActionsToGive;
 	}
 
 	// Reset reaction unless no actions (then end turn immediately)
-	if (ActionsToGive == 0 || Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned")))
+	if (ActionsToGive == 0 || Conditions.HasTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Stunned")))
 	{
 		EndTurnEffects();
 	}
@@ -128,69 +172,135 @@ void ACombatant::BeginTurn()
 void ACombatant::EndTurnEffects()
 {
 	InitiativeLight->SetHiddenInGame(true);
-	
+
 	// Define degrading condition tags
 	FGameplayTagContainer DegradingConditions;
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
-	DegradingConditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.3"));
-	
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.Frightened.3"));
+
 	// Check if combatant has any degrading conditions
 	if (Conditions.HasAny(DegradingConditions))
 	{
 		// Clumsy conditions
-		if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1")))
+		if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
-			Conditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
+			Conditions.AddTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3"));
-			Conditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3"));
+			Conditions.AddTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
 		}
-		
+
 		// Enfeebled conditions
-		if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1")))
+		if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
-			Conditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
+			Conditions.AddTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3"));
-			Conditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3"));
+			Conditions.AddTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
 		}
-		
+
 		// Frightened conditions
-		if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.1")))
+		if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Frightened.1")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.2")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Frightened.2")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
-			Conditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
+			Conditions.AddTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
 		}
-		else if (Conditions.HasTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.3")))
+		else if (Conditions.HasTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Frightened.3")))
 		{
-			Conditions.RemoveTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.3"));
-			Conditions.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
+			Conditions.RemoveTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Frightened.3"));
+			Conditions.AddTag(
+				FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
 		}
 	}
 }
+#pragma region CombatAttributeSet handlers
+void ACombatant::HandleHealthChange(float Magnitude, 
+ float NewHealth)
+{
+	if (NewHealth <= 0)
+	{
+		//TODO Handle death
+				UE_LOG(LogGAS, Warning, TEXT("Unit died!"));
+	}
+	UE_LOG(LogGAS, Log, TEXT("Health changed: %f"),NewHealth);
+}
 
+void ACombatant::HandleACChange(float Magnitude, float NewAC)
+{
+	UE_LOG(LogGAS, Log, TEXT("AC changed: %f"),NewAC);
+}
+
+void ACombatant::HandleFortitudeChange(float 
+Magnitude, float NewFortitude)
+{
+	UE_LOG(LogGAS, Log, TEXT("Fortitude changed: %f"), NewFortitude);
+}
+
+void ACombatant::HandleReflexChange(float Magnitude, 
+float NewReflex)
+{
+	UE_LOG(LogGAS, Log, TEXT("Reflex changed: %f"),NewReflex);
+}
+
+void ACombatant::HandleWillChange(float Magnitude, float NewWill)
+{
+	UE_LOG(LogGAS, Log, TEXT("Will changed: %f"),NewWill);
+}
+#pragma endregion CombatAttributeSet handlers
