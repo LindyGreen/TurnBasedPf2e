@@ -64,18 +64,7 @@ public:
 	//PointLight for initiative turn
 	UPROPERTY(BlueprintReadWrite, Category = "Highlighter")
 	TObjectPtr<UPointLightComponent> InitiativeLight;
-	// Initiative
-	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
-	//TODO Change to use GAS's
-	int32 Initiative = 0;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
-	//TODO MOVE TO GAS? MAYBE
-	bool bDoesHaveReaction = false;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
-	//TODO MOVE TO GAS? MAYBE
-	int32 ActionsLeft = 0;
+	// Initiative, Actions, and Reaction are now in GAS CombatAttributeSet
 
 	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
 	FText CharacterName;
@@ -96,9 +85,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void SpendReaction();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void SpendAction(int32 ActionCost = 1);
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void BeginTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurnEffects();
+	
+	// Blueprint-callable getters for GAS attributes
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Actions")
+	float GetActionsRemaining() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Actions")
+	float GetMaxActions() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Actions")
+	bool GetReactionAvailable() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
+	float GetCurrentHealth() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
+	float GetMaxHealth() const;
 #pragma region CombatAttributeSet handlers
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void HandleHealthChange(float Magnitude, float NewHealth);
@@ -110,6 +113,10 @@ public:
 	void HandleReflexChange(float Magnitude, float NewReflex);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void HandleWillChange(float Magnitude, float NewWill);
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void HandleActionsRemainingChange(float Magnitude, float NewActionsRemaining);
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void HandleReactionAvailableChange(float Magnitude, float NewReactionAvailable);
 #pragma endregion CombatAttributeSet handlers
 
 	// Hover and Selection System

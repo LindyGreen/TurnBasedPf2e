@@ -31,7 +31,16 @@ void UCombatAttributeSet::PostGameplayEffectExecute(
 
 		OnWillChanged.Broadcast(Data.EvaluatedData.Magnitude,GetWill());
 	}
-
-
+	//ACTIONS
+	else if (Data.EvaluatedData.Attribute == GetActionsRemainingAttribute())
+	{
+		SetActionsRemaining(FMath::Clamp(GetActionsRemaining(), 0, GetMaxActions()));
+		OnActionsRemainingChanged.Broadcast(Data.EvaluatedData.Magnitude, GetActionsRemaining());
+	}
+	else if (Data.EvaluatedData.Attribute == GetReactionAvailableAttribute())
+	{
+		SetReactionAvailable(FMath::Clamp(GetReactionAvailable(), 0, 1));
+		OnReactionAvailableChanged.Broadcast(Data.EvaluatedData.Magnitude, GetReactionAvailable());
+	}
 
 }

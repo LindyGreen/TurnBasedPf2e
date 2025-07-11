@@ -23,7 +23,6 @@ void UTurnManagerComponent::InitializeCombat()
 void UTurnManagerComponent::SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index, bool Force)
 {
 	if (!Combatant || !GetOwningGrid()) return;
-	//TODO add Logging to see if the indeces are corrent
 	
 	// Check if we need to move the unit
 	if (Combatant->LocationIndex != Index || Force)
@@ -72,7 +71,7 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 		float Initiative = Combatant->RollInitiative();
 		UE_LOG(Log_TurnManager, Display, TEXT("%s rolled initiative: %.2f"), *Combatant->GetName(), Initiative);
 		
-		// TODO: GetIndex and SetUnitIndexOnGrid
+		// TODO: GetIndex and SetUnitIndexOnGrid - maybe not required. Most likely no longer required
 		TempInitiativeHolder.Add(Initiative, Combatant); // we add here to temp MAP
 	}
 	
@@ -113,14 +112,15 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 	}
 }
 
-void UTurnManagerComponent::SpendActions(int32 ActionsToSpend)
+void UTurnManagerComponent::OnActionSpentInCombatant(int32 ActionsLeft)
 {
-	CurrentTurnActions=CurrentTurnActions-ActionsToSpend;
-	if (CurrentTurnActions <= 0)	EndTurn();
+//TODO probaby update the initiative tracker widget here.
+	if (ActionsLeft <= 0)	EndTurn();
 }
 
 void UTurnManagerComponent::EndTurn()
 {
+	if(bIsCombatActive==false){return;}//safety check 
 	UE_LOG(Log_TurnManager, Display, TEXT("Ending turn with %d combatants"), CombatantArray.Num());
 	
 	if (CurrentCombatant){CurrentCombatant->EndTurnEffects();} //Applies to the end of turn effects on the combatant

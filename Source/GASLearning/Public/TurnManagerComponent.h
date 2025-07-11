@@ -21,10 +21,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	bool bIsCombatActive = false; //This is generally useless safety check.
-
-	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
-	int32 CurrentTurnActions = 0; //Number of actions combatant has this turn, we get if from CurrentCombatant->BeginTurn()
-
+	
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	int32 CombatantTurn = 0; //The member of Combatant Array whose turn it is.
 
@@ -51,7 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartCombat();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
-	void SpendActions(int32 ActionsToSpend);//TBD might use gas
+	void OnActionSpentInCombatant(int32 ActionsLeft);
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")

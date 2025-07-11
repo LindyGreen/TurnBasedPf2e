@@ -46,18 +46,14 @@ void ACombatant::BeginPlay()
 	}
 	if (CombatAttributes)
 	{
-		CombatAttributes->OnHealthChanged.AddDynamic(this,
-			&ACombatant::HandleHealthChange);
-		CombatAttributes->OnACChanged.AddDynamic(this,
-		                                         &ACombatant::HandleACChange);
+		CombatAttributes->OnHealthChanged.AddDynamic(this,&ACombatant::HandleHealthChange);
+		CombatAttributes->OnACChanged.AddDynamic(this,&ACombatant::HandleACChange);
 
-		CombatAttributes->OnFortitudeChanged.AddDynamic(this,
-			&ACombatant::HandleFortitudeChange);
-		CombatAttributes->OnReflexChanged.AddDynamic(this,
-			&ACombatant::HandleReflexChange);
-		CombatAttributes->OnWillChanged.AddDynamic(this,
-		                                           &ACombatant::
-		                                           HandleWillChange);
+		CombatAttributes->OnFortitudeChanged.AddDynamic(this,&ACombatant::HandleFortitudeChange);
+		CombatAttributes->OnReflexChanged.AddDynamic(this,&ACombatant::HandleReflexChange);
+		CombatAttributes->OnWillChanged.AddDynamic(this, &ACombatant::HandleWillChange);
+		CombatAttributes->OnActionsRemainingChanged.AddDynamic(this, &ACombatant::HandleActionsRemainingChange);
+		CombatAttributes->OnReactionAvailableChanged.AddDynamic(this, &ACombatant::HandleReactionAvailableChange);
 	}
 }
 
@@ -76,12 +72,23 @@ void ACombatant::SetupPlayerInputComponent(
 
 float ACombatant::RollInitiative()
 {
-	return Initiative + UKismetMathLibrary::RandomFloatInRange(1.0f, 20.0f);
+	// Now uses GAS Initiative attribute
+	if (CombatAttributes)
+	{
+		return CombatAttributes->GetInitiative() + UKismetMathLibrary::RandomFloatInRange(1.0f, 20.0f);
+	}
+	return UKismetMathLibrary::RandomFloatInRange(1.0f, 20.0f);
 }
 
 void ACombatant::SpendReaction()
 {
-	bDoesHaveReaction = false;
+	// Now uses GAS ReactionAvailable attribute
+	if (CombatAttributes && AbilitySystemComponent)
+	{
+		// Apply a GameplayEffect to set ReactionAvailable to 0
+		// For now, set it directly (should use GameplayEffect in real implementation)
+		CombatAttributes->SetReactionAvailable(0);
+	}
 }
 
 
@@ -146,21 +153,22 @@ void ACombatant::BeginTurn()
 		}
 	}
 
-	// Set actions and inform turn manager
-	if (TurnManagerRef)
+	// Set actions in GAS - TurnManager will be informed via delegate
+	if (CombatAttributes && AbilitySystemComponent)
 	{
-		TurnManagerRef->CurrentTurnActions = ActionsToGive;
+		// Set MaxActions first, then ActionsRemaining
+		CombatAttributes->SetMaxActions(ActionsToGive);
+		CombatAttributes->SetActionsRemaining(ActionsToGive);
+		// Set reaction available
+		CombatAttributes->SetReactionAvailable(ActionsToGive > 0 ? 1 : 0);
+		
 	}
 
-	// Reset reaction unless no actions (then end turn immediately)
+	// End turn immediately if no actions
 	if (ActionsToGive == 0 || Conditions.HasTag(
 		FGameplayTag::RequestGameplayTag("Conditions.Stunned")))
 	{
 		EndTurnEffects();
-	}
-	else
-	{
-		bDoesHaveReaction = true;
 	}
 }
 
@@ -282,8 +290,7 @@ void ACombatant::HandleACChange(float Magnitude, float NewAC)
 	UE_LOG(LogGAS, Log, TEXT("AC changed: %f"),NewAC);
 }
 
-void ACombatant::HandleFortitudeChange(float 
-Magnitude, float NewFortitude)
+void ACombatant::HandleFortitudeChange(float Magnitude, float NewFortitude)
 {
 	UE_LOG(LogGAS, Log, TEXT("Fortitude changed: %f"), NewFortitude);
 }
@@ -311,3 +318,55 @@ void ACombatant::SetIsSelected(bool bNewIsSelected)
 	bIsSelected = bNewIsSelected;
 	CallToUpdateVisualIfHoveredOrSelected();
 }
+
+void ACombatant::HandleActionsRemainingChange(float Magnitude, float NewActionsRemaining)
+{
+	UE_LOG(LogGAS, Log, TEXT("Actions remaining changed: %f"), NewActionsRemaining);
+	// Inform TurnManager about action changes
+	if (TurnManagerRef)
+	{
+		TurnManagerRef->OnActionSpentInCombatant(NewActionsRemaining);
+	}
+}
+
+void ACombatant::HandleReactionAvailableChange(float Magnitude, float NewReactionAvailable)
+{
+	UE_LOG(LogGAS, Log, TEXT("Reaction available changed: %f"), NewReactionAvailable);
+}
+
+void ACombatant::SpendAction(int32 ActionCost)
+{
+	if (CombatAttributes && AbilitySystemComponent)
+	{
+		// Apply cost via attribute modifier
+		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetActionsRemainingAttribute(),
+			EGameplayModOp::Additive,-ActionCost);
+	}
+}
+
+#pragma region Blueprint-callable getters
+float ACombatant::GetActionsRemaining() const
+{
+	return CombatAttributes ? CombatAttributes->GetActionsRemaining() : 0.0f;
+}
+
+float ACombatant::GetMaxActions() const
+{
+	return CombatAttributes ? CombatAttributes->GetMaxActions() : 0.0f;
+}
+
+bool ACombatant::GetReactionAvailable() const
+{
+	return CombatAttributes ? CombatAttributes->GetReactionAvailable() > 0.0f : false;
+}
+
+float ACombatant::GetCurrentHealth() const
+{
+	return CombatAttributes ? CombatAttributes->GetHealth() : 0.0f;
+}
+
+float ACombatant::GetMaxHealth() const
+{
+	return CombatAttributes ? CombatAttributes->GetMaxHealth() : 0.0f;
+}
+#pragma endregion Blueprint-callable getters

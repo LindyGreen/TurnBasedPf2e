@@ -73,6 +73,37 @@ public:
 	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MovementSpeed);
 
 #pragma endregion 
+
+#pragma region Initiative
+	// Initiative (broadcast for turn order changes)
+	UPROPERTY()
+	FGameplayAttributeData Initiative;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Initiative);
+#pragma endregion
+
+#pragma region Actions
+	// Actions remaining this turn (broadcast for UI/AI updates)
+	UPROPERTY()
+	FGameplayAttributeData ActionsRemaining;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ActionsRemaining);
+	
+	UPROPERTY()
+	FPlayAttributeEvent OnActionsRemainingChanged;
+	
+	// Max actions per turn (usually 3, modified by conditions)
+	UPROPERTY()
+	FGameplayAttributeData MaxActions;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxActions);
+	
+	// Reaction available (0 or 1)
+	UPROPERTY()
+	FGameplayAttributeData ReactionAvailable;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ReactionAvailable);
+	
+	UPROPERTY()
+	FPlayAttributeEvent OnReactionAvailableChanged;
+
+#pragma endregion
 	
 	
 };
