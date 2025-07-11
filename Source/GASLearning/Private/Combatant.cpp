@@ -66,11 +66,6 @@ UAbilitySystemComponent* ACombatant::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-// Called every frame
-void ACombatant::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
 
 // Called to bind functionality to input
 void ACombatant::SetupPlayerInputComponent(

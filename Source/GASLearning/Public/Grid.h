@@ -83,4 +83,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void AddStateToTile(FIntPoint TileIndex, ETileState State);
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void RemoveStateFromTile(FIntPoint TileIndex, ETileState State);
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void ClearStateFromTiles(ETileState State);
+	
 };

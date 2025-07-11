@@ -65,6 +65,14 @@ public:
 	FPlayAttributeEvent OnWillChanged;
 
 #pragma endregion 
+
+#pragma region Movement
+	// Movement Speed (no broadcast required)
+	UPROPERTY()
+	FGameplayAttributeData MovementSpeed;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MovementSpeed);
+
+#pragma endregion 
 	
 	
 };

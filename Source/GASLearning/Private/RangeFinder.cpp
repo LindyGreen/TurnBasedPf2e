@@ -3,13 +3,13 @@
 
 #include "RangeFinder.h"
 #include "Algo/Reverse.h"
-
+#include "LogTypes.h"
 // Sets default values for this component's properties
 URangeFinder::URangeFinder()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -31,7 +31,7 @@ TArray<FIntPoint> URangeFinder::GeneratePossibleArray(
 	switch (Enum)
 	{
 	case EAE_SpellPattern_Invalid:
-		UE_LOG(LogTemp, Display,
+		UE_LOG(Log_Grid, Display,
 		       TEXT("URangeFinder::GeneratePossibleArray: Invalid Enum"));
 		break;
 	case EAE_SpellPattern_Burst:
@@ -129,7 +129,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint,
 				}
 			}
 		}
-		UE_LOG(LogTemp, Warning,
+		UE_LOG(Log_Grid, Log,
 		       TEXT("URangeFinder::GenerateCone - OriginPoint is orthogonal"));
 	}
 	else //diagonals
@@ -370,7 +370,7 @@ if (AnalizedTileIndexes.Contains(CurrentNeighbor.Index))
 }
 	if (CostFromStart>MaxPathLength) return false;
 	int32 IndexInDiscovered=DiscoveredTileIndexes.Find(CurrentNeighbor.Index);
-if (!(IndexInDiscovered==-1))
+if (IndexInDiscovered!=-1)
 {
 	CurrentNeighbor=PathfindingData[CurrentNeighbor.Index];
 	if (CostFromStart>=CurrentNeighbor.CostFromStart) return false;

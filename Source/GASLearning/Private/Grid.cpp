@@ -2,9 +2,7 @@
 
 
 #include "Grid.h"
-
 #include "LogTypes.h"
-
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -241,7 +239,6 @@ void AGrid::AddStateToTile(FIntPoint TileIndex, ETileState State)
 	
 	// Third - Add unique state to tile states of local TileStates, there is no clear function, 
 	// because clear function should run prior to this 
-	// TODO add a clear state
 	LocalTile.TileStates.AddUnique(State);
 	
 	// Fourth - Check if TileStates >= 0, return otherwise
@@ -268,6 +265,49 @@ void AGrid::AddStateToTile(FIntPoint TileIndex, ETileState State)
 	if (GridMeshInstance)
 	{
 		GridMeshInstance->UpdateTileVisual(LocalTile);
+	}
+}
+
+
+void AGrid::RemoveStateFromTile(FIntPoint TileIndex, ETileState State)
+{
+	// Check if valid
+	if (!GridTiles.Contains(TileIndex))
+	{
+		return;
+	}
+
+	// Get tile data
+	FS_TileData LocalTile = GridTiles[TileIndex];
+
+	// Remove state from tile - only continue if state was actually removed
+	if (LocalTile.TileStates.Remove(State))
+	{
+		// Update the tile data
+		GridTiles[TileIndex] = LocalTile;
+
+		// Update the state tracking map directly
+		if (FS_IntPointArray* StateArrayPtr =  TileStatesToIndexes.Find(State))
+		{
+
+			StateArrayPtr->IntPointArray.Remove(TileIndex);
+		}
+
+		// Update visuals
+		if (GridMeshInstance)
+		{
+			GridMeshInstance->UpdateTileVisual(LocalTile);
+		}
+	}
+}
+
+
+void AGrid::ClearStateFromTiles(ETileState State)
+{
+TArray<FIntPoint> TilesToClear=GetAllTilesWithState(State);
+	for (const FIntPoint& TileIndex : TilesToClear)//better than TilesToClear.[i] variant
+	{
+		RemoveStateFromTile(TileIndex, State);
 	}
 }
 

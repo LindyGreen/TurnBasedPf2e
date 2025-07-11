@@ -31,9 +31,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(
 		class UInputComponent* PlayerInputComponent) override;
@@ -108,11 +105,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void HandleACChange(float Magnitude, float NewAC);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void HandleFortitudeChange(float Magnitude, float
-	                           NewFortitude);
+	void HandleFortitudeChange(float Magnitude, float NewFortitude);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void HandleReflexChange(float Magnitude, float
-	                        NewReflex);
+	void HandleReflexChange(float Magnitude, float NewReflex);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void HandleWillChange(float Magnitude, float NewWill);
 #pragma endregion CombatAttributeSet handlers
