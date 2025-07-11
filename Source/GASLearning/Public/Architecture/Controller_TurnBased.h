@@ -42,9 +42,5 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	AActor* GetUnitUnderCursor();
-	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
-	void SetTileHighlight(ETileState State, FIntPoint TileIndex);
-	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
-	void ClearTileHighlight(ETileState State, FIntPoint TileIndex);
-	
+
 };

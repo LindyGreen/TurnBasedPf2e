@@ -23,7 +23,7 @@ ACombatant::ACombatant()
 		TEXT("AbilitySystemComponent"));
 	//Capsule
 	Capsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
-	Capsule->SetupAttachment(RootComponent);
+	RootComponent=Capsule;
 	//InitiativeLight
 	InitiativeLight = CreateDefaultSubobject<UPointLightComponent>(
 		"InitiativeLight");
@@ -299,3 +299,15 @@ void ACombatant::HandleWillChange(float Magnitude, float NewWill)
 	UE_LOG(LogGAS, Log, TEXT("Will changed: %f"),NewWill);
 }
 #pragma endregion CombatAttributeSet handlers
+
+void ACombatant::SetIsHovered(bool bNewIsHovered)
+{
+	bIsHovered = bNewIsHovered;
+	CallToUpdateVisualIfHoveredOrSelected();
+}
+
+void ACombatant::SetIsSelected(bool bNewIsSelected)
+{
+	bIsSelected = bNewIsSelected;
+	CallToUpdateVisualIfHoveredOrSelected();
+}

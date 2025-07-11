@@ -42,7 +42,7 @@ public:
 	TObjectPtr<UTurnManagerComponent> TurnManagerRef = nullptr;
 
 	// Location
-	UPROPERTY(BlueprintReadWrite, Category = "Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "Grid")//set in Turn manager SetUnitOnGrid
 	FIntPoint LocationIndex = FIntPoint(-1, -1);
 
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
@@ -111,4 +111,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void HandleWillChange(float Magnitude, float NewWill);
 #pragma endregion CombatAttributeSet handlers
+
+	// Hover and Selection System
+	UFUNCTION(BlueprintCallable, Category = "Highlighter")
+	void SetIsHovered(bool bNewIsHovered);
+	
+	UFUNCTION(BlueprintCallable, Category = "Highlighter") 
+	void SetIsSelected(bool bNewIsSelected);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Highlighter")
+	void CallToUpdateVisualIfHoveredOrSelected();
 };

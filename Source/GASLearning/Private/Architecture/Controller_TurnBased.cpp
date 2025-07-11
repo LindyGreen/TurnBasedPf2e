@@ -53,16 +53,28 @@ AActor* CurrentHover = GetUnitUnderCursor();//setting the one we connect with as
 			if (!(CurrentHover==HoveredCombatant))//checks if the current hover is the hoveredCombatant
 		UE_LOG(Log_Grid, Log, TEXT("Hovered combatant != Current hover"));
 			{
-			//TODO call ChangeIsHovered in previous combatant - false
-		HoveredCombatant =Cast<ACombatant>(CurrentHover);//set current hover as the HoveredCombatant and make previous unhover
-			//TODO call ChangeIsHovered in new combatant - true
+			// Call ChangeIsHovered in previous combatant - false
+			if (HoveredCombatant)
+			{
+				HoveredCombatant->SetIsHovered(false);
+			}
+			HoveredCombatant =Cast<ACombatant>(CurrentHover);//set current hover as the HoveredCombatant and make previous unhover
+			// Call ChangeIsHovered in new combatant - true
+			if (HoveredCombatant)
+			{
+				HoveredCombatant->SetIsHovered(true);
+			}
 			}		
 		}
 		else //no active hovered combatant before, one now
 		{
 		UE_LOG(Log_Grid, Log, TEXT("HoveredCombatant is not valid - there is't one likely"));
 		HoveredCombatant =Cast<ACombatant>(CurrentHover);//set current hover as the HoveredCombatant
-		//TODO call ChangeIsHovered in combatant - true
+		// Call ChangeIsHovered in combatant - true
+		if (HoveredCombatant)
+		{
+			HoveredCombatant->SetIsHovered(true);
+		}
 		}
 }
 
@@ -73,8 +85,9 @@ else //clear HoveredCombatant
 	if (HoveredCombatant)
 	{
 	UE_LOG(Log_Grid, Log, TEXT("We clear previous hovered combatant"));
-		//Todo Call ChangeIsHoveredInCombatant-false
-			HoveredCombatant=nullptr;
+		// Call ChangeIsHoveredInCombatant-false
+		HoveredCombatant->SetIsHovered(false);
+		HoveredCombatant=nullptr;
 	}
 	
 }
@@ -82,7 +95,7 @@ else //clear HoveredCombatant
 	if (HoveredCombatant)
 	{
 	UE_LOG(Log_Grid, Log, TEXT("new Hovered Combatant we have to get Index From"));
-		//TODO GetIndex from Combatant and set as NewIndex
+	NewIndex=HoveredCombatant->LocationIndex;
 	}
 	else//if no combatant under the cursor
 	{

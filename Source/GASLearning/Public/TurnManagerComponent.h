@@ -51,7 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartCombat();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
-	void SpendActions(int32 ActionsToSpend);
+	void SpendActions(int32 ActionsToSpend);//TBD might use gas
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
