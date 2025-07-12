@@ -6,6 +6,12 @@
 #include "TurnManagerComponent.generated.h"
 class ACombatant;
 class URangeFinder;
+
+// Delegates for UI communication
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCombatStarted, const TArray<ACombatant*>&, SortedCombatants);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnChanged, ACombatant*, NewCurrentCombatant);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCombatantActionsChanged, ACombatant*, Combatant, int32, ActionsRemaining);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCombatEnded);
 UCLASS(Blueprintable, meta=(BlueprintSpawnableComponent))
 class GASLEARNING_API UTurnManagerComponent : public UActorComponent
 {
@@ -39,6 +45,19 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	FS_IntPointArray EffectAreaTEMP; //Temporary storage for effect areas, this is used for grid mesh instance highlights
+
+	// UI Delegates
+	UPROPERTY(BlueprintAssignable, Category = "Combat Events")
+	FOnCombatStarted OnCombatStarted;
+
+	UPROPERTY(BlueprintAssignable, Category = "Combat Events")
+	FOnTurnChanged OnTurnChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Combat Events")
+	FOnCombatantActionsChanged OnCombatantActionsChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Combat Events")
+	FOnCombatEnded OnCombatEnded;
 
 	// Helper to get owning Grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Grid")

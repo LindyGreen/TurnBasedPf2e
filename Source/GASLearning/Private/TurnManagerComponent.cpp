@@ -97,6 +97,9 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 		}
 	}
 	
+	// Store initiative map for UI reference
+	CurrentInitiativeHolder = TempInitiativeHolder;
+	
 	UE_LOG(Log_TurnManager, Display, TEXT("Final CombatantArray has %d members"), CombatantArray.Num());
 	
 	if (!CombatantArray.IsEmpty())
@@ -104,7 +107,25 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 		CurrentCombatant = CombatantArray[0];
 		bIsCombatActive=true;
 		UE_LOG(Log_TurnManager, Warning, TEXT("Combat started! First combatant: %s"), *CurrentCombatant->GetName());
+		
+		// Broadcast combat started event
+		if (OnCombatStarted.IsBound())
+		{
+			TArray<ACombatant*> CombatantPtrs;
+			for (auto& Combatant : CombatantArray)
+			{
+				CombatantPtrs.Add(Combatant.Get());
+			}
+			OnCombatStarted.Broadcast(CombatantPtrs);
+		}
+		
 		CurrentCombatant->BeginTurn();
+		
+		// Broadcast turn changed event
+		if (OnTurnChanged.IsBound())
+		{
+			OnTurnChanged.Broadcast(CurrentCombatant.Get());
+		}
 	}
 	else
 	{
@@ -114,7 +135,12 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 
 void UTurnManagerComponent::OnActionSpentInCombatant(int32 ActionsLeft)
 {
-//TODO probaby update the initiative tracker widget here.
+	// Broadcast action change event for UI update
+	if (OnCombatantActionsChanged.IsBound() && CurrentCombatant)
+	{
+		OnCombatantActionsChanged.Broadcast(CurrentCombatant.Get(), ActionsLeft);
+	}
+	
 	if (ActionsLeft <= 0)	EndTurn();
 }
 
@@ -129,8 +155,13 @@ void UTurnManagerComponent::EndTurn()
 	{
 		CurrentCombatant=CombatantArray[CombatantTurn];//Sets the combatant whose turn should be as active combatant
 		CurrentCombatant->BeginTurn(); //Starts new combatants turn
+		
+		// Broadcast turn changed event to update UI
+		if (OnTurnChanged.IsBound())
+		{
+			OnTurnChanged.Broadcast(CurrentCombatant.Get());
+		}
 	}
-	//TODO Call On Turn Changed to WBP initiative tracker should be here.
 	UE_LOG(Log_TurnManager, Log, TEXT("EndTurn function ran"));
 }
 void UTurnManagerComponent::EndCombat()
@@ -139,9 +170,16 @@ void UTurnManagerComponent::EndCombat()
 	//TODO Destroying all active combatants.
 
 	CombatantArray.Empty();
+	CurrentInitiativeHolder.Empty();
+	CurrentCombatant = nullptr;
 	bIsCombatActive=false;
-	//TODO here I have to put a delegate that combat ended and other stuff like quest completion etc.
-	//Also a widget killer,
+	
+	// Broadcast combat ended event
+	if (OnCombatEnded.IsBound())
+	{
+		OnCombatEnded.Broadcast();
+	}
+	
 	UE_LOG(Log_TurnManager, Log, TEXT("EndCombat function ran"));
 }
 //

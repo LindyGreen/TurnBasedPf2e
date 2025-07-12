@@ -104,6 +104,16 @@ public:
 	FPlayAttributeEvent OnReactionAvailableChanged;
 
 #pragma endregion
-	
-	
+
+#pragma region AttackAndDamage
+	// Attack modifiers for abilities to use
+	UPROPERTY()
+	FGameplayAttributeData AttackBonus;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, AttackBonus);
+
+	UPROPERTY()
+	FGameplayAttributeData DamageBonus;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageBonus);
+
+#pragma endregion AttackAndDamage
 };
