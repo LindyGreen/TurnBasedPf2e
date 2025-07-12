@@ -13,17 +13,7 @@ class GASLEARNING_API UBasicMeleeAttackAbility : public UMyBaseGameplayAbility
 public:
 	UBasicMeleeAttackAbility();
 
-	// Damage properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 BaseDamage = 6; // 1d6 base weapon damage probably will do dice later with modifiers. 
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 StrengthModifier = 2; // Will be dynamic later or not, no idea
-
-	// Attack roll properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 AttackBonus = 5; // Base attack bonus - will be modified or creature specific 
-
+	
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 

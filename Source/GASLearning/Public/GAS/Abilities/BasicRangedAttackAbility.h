@@ -12,17 +12,6 @@ class GASLEARNING_API UBasicRangedAttackAbility : public UMyBaseGameplayAbility
 public:
 	UBasicRangedAttackAbility();
 
-	// Damage properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 BaseDamage = 6; // 1d6 base weapon damage
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 DexterityModifier = 3; // Will be dynamic later does not affect damage
-
-	// Attack roll properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 AttackBonus = 5; // Base attack bonus
-
 	// Ranged specific properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	int32 MaxRange = 30; // Maximum range in squares

@@ -115,5 +115,13 @@ public:
 	FGameplayAttributeData DamageBonus;
 	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageBonus);
 
+	UPROPERTY()
+	FGameplayAttributeData DamageDie;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDie);
+
+	UPROPERTY()
+	FGameplayAttributeData DamageDieCount;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDieCount);
+
 #pragma endregion AttackAndDamage
 };

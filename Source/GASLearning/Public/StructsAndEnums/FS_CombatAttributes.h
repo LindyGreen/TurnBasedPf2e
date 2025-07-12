@@ -44,6 +44,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="Damage Bonus"))
 	int32 DamageBonus;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="Damage Die"))
+	int32 DamageDie;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="Damage Die Count"))
+	int32 DamageDieCount;
+
 	FS_CombatAttributes()
 	{
 		// PF2e reasonable defaults
@@ -57,5 +63,7 @@ public:
 		MaxActions = 3.0f;
 		AttackBonus = 5;
 		DamageBonus = 3;
+		DamageDie = 6; // d6 weapon by default
+		DamageDieCount = 1; // 1 die normally, 2 with striking, 3 with greater striking
 	}
 };

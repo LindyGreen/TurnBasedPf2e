@@ -40,9 +40,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	int32 DamageDiceCount = 2; // Number of dice (e.g., 2d6)
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 SpellcastingModifier = 3; // Will be dynamic later
-
 	// Saving throw properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
 	bool bAllowsSave = true;

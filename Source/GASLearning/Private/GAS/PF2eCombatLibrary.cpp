@@ -132,3 +132,17 @@ EDegreeOfSuccess UPF2eCombatLibrary::ApplyNaturalRollModifiers(EDegreeOfSuccess 
 	
 	return BaseResult;
 }
+
+int32 UPF2eCombatLibrary::RollDamage(int32 DamageDie, int32 DamageDieCount, int32 DamageBonus)
+{
+	int32 TotalDamage = 0;
+	
+	// Roll multiple dice (for striking runes, spell damage, etc.)
+	for (int32 i = 0; i < DamageDieCount; i++)
+	{
+		TotalDamage += UKismetMathLibrary::RandomIntegerInRange(1, DamageDie);
+	}
+	
+	// Add flat damage bonus
+	return TotalDamage + DamageBonus;
+}

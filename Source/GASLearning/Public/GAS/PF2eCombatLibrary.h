@@ -37,6 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")
 	static int32 ApplyDamageMultiplier(int32 BaseDamage, EDegreeOfSuccess Result);
 
+	// General damage rolling function
+	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
+	static int32 RollDamage(int32 DamageDie, int32 DamageDieCount, int32 DamageBonus = 0);
+
 	// Utility functions
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")
 	static FString GetDegreeOfSuccessString(EDegreeOfSuccess Degree);
