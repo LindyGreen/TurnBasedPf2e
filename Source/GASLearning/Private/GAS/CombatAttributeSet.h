@@ -123,5 +123,9 @@ public:
 	FGameplayAttributeData DamageDieCount;
 	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDieCount);
 
+	UPROPERTY()
+	FGameplayAttributeData MaxDieRoll;
+	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxDieRoll);
+
 #pragma endregion AttackAndDamage
 };

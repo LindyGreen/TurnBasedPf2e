@@ -25,13 +25,17 @@ public:
 
 	// Specific roll functions
 	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
-	static EDegreeOfSuccess RollAttack(int32 AttackBonus, int32 TargetAC);
+	static EDegreeOfSuccess RollAttack(int32 AttackBonus, int32 TargetAC, int32 MaxDieRoll = 20);
 
 	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
-	static EDegreeOfSuccess RollSave(int32 SaveBonus, int32 DC);
+	static EDegreeOfSuccess RollSave(int32 SaveBonus, int32 DC, int32 MaxDieRoll = 20);
 
 	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
-	static EDegreeOfSuccess RollSkillCheck(int32 SkillBonus, int32 DC);
+	static EDegreeOfSuccess RollSkillCheck(int32 SkillBonus, int32 DC, int32 MaxDieRoll = 20);
+
+	// Range penalty version for ranged attacks
+	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
+	static EDegreeOfSuccess RollAttackWithPenalty(int32 AttackBonus, int32 TargetAC, int32 RangePenalty, int32 MaxDieRoll = 20);
 
 	// Damage calculation helpers
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")
@@ -40,6 +44,10 @@ public:
 	// General damage rolling function
 	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
 	static int32 RollDamage(int32 DamageDie, int32 DamageDieCount, int32 DamageBonus = 0);
+
+	// Difficulty control - MaxDieRoll for controlling crits
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")
+	static int32 RollD20(int32 MaxDieRoll = 20);
 
 	// Utility functions
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")

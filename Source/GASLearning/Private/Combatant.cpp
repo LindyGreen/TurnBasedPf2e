@@ -369,4 +369,9 @@ float ACombatant::GetMaxHealth() const
 {
 	return CombatAttributes ? CombatAttributes->GetMaxHealth() : 0.0f;
 }
+
+int32 ACombatant::GetMaxDieRoll() const
+{
+	return CombatAttributes ? CombatAttributes->GetMaxDieRoll() : 20;
+}
 #pragma endregion Blueprint-callable getters

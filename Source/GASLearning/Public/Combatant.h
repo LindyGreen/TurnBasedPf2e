@@ -102,6 +102,8 @@ public:
 	float GetCurrentHealth() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	float GetMaxHealth() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
+	int32 GetMaxDieRoll() const;
 #pragma region CombatAttributeSet handlers
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void HandleHealthChange(float Magnitude, float NewHealth);

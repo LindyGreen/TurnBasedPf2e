@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GAS/MyBaseGameplayAbility.h"
+#include "GAS/PF2eCombatLibrary.h"
 #include "BasicRangedAttackAbility.generated.h"
 
 UCLASS(BlueprintType, Blueprintable)
@@ -24,7 +25,7 @@ protected:
 
 	// Helper functions
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	int32 RollAttack(int32 RangePenalty = 0) const;
+	EDegreeOfSuccess RollAttack(int32 RangePenalty, int32 TargetAC) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat") 
 	int32 RollDamage() const;
@@ -32,12 +33,19 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	bool IsTargetInRange(class ACombatant* Target, int32& OutRangePenalty) const;
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
+	UFUNCTION(BlueprintCallable, Category = "Combat")//probably redundant will be handled by the pre-attack phase  
 	bool HasLineOfSight(class ACombatant* Target) const;
 
+	// PF2e degree of success events ON THE TARGET
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void OnAttackHit(class ACombatant* Target, int32 Damage);
+	void OnAttackCriticalSuccess(class ACombatant* Target, int32 Damage);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void OnAttackMiss(class ACombatant* Target);
+	void OnAttackSuccess(class ACombatant* Target, int32 Damage);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void OnAttackFailure(class ACombatant* Target);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
+	void OnAttackCriticalFailure(class ACombatant* Target);
 };

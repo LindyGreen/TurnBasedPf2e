@@ -9,26 +9,36 @@
 **Purpose**: Core combat statistics for all combatants
 
 **Implemented Attributes**:
+
+##### Health System
 - `Health` - Current hit points (clamped 0-MaxHealth, broadcasts changes)
 - `MaxHealth` - Maximum hit points 
-- `AC` - Armor Class (broadcasts changes only)
-- `Fortitude` - Fortitude save (broadcasts changes only)
-- `Reflex` - Reflex save (broadcasts changes only)
-- `Will` - Will save (broadcasts changes only)
-- `Perception` - Perception modifier (no broadcast needed)
-  //TODO add character speed here as well. Maybe to-hit and damage as well. 
-- //TODO add initiative 
-- //Note - damaging abilities don't care much about effects. 
-- //Note: I don't have to care about debuffs on damage if no one can produce debuffs on hit and damage.
-  **Handler Functions**: All attribute changes are handled in `ACombatant` class with proper logging via `LogGAS` category.
+
+##### Defenses & Saves (all broadcast changes)
+- `AC` - Armor Class
+- `Fortitude` - Fortitude save 
+- `Reflex` - Reflex save
+- `Will` - Will save
+- `Perception` - Perception modifier
+
+##### Movement
+- `MovementSpeed` - Character movement speed (no broadcast needed)
+
+##### Action Economy (✅ MIGRATED TO GAS)
+- `Initiative` - Initiative modifier/roll result
+- `ActionsRemaining` - Current actions left this turn (broadcasts changes)
+- `MaxActions` - Maximum actions per turn (usually 3, modified by conditions)
+- `ReactionAvailable` - Whether reaction is available (0 or 1, broadcasts changes)
+
+##### Attack & Damage System (✅ NEW)
+- `AttackBonus` - To-hit modifier for abilities
+- `DamageBonus` - Flat damage bonus
+- `DamageDie` - Weapon damage die size (d6, d8, etc.)
+- `DamageDieCount` - Number of damage dice (1 normally, 2+ with striking runes)
+
+**Handler Functions**: All attribute changes are handled in `ACombatant` class with proper logging via `LogGAS` category.
 
 ### Planned AttributeSets
-#### UActionsAttributeSet
-**Purpose**: Number of actions and reactions 
-**Status**: Not implemented yet
-//TODO move these from Combatant 
-//TODO repurpose the listeners to change the initiative like one curently does 
-
 #### USkillAttributeSet
 **Purpose**: Skill modifiers for player characters, enemies don't need them
 **Status**: Not implemented yet
@@ -47,39 +57,64 @@
 - Focus Points (TBD)
 - Divine Font (Because I hate myself, why would I make a cleric protagonists?)
 
+### AttributeSet Distribution
+- **UCombatAttributeSet**: Assigned to ALL combatants (PCs and NPCs) ✅
+- **USkillAttributeSet**: Only assigned to player characters (TBD)
+- **USpellResourceAttributeSet**: Only assigned to spellcasting characters (TBD)
 
-### AttributeSet Distribution (reiteration)
-- **UCombatAttributeSet**: Assigned to ALL combatants (PCs and NPCs)
-- **USkillAttributeSet**: Only assigned to player characters
-- **USpellResourceAttributeSet**: Only assigned to spellcasting characters
+## Data Integration Architecture
 
-## Architecture Notes and Issues To Address
+### Character Data Structure (✅ IMPLEMENTED)
+**Location**: `Source/GASLearning/Public/StructsAndEnums/`
+- **FS_CompleteCharacterData** - Master data table struct combining all character data
+- **FS_CombatAttributes** - Combat stats with weapon attributes
+- **FS_CharacterInfo** - Basic character info (name, level, type)
+- **FS_Skills** - All PF2e skills
+- **FS_SpellResourcesAndAttributes** - Spell slots and casting mechanics
+- **FS_CombatantDataAssets** - Visual assets (mesh, animations, portrait)
+
+### GAS Integration Process
+1. **Data Table Creation** - Create data table from FS_CompleteCharacterData
+2. **Attribute Population** - Initialize GAS attributes from data table values
+3. **Ability Granting** - Grant starting abilities based on character data
 
 ### Current Integration
 - All AttributeSets are created as components in `ACombatant` constructor
 - Event delegates are bound in `BeginPlay()` to handle attribute changes
 - `PostGameplayEffectExecute()` handles clamping and broadcasting for each AttributeSet
+- **NEW**: TurnManager listens to action changes via OnActionSpentInCombatant delegate
 
-### Prepared Spells
-For prepared casters (like Clerics and Wizards), spell tracking is complex: 
-- Each spell can be prepared multiple times
-- Need to track individual uses per spell
-- May require custom data structures beyond simple attributes
-- The Bonded item is its own beast, so but party is Cleric, Rogue, Sorcerer, Fighter (archer).
+### Action Economy Integration (✅ COMPLETE)
+- **Initiative**: Migrated from individual Combatant variables to GAS AttributeSet
+- **Action Management**: ActionsRemaining, MaxActions, ReactionAvailable all in GAS
+- **Delegate System**: OnActionsRemainingChanged, OnReactionAvailableChanged for UI updates
+- **Auto Turn End**: TurnManager auto-ends turn when actions <= 0
+- **Blueprint Access**: GetActionsRemaining(), GetMaxActions(), SpendAction() functions
 
-### Conditions Integration
-Current gameplay tags can be integrated with GAS but it's low priority. 
-The game can ship without that.
+## PF2e Combat Library Integration (✅ IMPLEMENTED)
+**Location**: `Source/GASLearning/Public/GAS/PF2eCombatLibrary.h`
+
+### Centralized Combat Mechanics
+- **EDegreeOfSuccess** enum with PF2e's 4-tier system
+- **Natural 20/1 Rules** - Auto-shift degree of success by one step
+- **Damage Rolling** - Unified RollDamage(DamageDie, DamageDieCount, DamageBonus)
+- **Attack/Save Rolling** - Handles all d20 rolls with proper PF2e mechanics
+
+### Ability Integration
+All abilities (BasicMeleeAttackAbility, BasicRangedAttackAbility, BasicDamageSpellAbility) use:
+- Centralized damage calculation
+- GAS attribute accessors for weapon stats
+- PF2e degree of success system
 
 ## Testing Status
 - ✅ Damage abilities successfully modify Health attribute
 - ✅ Attribute change handlers properly log via LogGAS
-- ✅ Health clamping works correctly - death is called on HP==0.
-- ⏳ Need to implement initial attribute value setting 
-- ⏳ Need to test other attribute modifications in bp all at the same time
-- ⏳ Need to connect it to my Initiative Tracker 
-
-- 
-- Note: No health bar testing. Health bar for player combatants won't be on the character, only npcs
-- So -- Logs are enough 
-- 
+- ✅ Health clamping works correctly - death is called on HP==0
+- ✅ Health works correctly - widget displays it at least 
+- ✅ Action economy migrated to GAS with delegate system
+- ✅ Centralized combat mechanics in PF2eCombatLibrary
+- ✅ All abilities use unified damage rolling system
+- 🚧 **CURRENT**: Data table creation and attribute population
+- ⏳ Need to test data table → GAS attribute initialization
+- ⏳ Need to test ability granting from character data
+- ⏳ Need to connect to Initiative Tracker UI

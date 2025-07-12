@@ -1,68 +1,58 @@
 # Action System Documentation
 
-## Current State: OVERCOMPLICATED MESS
-**Status:** Needs complete overhaul/simplification
+## Current State: GAS-INTEGRATED SYSTEM ✅
+**Status:** Successfully migrated to GAS with clean architecture
 
 
 
-## What We Currently Have (TO BE DELETED)
+## NEW Action Economy System (✅ IMPLEMENTED)
 
-### Grid Operation Actions (REDUNDANT - Use Obstacles/GridModifiers instead)
-- `Action_AddTile` - Add tiles to grid → **REPLACE:** Add rows functionality
-- `Action_RemoveTile` - Remove tiles from grid → **REPLACE:** Place obstacles  
-- `Action_IncreaseDecreaseTileHeight` - Modify tile elevation → **REPLACE:** Obstacles with `bUseForTileHeight = true`
-- `Action_SetTileType` - Set difficult terrain, etc. → **REPLACE:** Obstacles with appropriate `TileType`
+### GAS-Integrated Action Management
+**Location**: `UCombatAttributeSet` + `ACombatant` + `UTurnManagerComponent`
 
-### Unit Management Actions (REDUNDANT - Use TurnManager + Database instead)
-- `Action_AddRemoveUnitFromCombat` - Add/remove combat units → **REPLACE:** TurnManager spawning from database
-- `Action_SelectTileAndUnit` - Unit selection → **REPLACE:** Initiative system in TurnManager
+#### Action Attributes (in GAS)
+- `ActionsRemaining` - Current actions left this turn (0-4, broadcasts changes)
+- `MaxActions` - Maximum actions per turn (usually 3, modified by conditions)
+- `ReactionAvailable` - Whether reaction is available (0 or 1, broadcasts changes)
+- `Initiative` - Initiative value for turn order
 
-### Pathfinding Actions (REDUNDANT - Core systems handle this)
-- `Action_MoveUnitOnGrid` - Unit movement → **REPLACE:** Simple movement through grid system
-- `Action_FindPathToTarget` - Pathfinding → **REPLACE:** Direct pathfinding calls
-- `Action_SelectAndReachable` - Show movement range → **REPLACE:** Grid highlighting
-- `Action_SelectTile_CalculateMinCost` - Movement cost calculation → **REPLACE:** Pathfinding system
-- `Action_ShowTileNeighbor` - Debug tile neighbors → **DELETE:** Debug only
+#### Action Economy Flow
+1. **Turn Start**: TurnManager calls `BeginTurn()` on current combatant
+2. **Action Calculation**: Combatant calculates actions based on conditions
+3. **Action Spending**: Abilities call `SpendAction(ActionCost)` 
+4. **Auto Turn End**: When ActionsRemaining <= 0, TurnManager advances turn
+5. **UI Updates**: All action buttons update via delegate system
 
-### Combat Actions (POTENTIALLY USEFUL)
-- `Action_CastASpell` - Spell casting → **SIMPLIFY:** Direct spell system integration
-- `Action_SelectTileAndUnitSpellRange` - Spell targeting → **SIMPLIFY:** Integrated with spell casting
+### Ability System Integration (✅ IMPLEMENTED)
 
-### Debug Actions (DELETE ALL)
-- Multiple `Button_Action_*` classes for debug UI → **DELETE:** Not needed for production
+#### Base Ability Class: UMyBaseGameplayAbility
+**Location**: `Source/GASLearning/Public/GAS/MyBaseGameplayAbility.h`
 
-## What We ACTUALLY Need (Simple TTRPG Actions)
+**UI Data Properties**:
+- `DisplayName` - Ability name for buttons
+- `Description` - Tooltip text
+- `Icon` - Button icon (UTexture2D)
+- `ActionCost` - How many actions this ability costs (1-3)
+- `Range` - Ability range in grid squares
+- `Category` - Attack/Spell/Item/Free for button grouping
 
-### Core Action States
-```
-None → ActionSelected → Execute/Cancel
-```
+#### Implemented Abilities - to modify and build others upon
+1. **BasicMeleeAttackAbility** - 1 action, adjacent range/+1 if reach, uses weapon stats
+2. **BasicRangedAttackAbility** - 1 action, 30 square range, range penalties
+3. **BasicDamageSpellAbility** - 2 actions, 24 square range, save for half
 
-### Essential Actions (3-4 total)
-1. **Cast Spell**
-   - Input: Click spell button/hotkey
-   - State: Show spell targets/range
-   - Execute: Left click target → Cast spell
-   - Cancel: Right click → Clear selection
+#### PF2e Combat Integration
+All abilities use **UPF2eCombatLibrary** for:
+- Degree of success calculation (Critical Success/Success/Failure/Critical Failure)
+- Natural 20/1 rule handling
+- Centralized damage rolling with weapon/spell dice
+- Attack roll and save mechanics
 
-2. **Move Unit** 
-   - Input: Select unit (through initiative)
-   - State: Show movement range
-   - Execute: Left click destination → Move unit
-   - Cancel: Right click → Clear selection
-
-3. **End Turn**
-   - Input: End turn button/hotkey
-   - Execute: Pass turn to next unit in initiative
-
-4. **Special Abilities** (maybe)
-   - Similar to spell casting but for class abilities
-
-### Implementation Strategy
-- **Remove:** All 20+ existing action classes
-- **Replace with:** Simple state machine in PlayerController
-- **Use:** Direct function calls to existing systems (Grid, TurnManager, Spells)
-- **Keep simple:** 3 states, minimal complexity
+### Movement System Design (TBD)
+**Decision**: Movement is NOT a GameplayAbility - uses simple function calls
+- `BeginMovement()` → Show movement range
+- `ExecuteMovement(Destination)` → Move unit + spend 1 action
+- Integrates with existing BP pathfinding and animation systems
 
 ## Integration Points
 
@@ -102,16 +92,37 @@ None → ActionSelected → Execute/Cancel
 - Use existing targeting patterns (Burst, Line, Cone, etc.)
 - Integrate with action economy
 
-## Migration Plan
-1. **Document current mess** ✓
-2. **Delete redundant actions** (90% of them)
-3. **Build simple 3-state system** 
-4. **Test with basic spell casting** 
-5. **Add movement if needed**
-6. **Clean up any remaining complexity**
+## UI Integration Plan (NEXT PHASE)
+
+### Widget Architecture Design
+- **Initiative Tracker Widget** = master widget with action count display - Requires testing
+- **Dynamic Ability Widgets** = spawn/despawn based on current combatant's abilities
+- **Single Action Source** = GAS delegates update all buttons when actions change
+- **Turn Start Trigger** = get combatant abilities → categorize → spawn buttons
+
+### Button Categories
+1. **Movement** - Simple BeginMovement/ExecuteMovement functions
+2. **Attacks** - BasicMeleeAttackAbility, BasicRangedAttackAbility (GAS)
+3. **Spells** - BasicDamageSpellAbility and future spell abilities (GAS)
+4. **Items** - Item usage abilities (GAS)
+5. **Free Actions** - Quick actions that don't cost action points
+
+### Data-Driven Approach
+- **No switch statements** - abilities automatically expose UI data
+- **Ability inheritance** - all abilities inherit from UMyBaseGameplayAbility
+- **DataTable integration** - abilities granted based on character data
+- **Widget loop**: Get ability specs → Cast to base class → Extract UI data
+
+## Implementation Status
+- ✅ **Phase 1**: GAS integration and ability system complete
+- ✅ **Phase 2**: PF2e combat mechanics and centralized damage system complete
+- 🚧 **Phase 3**: Data table creation and attribute population (CURRENT)
+- ⏳ **Phase 4**: UI integration and widget generation
+- ⏳ **Phase 5**: Movement system implementation
+- ⏳ **Phase 5**: Targeting system implementation
 
 ## Notes
-- This system got out of hand because each simple operation became its own class
-- TTRPG needs simple click-to-execute, not enterprise action patterns
-- Most functionality already exists in core systems (Grid, TurnManager, Spells)
-- Keep it stupid simple: Click → Select → Execute → Done
+- Successfully simplified from 20+ blueprint action classes to 3 core ability types
+- GAS provides clean action economy with automatic UI updates
+- PF2e mechanics centralized in combat library for consistency
+- Data-driven design eliminates hardcoded ability lists

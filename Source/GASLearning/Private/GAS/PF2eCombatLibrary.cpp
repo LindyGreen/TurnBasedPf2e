@@ -27,35 +27,35 @@ EDegreeOfSuccess UPF2eCombatLibrary::CalculateDegreeOfSuccess(int32 Roll, int32 
 	return ApplyNaturalRollModifiers(BaseResult, D20Result);
 }
 
-EDegreeOfSuccess UPF2eCombatLibrary::RollAttack(int32 AttackBonus, int32 TargetAC)
+EDegreeOfSuccess UPF2eCombatLibrary::RollAttack(int32 AttackBonus, int32 TargetAC, int32 MaxDieRoll)
 {
-	int32 D20Roll = UKismetMathLibrary::RandomIntegerInRange(1, 20);
+	int32 D20Roll = RollD20(MaxDieRoll);
 	int32 TotalRoll = D20Roll + AttackBonus;
 	
-	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Attack roll %d + %d = %d vs AC %d"), 
-		D20Roll, AttackBonus, TotalRoll, TargetAC);
+	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Attack roll %d + %d = %d vs AC %d (MaxDie: %d)"), 
+		D20Roll, AttackBonus, TotalRoll, TargetAC, MaxDieRoll);
 	
 	return CalculateDegreeOfSuccess(TotalRoll, TargetAC, D20Roll);
 }
 
-EDegreeOfSuccess UPF2eCombatLibrary::RollSave(int32 SaveBonus, int32 DC)
+EDegreeOfSuccess UPF2eCombatLibrary::RollSave(int32 SaveBonus, int32 DC, int32 MaxDieRoll)
 {
-	int32 D20Roll = UKismetMathLibrary::RandomIntegerInRange(1, 20);
+	int32 D20Roll = RollD20(MaxDieRoll);
 	int32 TotalRoll = D20Roll + SaveBonus;
 	
-	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Save roll %d + %d = %d vs DC %d"), 
-		D20Roll, SaveBonus, TotalRoll, DC);
+	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Save roll %d + %d = %d vs DC %d (MaxDie: %d)"), 
+		D20Roll, SaveBonus, TotalRoll, DC, MaxDieRoll);
 	
 	return CalculateDegreeOfSuccess(TotalRoll, DC, D20Roll);
 }
 
-EDegreeOfSuccess UPF2eCombatLibrary::RollSkillCheck(int32 SkillBonus, int32 DC)
+EDegreeOfSuccess UPF2eCombatLibrary::RollSkillCheck(int32 SkillBonus, int32 DC, int32 MaxDieRoll)
 {
-	int32 D20Roll = UKismetMathLibrary::RandomIntegerInRange(1, 20);
+	int32 D20Roll = RollD20(MaxDieRoll);
 	int32 TotalRoll = D20Roll + SkillBonus;
 	
-	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Skill check %d + %d = %d vs DC %d"), 
-		D20Roll, SkillBonus, TotalRoll, DC);
+	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Skill check %d + %d = %d vs DC %d (MaxDie: %d)"), 
+		D20Roll, SkillBonus, TotalRoll, DC, MaxDieRoll);
 	
 	return CalculateDegreeOfSuccess(TotalRoll, DC, D20Roll);
 }
@@ -145,4 +145,28 @@ int32 UPF2eCombatLibrary::RollDamage(int32 DamageDie, int32 DamageDieCount, int3
 	
 	// Add flat damage bonus
 	return TotalDamage + DamageBonus;
+}
+
+int32 UPF2eCombatLibrary::RollD20(int32 MaxDieRoll)
+{
+	// Failsafe Clamp MaxDieRoll so If i accidentally make it 200 it wont break the game
+	MaxDieRoll = FMath::Clamp(MaxDieRoll, 1, 20);
+	
+	// Roll 1 to MaxDieRoll (difficulty control)
+	int32 Roll = UKismetMathLibrary::RandomIntegerInRange(1, MaxDieRoll);
+	
+	UE_LOG(LogGAS, VeryVerbose, TEXT("PF2eCombatLibrary: d20 roll = %d (MaxDie: %d)"), Roll, MaxDieRoll);
+	
+	return Roll;
+}
+
+EDegreeOfSuccess UPF2eCombatLibrary::RollAttackWithPenalty(int32 AttackBonus, int32 TargetAC, int32 RangePenalty, int32 MaxDieRoll)
+{
+	int32 D20Roll = RollD20(MaxDieRoll);
+	int32 TotalRoll = D20Roll + AttackBonus - RangePenalty;
+	
+	UE_LOG(LogGAS, Verbose, TEXT("PF2eCombatLibrary: Attack roll %d + %d - %d = %d vs AC %d (MaxDie: %d)"), 
+		D20Roll, AttackBonus, RangePenalty, TotalRoll, TargetAC, MaxDieRoll);
+	
+	return CalculateDegreeOfSuccess(TotalRoll, TargetAC, D20Roll);
 }

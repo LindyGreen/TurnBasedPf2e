@@ -50,6 +50,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="Damage Die Count"))
 	int32 DamageDieCount;
 
+	// Difficulty control - MaxDieRoll for controlling crits
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(DisplayName="Max Die Roll", ClampMin="1", ClampMax="20"))
+	int32 MaxDieRoll;
+
 	FS_CombatAttributes()
 	{
 		// PF2e reasonable defaults
@@ -65,5 +69,6 @@ public:
 		DamageBonus = 3;
 		DamageDie = 6; // d6 weapon by default
 		DamageDieCount = 1; // 1 die normally, 2 with striking, 3 with greater striking
+		MaxDieRoll = 20; // Max roll selected combaatant can roll
 	}
 };

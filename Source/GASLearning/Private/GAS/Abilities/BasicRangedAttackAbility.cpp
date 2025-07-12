@@ -39,47 +39,58 @@ void UBasicRangedAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	int32 RangePenalty = 0;
 	// In real implementation: bool InRange = IsTargetInRange(Target, RangePenalty);
 	
-	// Simulate attack
-	int32 AttackRoll = RollAttack(RangePenalty);
-	UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Attack roll: %d (Range penalty: %d)"), AttackRoll, RangePenalty);
+	// Simulate attack using PF2e degree of success system
+	//First finds the target AC. Second finds the Edegree of success by rolling attack, then calculates the damage and effects based on the roll.
+	//Will have to clean it up after all required functions are implemented to use children of this class for all ranged attacks
+	int32 TargetAC = 15; // TODO: Get from actual target
+	EDegreeOfSuccess AttackResult = RollAttack(RangePenalty, TargetAC);
 	
-	// Simulate hitting a target with AC 15
-	int32 TargetAC = 15;
-	if (AttackRoll >= TargetAC)
+	// Calculate damage once
+	int32 Damage = RollDamage();
+	
+	switch (AttackResult)
 	{
-		int32 Damage = RollDamage();
-		UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Hit! Damage: %d"), Damage);
-		
-		// Call Blueprint event for hit
-		OnAttackHit(nullptr, Damage); // TODO: Pass actual target
-	}
-	else
-	{
-		UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Miss!"));
-		
-		// Call Blueprint event for miss
-		OnAttackMiss(nullptr); // TODO: Pass actual target
+		case EDegreeOfSuccess::CriticalSuccess:
+			{
+				int32 DoubleDamage = Damage * 2;
+				UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Critical Hit! Double damage: %d"), DoubleDamage);
+				OnAttackCriticalSuccess(nullptr, DoubleDamage); // TODO: Pass actual target
+			}
+			break;
+			
+		case EDegreeOfSuccess::Success:
+			UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Hit! Damage: %d"), Damage);
+			OnAttackSuccess(nullptr, Damage); // TODO: Pass actual target
+			break;
+			
+		case EDegreeOfSuccess::Failure:
+			UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Miss!"));
+			OnAttackFailure(nullptr); // TODO: Pass actual target
+			break;
+			
+		case EDegreeOfSuccess::CriticalFailure:
+			UE_LOG(LogGAS, Log, TEXT("BasicRangedAttackAbility: Critical Miss!"));
+			OnAttackCriticalFailure(nullptr); // TODO: Pass actual target
+			break;
 	}
 	
 	// End the ability
 	EndAbility(Handle, ActorInfo, ActivationInfo, false, false);
 }
 
-int32 UBasicRangedAttackAbility::RollAttack(int32 RangePenalty) const
+EDegreeOfSuccess UBasicRangedAttackAbility::RollAttack(int32 RangePenalty, int32 TargetAC) const
 {
 	// Get attack bonus from GAS attributes
 	ACombatant* Attacker = GetOwningCombatant();
 	if (!Attacker || !Attacker->CombatAttributes)
 	{
 		UE_LOG(LogGAS, Error, TEXT("BasicRangedAttackAbility: No attacker or combat attributes found"));
-		// Roll without bonus
-		return UKismetMathLibrary::RandomIntegerInRange(1, 20) - RangePenalty;
+		return EDegreeOfSuccess::CriticalFailure;
 	}
 	
-	// Roll 1d20 + attack bonus - range penalty
-	int32 D20Roll = UKismetMathLibrary::RandomIntegerInRange(1, 20);
 	int32 AttackBonus = Attacker->CombatAttributes->GetAttackBonus();
-	return D20Roll + AttackBonus - RangePenalty;
+	int32 MaxDieRoll = Attacker->CombatAttributes->GetMaxDieRoll();
+	return UPF2eCombatLibrary::RollAttackWithPenalty(AttackBonus, TargetAC, RangePenalty, MaxDieRoll);//call to the library
 }
 
 int32 UBasicRangedAttackAbility::RollDamage() const

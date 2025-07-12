@@ -80,7 +80,8 @@ EDegreeOfSuccess UBasicMeleeAttackAbility::RollAttack(int32 TargetAC) const
 	}
 	
 	int32 AttackBonus = Attacker->CombatAttributes->GetAttackBonus();
-	return UPF2eCombatLibrary::RollAttack(AttackBonus, TargetAC);
+	int32 MaxDieRoll = Attacker->CombatAttributes->GetMaxDieRoll();
+	return UPF2eCombatLibrary::RollAttack(AttackBonus, TargetAC, MaxDieRoll);//call to the library
 }
 
 int32 UBasicMeleeAttackAbility::RollDamage() const
@@ -90,7 +91,7 @@ int32 UBasicMeleeAttackAbility::RollDamage() const
 	if (!Attacker || !Attacker->CombatAttributes)
 	{
 		UE_LOG(LogGAS, Error, TEXT("BasicMeleeAttackAbility: No attacker or combat attributes found for damage"));
-		// Fallback damage
+		// Fallback damage, it's a crit fail so it doesn't matter whats inside.
 		return UPF2eCombatLibrary::RollDamage(6, 1, 0);
 	}
 	
