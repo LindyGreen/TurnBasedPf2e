@@ -63,7 +63,7 @@ public:
 		Reflex = 2.0f;
 		Will = 1.0f;
 		Perception = 2.0f;
-		MovementSpeed = 30.0f;
+		MovementSpeed = 5.0f;//in squares
 		MaxActions = 3.0f;
 		AttackBonus = 5;
 		DamageBonus = 3;
