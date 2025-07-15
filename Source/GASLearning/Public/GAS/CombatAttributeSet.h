@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GAS/BaseAttributeSet.h"
+#include "GAS/BaseAttributeSet.h"//Its attributeSet.h child with the macro defined in it
 #include "AbilitySystemComponent.h"
 #include "CombatAttributeSet.generated.h"
 
@@ -20,46 +20,47 @@ public:
 	UPROPERTY()
 	FPlayAttributeEvent OnHealthChanged;
 	//Health (clamp and broadcast)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Health;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Health);
-	UPROPERTY()
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Health);
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData MaxHealth;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxHealth);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxHealth);
 	// Perception (no broadcast)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Perception;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet,
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet,
 	Perception);
 #pragma region SavesAndAC
 	// AC (broadcast only)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData AC;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, AC);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, AC);
 
 	UPROPERTY()
 	FPlayAttributeEvent OnACChanged;
 
 	// Saves (broadcast only)
 	
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Fortitude;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet,
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet,
 	Fortitude);
 
 	UPROPERTY()
 	FPlayAttributeEvent OnFortitudeChanged;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Reflex;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Reflex);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Reflex);
 
 	UPROPERTY()
 	FPlayAttributeEvent OnReflexChanged;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Will;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Will);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Will);
 
 	UPROPERTY()
 	FPlayAttributeEvent OnWillChanged;
@@ -68,37 +69,37 @@ public:
 
 #pragma region Movement
 	// Movement Speed (no broadcast required)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData MovementSpeed;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MovementSpeed);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MovementSpeed);
 
 #pragma endregion 
 
 #pragma region Initiative
 	// Initiative (broadcast for turn order changes)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData Initiative;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Initiative);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, Initiative);
 #pragma endregion
 
 #pragma region Actions
 	// Actions remaining this turn (broadcast for UI/AI updates)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData ActionsRemaining;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ActionsRemaining);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ActionsRemaining);
 	
 	UPROPERTY()
 	FPlayAttributeEvent OnActionsRemainingChanged;
 	
 	// Max actions per turn (usually 3, modified by conditions)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData MaxActions;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxActions);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxActions);
 	
 	// Reaction available (0 or 1)
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData ReactionAvailable;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ReactionAvailable);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ReactionAvailable);
 	
 	UPROPERTY()
 	FPlayAttributeEvent OnReactionAvailableChanged;
@@ -107,25 +108,25 @@ public:
 
 #pragma region AttackAndDamage
 	// Attack modifiers for abilities to use
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData AttackBonus;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, AttackBonus);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, AttackBonus);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData DamageBonus;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageBonus);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageBonus);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData DamageDie;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDie);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDie);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData DamageDieCount;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDieCount);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, DamageDieCount);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FGameplayAttributeData MaxDieRoll;
-	PLAY_ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxDieRoll);
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxDieRoll);
 
 #pragma endregion AttackAndDamage
 };

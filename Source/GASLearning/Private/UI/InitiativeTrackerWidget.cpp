@@ -3,7 +3,11 @@
 #include "TurnManagerComponent.h"
 #include "Components/PanelWidget.h"
 #include "Components/VerticalBox.h"
+#include "Components/Button.h"
 #include "LogTypes.h"
+
+#include "GAS/CombatAttributeSet.h"
+
 #include "UObject/ConstructorHelpers.h"
 
 UInitiativeTrackerWidget::UInitiativeTrackerWidget(const FObjectInitializer& ObjectInitializer)
@@ -32,7 +36,6 @@ void UInitiativeTrackerWidget::NativeDestruct()
 	{
 		TurnManagerRef->OnCombatStarted.RemoveDynamic(this, &UInitiativeTrackerWidget::OnCombatStarted);
 		TurnManagerRef->OnTurnChanged.RemoveDynamic(this, &UInitiativeTrackerWidget::OnTurnChanged);
-		TurnManagerRef->OnCombatantActionsChanged.RemoveDynamic(this, &UInitiativeTrackerWidget::UpdateCombatantActions);
 		TurnManagerRef->OnCombatEnded.RemoveDynamic(this, &UInitiativeTrackerWidget::OnCombatEnded);
 		TurnManagerRef = nullptr;
 	}
@@ -56,7 +59,6 @@ void UInitiativeTrackerWidget::InitializeTracker(UTurnManagerComponent* InTurnMa
 	// Bind to delegates
 	TurnManagerRef->OnCombatStarted.AddDynamic(this, &UInitiativeTrackerWidget::OnCombatStarted);
 	TurnManagerRef->OnTurnChanged.AddDynamic(this, &UInitiativeTrackerWidget::OnTurnChanged);
-	TurnManagerRef->OnCombatantActionsChanged.AddDynamic(this, &UInitiativeTrackerWidget::UpdateCombatantActions);
 	TurnManagerRef->OnCombatEnded.AddDynamic(this, &UInitiativeTrackerWidget::OnCombatEnded);
 	
 	UE_LOG(LogUI, Log, TEXT("InitiativeTrackerWidget: Initialized with TurnManager"));
@@ -98,15 +100,6 @@ void UInitiativeTrackerWidget::UpdateCurrentTurn(ACombatant* CurrentCombatant)
 
 	UE_LOG(LogUI, Log, TEXT("InitiativeTrackerWidget: Updated current turn to %s"), 
 		CurrentCombatant ? *CurrentCombatant->CharacterName.ToString() : TEXT("None"));
-}
-
-void UInitiativeTrackerWidget::UpdateCombatantActions(ACombatant* Combatant, int32 ActionsRemaining)
-{
-	UInitiativeEntryWidget* EntryWidget = FindEntryForCombatant(Combatant);
-	if (EntryWidget)
-	{
-		EntryWidget->UpdateActionsDisplay(ActionsRemaining, Combatant->GetMaxActions());
-	}
 }
 
 void UInitiativeTrackerWidget::ClearTracker()

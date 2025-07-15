@@ -6,7 +6,7 @@
 #include "AttributeSet.h"
 #include "BaseAttributeSet.generated.h"
 //Defining out getters and setters
-#define PLAY_ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
+#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
 GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \

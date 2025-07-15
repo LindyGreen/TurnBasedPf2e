@@ -26,6 +26,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<class UVerticalBox> InitiativeList;
 
+	// SpendAction button
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UButton> SpendActionButton;
+
 	// Reference to Turn Manager
 	UPROPERTY(BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<UTurnManagerComponent> TurnManagerRef;
@@ -44,8 +48,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void UpdateCurrentTurn(ACombatant* CurrentCombatant);
 
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void UpdateCombatantActions(ACombatant* Combatant, int32 ActionsRemaining);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ClearTracker();
@@ -59,6 +61,7 @@ public:
 
 	UFUNCTION()
 	void OnCombatEnded();
+
 
 private:
 	// Store entry widgets for updates

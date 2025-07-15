@@ -1,6 +1,6 @@
 #include "GAS/Abilities/BasicRangedAttackAbility.h"
 #include "Combatant.h"
-#include "GAS/CombatAttributeSet.h"
+#include "GASLearning/Public/GAS/CombatAttributeSet.h"
 #include "GAS/PF2eCombatLibrary.h"
 #include "LogTypes.h"
 #include "Kismet/KismetMathLibrary.h"

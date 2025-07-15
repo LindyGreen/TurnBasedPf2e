@@ -133,15 +133,14 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 	}
 }
 
-void UTurnManagerComponent::OnActionSpentInCombatant(int32 ActionsLeft)
+void UTurnManagerComponent::OnActionSpentInCombatant(float ActionsLeft)
 {
-	// Broadcast action change event for UI update
-	if (OnCombatantActionsChanged.IsBound() && CurrentCombatant)
+	// Only handle turn ending logic
+	if (ActionsLeft <= 0.0f)
 	{
-		OnCombatantActionsChanged.Broadcast(CurrentCombatant.Get(), ActionsLeft);
+		UE_LOG(Log_TurnManager, Warning, TEXT("ShouldEndTurn"));
+		EndTurn();	
 	}
-	
-	if (ActionsLeft <= 0)	EndTurn();
 }
 
 void UTurnManagerComponent::EndTurn()

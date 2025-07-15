@@ -8,8 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
 #include "AbilitySystemComponent.h"
-
-#include "GAS/CombatAttributeSet.h"
+#include "../Public/GAS/CombatAttributeSet.h"
 #include "LogTypes.h"
 
 #include "Kismet/KismetMathLibrary.h"
@@ -32,8 +31,7 @@ ACombatant::ACombatant()
 	InitiativeLight->SetRelativeLocation(FVector(0, 0, 200));
 	InitiativeLight->SetHiddenInGame(true);
 	//GAS
-	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(
-		TEXT("CombatAttributeSet"));
+	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("CombatAttributeSet"));
 }
 
 // Called when the game starts or when spawned
@@ -85,9 +83,9 @@ void ACombatant::SpendReaction()
 	// Now uses GAS ReactionAvailable attribute
 	if (CombatAttributes && AbilitySystemComponent)
 	{
-		// Apply a GameplayEffect to set ReactionAvailable to 0
-		// For now, set it directly (should use GameplayEffect in real implementation)
-		CombatAttributes->SetReactionAvailable(0);
+		// Use ApplyModToAttribute to trigger delegates properly
+		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetReactionAvailableAttribute(),
+			EGameplayModOp::Override, 0.0f);
 	}
 }
 
@@ -156,12 +154,14 @@ void ACombatant::BeginTurn()
 	// Set actions in GAS - TurnManager will be informed via delegate
 	if (CombatAttributes && AbilitySystemComponent)
 	{
-		// Set MaxActions first, then ActionsRemaining
-		CombatAttributes->SetMaxActions(ActionsToGive);
-		CombatAttributes->SetActionsRemaining(ActionsToGive);
+		// Use ApplyModToAttribute to trigger delegates properly
+		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetMaxActionsAttribute(),
+			EGameplayModOp::Override, ActionsToGive);
+		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetActionsRemainingAttribute(),
+			EGameplayModOp::Override, ActionsToGive);
 		// Set reaction available
-		CombatAttributes->SetReactionAvailable(ActionsToGive > 0 ? 1 : 0);
-		
+		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetReactionAvailableAttribute(),
+			EGameplayModOp::Override, ActionsToGive > 0 ? 1.0f : 0.0f);
 	}
 
 	// End turn immediately if no actions
@@ -295,8 +295,7 @@ void ACombatant::HandleFortitudeChange(float Magnitude, float NewFortitude)
 	UE_LOG(LogGAS, Log, TEXT("Fortitude changed: %f"), NewFortitude);
 }
 
-void ACombatant::HandleReflexChange(float Magnitude, 
-float NewReflex)
+void ACombatant::HandleReflexChange(float Magnitude, float NewReflex)
 {
 	UE_LOG(LogGAS, Log, TEXT("Reflex changed: %f"),NewReflex);
 }
@@ -319,19 +318,24 @@ void ACombatant::SetIsSelected(bool bNewIsSelected)
 	CallToUpdateVisualIfHoveredOrSelected();
 }
 
-void ACombatant::HandleActionsRemainingChange(float Magnitude, float NewActionsRemaining)
-{
-	UE_LOG(LogGAS, Log, TEXT("Actions remaining changed: %f"), NewActionsRemaining);
-	// Inform TurnManager about action changes
-	if (TurnManagerRef)
-	{
-		TurnManagerRef->OnActionSpentInCombatant(NewActionsRemaining);
-	}
-}
-
 void ACombatant::HandleReactionAvailableChange(float Magnitude, float NewReactionAvailable)
 {
 	UE_LOG(LogGAS, Log, TEXT("Reaction available changed: %f"), NewReactionAvailable);
+}
+
+void ACombatant::HandleActionsRemainingChange(float Magnitude, float NewActionsRemaining)
+{
+	UE_LOG(LogGAS, Warning, TEXT("HandleActionsRemainingChange called - Magnitude: %f, NewActionsRemaining: %f"), Magnitude, NewActionsRemaining);
+	// Inform TurnManager about action changes
+	if (TurnManagerRef)
+	{
+		UE_LOG(LogGAS, Warning, TEXT("Calling TurnManager->OnActionSpentInCombatant with %d"), FMath::RoundToInt(NewActionsRemaining));
+		TurnManagerRef->OnActionSpentInCombatant(FMath::RoundToInt(NewActionsRemaining));
+	}
+	else
+	{
+		UE_LOG(LogGAS, Error, TEXT("TurnManagerRef is null in HandleActionsRemainingChange!"));
+	}
 }
 
 void ACombatant::SpendAction(int32 ActionCost)
@@ -349,40 +353,9 @@ void ACombatant::SpendAction(int32 ActionCost)
 			ActionCost, CurrentActions, NewActions);
 		
 		// Use ApplyModToAttribute to trigger delegates properly
-		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetActionsRemainingAttribute(),
-			EGameplayModOp::Additive, -ActionCost);
+		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetActionsRemainingAttribute(),EGameplayModOp::Additive, -ActionCost);
+		
 	}
-}
-
-#pragma region Blueprint-callable getters
-float ACombatant::GetActionsRemaining() const
-{
-	return CombatAttributes ? CombatAttributes->GetActionsRemaining() : 0.0f;
-}
-
-float ACombatant::GetMaxActions() const
-{
-	return CombatAttributes ? CombatAttributes->GetMaxActions() : 0.0f;
-}
-
-bool ACombatant::GetReactionAvailable() const
-{
-	return CombatAttributes ? CombatAttributes->GetReactionAvailable() > 0.0f : false;
-}
-
-float ACombatant::GetCurrentHealth() const
-{
-	return CombatAttributes ? CombatAttributes->GetHealth() : 0.0f;
-}
-
-float ACombatant::GetMaxHealth() const
-{
-	return CombatAttributes ? CombatAttributes->GetMaxHealth() : 0.0f;
-}
-
-int32 ACombatant::GetMaxDieRoll() const
-{
-	return CombatAttributes ? CombatAttributes->GetMaxDieRoll() : 20;
 }
 
 void ACombatant::SetCombatAttribute(ECombatAttributeType AttributeType, float Value)
@@ -539,5 +512,3 @@ void ACombatant::InitializeCombatAttributes(const FS_CombatAttributes& CombatAtt
 		CombatAttributes->GetHealth(), CombatAttributes->GetMaxHealth(), 
 		CombatAttributes->GetAC(), (float)CombatAttributes->GetMaxDieRoll());
 }
-
-#pragma endregion Blueprint-callable getters

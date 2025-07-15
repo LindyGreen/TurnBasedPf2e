@@ -2,7 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/Border.h"
-#include "../GAS/CombatAttributeSet.h"
+#include "../../Public/GAS/CombatAttributeSet.h"
 #include "LogTypes.h"
 
 UInitiativeEntryWidget::UInitiativeEntryWidget(const FObjectInitializer& ObjectInitializer)
@@ -76,8 +76,8 @@ void UInitiativeEntryWidget::UpdateHealthDisplay()
 	if (!CombatantRef || !IsValid(CombatantRef) || !HealthBar)
 		return;
 
-	float CurrentHealth = CombatantRef->GetCurrentHealth();
-	float MaxHealth = CombatantRef->GetMaxHealth();
+	float CurrentHealth = CombatantRef->CombatAttributes->GetHealth();
+	float MaxHealth = CombatantRef->CombatAttributes->GetMaxHealth();
 	
 	if (MaxHealth > 0)
 	{
@@ -134,13 +134,13 @@ void UInitiativeEntryWidget::UpdateDisplay()
 		return;
 
 	// Update actions
-	UpdateActionsDisplay(CombatantRef->GetActionsRemaining(), CombatantRef->GetMaxActions());
+	UpdateActionsDisplay(CombatantRef->CombatAttributes->GetActionsRemaining(), CombatantRef->CombatAttributes->GetMaxActions());
 	
 	// Update health
 	UpdateHealthDisplay();
 	
 	// Update reaction status
-	UpdateReactionDisplay(CombatantRef->GetReactionAvailable());
+	UpdateReactionDisplay(CombatantRef->CombatAttributes->GetReactionAvailable() > 0.0f);
 }
 
 void UInitiativeEntryWidget::OnHealthChanged(float Magnitude, float NewHealth)
@@ -157,6 +157,6 @@ void UInitiativeEntryWidget::OnActionsChanged(float Magnitude, float NewActionsR
 	
 	if (CombatantRef)
 	{
-		UpdateActionsDisplay(NewActionsRemaining, CombatantRef->GetMaxActions());
+		UpdateActionsDisplay(NewActionsRemaining, CombatantRef->CombatAttributes->GetMaxActions());
 	}
 }

@@ -93,19 +93,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurnEffects();
 	
-	// Blueprint-callable getters for GAS attributes
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Actions")
-	float GetActionsRemaining() const;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Actions")
-	float GetMaxActions() const;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Actions")
-	bool GetReactionAvailable() const;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
-	float GetCurrentHealth() const;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
-	float GetMaxHealth() const;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
-	int32 GetMaxDieRoll() const;
 	
 	// GAS Wrapper Functions for Blueprint Access
 	UFUNCTION(BlueprintCallable, Category = "Attributes")

@@ -1,11 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "CombatAttributeSet.h"
+#include "LogTypes.h"
+#include "GAS/CombatAttributeSet.h"
 #include "GameplayEffectExtension.h"
+
+/*UCombatAttributeSet::UCombatAttributeSet()
+{
+//WELL would you look at that,
+//I need to figure how to make this work with my DT, maybe well, who knows	
+}*/
+
 void UCombatAttributeSet::PostGameplayEffectExecute(
 	const struct FGameplayEffectModCallbackData& Data)
 {//EXECUTED ON ATTRIBUTE CHANGE
+
 	//HP
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
@@ -34,8 +42,9 @@ void UCombatAttributeSet::PostGameplayEffectExecute(
 	//ACTIONS
 	else if (Data.EvaluatedData.Attribute == GetActionsRemainingAttribute())
 	{
-		SetActionsRemaining(FMath::Clamp(GetActionsRemaining(), 0, GetMaxActions()));
-		OnActionsRemainingChanged.Broadcast(Data.EvaluatedData.Magnitude, GetActionsRemaining());
+		float ClampedValue = FMath::Clamp(GetActionsRemaining(), 0.0f, GetMaxActions());
+		SetActionsRemaining(ClampedValue);
+		OnActionsRemainingChanged.Broadcast(Data.EvaluatedData.Magnitude, ClampedValue);
 	}
 	else if (Data.EvaluatedData.Attribute == GetReactionAvailableAttribute())
 	{

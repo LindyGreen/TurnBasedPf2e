@@ -3,6 +3,8 @@
 #include "LogTypes.h"
 #include "AbilitySystemComponent.h"
 
+#include "GAS/CombatAttributeSet.h"
+
 UMyBaseGameplayAbility::UMyBaseGameplayAbility()
 {
 	// Set default values
@@ -65,10 +67,10 @@ bool UMyBaseGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle
 		return false;
 	}
 
-	if (Combatant->GetActionsRemaining() < ActionCost)
+	if (Combatant->CombatAttributes->GetActionsRemaining() < ActionCost)
 	{
 		UE_LOG(LogGAS, Verbose, TEXT("MyBaseGameplayAbility: Insufficient actions for %s (Required: %d, Available: %f)"), 
-			*DisplayName.ToString(), ActionCost, Combatant->GetActionsRemaining());
+			*DisplayName.ToString(), ActionCost, Combatant->CombatAttributes->GetActionsRemaining());
 		return false;
 	}
 
@@ -92,10 +94,10 @@ bool UMyBaseGameplayAbility::TrySpendActions(int32 ActionsToSpend)
 	}
 
 	// Check if we have enough actions
-	if (Combatant->GetActionsRemaining() < ActionsToSpend)
+	if (Combatant->CombatAttributes->GetActionsRemaining() < ActionsToSpend)
 	{
 		UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: Insufficient actions (Required: %d, Available: %f)"), 
-			ActionsToSpend, Combatant->GetActionsRemaining());
+			ActionsToSpend, Combatant->CombatAttributes->GetActionsRemaining());
 		return false;
 	}
 
