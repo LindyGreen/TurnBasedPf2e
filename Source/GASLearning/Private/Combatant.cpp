@@ -336,11 +336,21 @@ void ACombatant::HandleReactionAvailableChange(float Magnitude, float NewReactio
 
 void ACombatant::SpendAction(int32 ActionCost)
 {
+	UE_LOG(LogGAS, Warning, TEXT("SpendAction called - TurnManagerRef is %s"), 
+		TurnManagerRef ? TEXT("VALID") : TEXT("NULL"));
+		
 	if (CombatAttributes && AbilitySystemComponent)
 	{
-		// Apply cost via attribute modifier
+		// Get current actions
+		float CurrentActions = CombatAttributes->GetActionsRemaining();
+		float NewActions = CurrentActions - ActionCost;
+		
+		UE_LOG(LogGAS, Warning, TEXT("SpendAction: %d cost, %f current, %f new"), 
+			ActionCost, CurrentActions, NewActions);
+		
+		// Use ApplyModToAttribute to trigger delegates properly
 		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetActionsRemainingAttribute(),
-			EGameplayModOp::Additive,-ActionCost);
+			EGameplayModOp::Additive, -ActionCost);
 	}
 }
 
@@ -374,4 +384,160 @@ int32 ACombatant::GetMaxDieRoll() const
 {
 	return CombatAttributes ? CombatAttributes->GetMaxDieRoll() : 20;
 }
+
+void ACombatant::SetCombatAttribute(ECombatAttributeType AttributeType, float Value)
+{
+	if (!CombatAttributes || !AbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("SetCombatAttribute: CombatAttributes or ASC is null"));
+		return;
+	}
+	
+	// Use ApplyModToAttribute for proper GAS integration
+	FGameplayAttribute Attribute;
+	
+	switch (AttributeType)
+	{
+		case ECombatAttributeType::Health:
+			Attribute = CombatAttributes->GetHealthAttribute();
+			break;
+		case ECombatAttributeType::MaxHealth:
+			Attribute = CombatAttributes->GetMaxHealthAttribute();
+			break;
+		case ECombatAttributeType::AC:
+			Attribute = CombatAttributes->GetACAttribute();
+			break;
+		case ECombatAttributeType::Fortitude:
+			Attribute = CombatAttributes->GetFortitudeAttribute();
+			break;
+		case ECombatAttributeType::Reflex:
+			Attribute = CombatAttributes->GetReflexAttribute();
+			break;
+		case ECombatAttributeType::Will:
+			Attribute = CombatAttributes->GetWillAttribute();
+			break;
+		case ECombatAttributeType::Perception:
+			Attribute = CombatAttributes->GetPerceptionAttribute();
+			break;
+		case ECombatAttributeType::MovementSpeed:
+			Attribute = CombatAttributes->GetMovementSpeedAttribute();
+			break;
+		case ECombatAttributeType::Initiative:
+			Attribute = CombatAttributes->GetInitiativeAttribute();
+			break;
+		case ECombatAttributeType::ActionsRemaining:
+			Attribute = CombatAttributes->GetActionsRemainingAttribute();
+			break;
+		case ECombatAttributeType::MaxActions:
+			Attribute = CombatAttributes->GetMaxActionsAttribute();
+			break;
+		case ECombatAttributeType::ReactionAvailable:
+			Attribute = CombatAttributes->GetReactionAvailableAttribute();
+			break;
+		case ECombatAttributeType::AttackBonus:
+			Attribute = CombatAttributes->GetAttackBonusAttribute();
+			break;
+		case ECombatAttributeType::DamageBonus:
+			Attribute = CombatAttributes->GetDamageBonusAttribute();
+			break;
+		case ECombatAttributeType::DamageDie:
+			Attribute = CombatAttributes->GetDamageDieAttribute();
+			break;
+		case ECombatAttributeType::DamageDieCount:
+			Attribute = CombatAttributes->GetDamageDieCountAttribute();
+			break;
+		case ECombatAttributeType::MaxDieRoll:
+			Attribute = CombatAttributes->GetMaxDieRollAttribute();
+			break;
+		default:
+			UE_LOG(LogTemp, Error, TEXT("SetCombatAttribute: Unknown attribute type"));
+			return;
+	}
+	
+	// Set the attribute value properly through GAS
+	AbilitySystemComponent->SetNumericAttributeBase(Attribute, Value);
+}
+
+float ACombatant::GetCombatAttribute(ECombatAttributeType AttributeType) const
+{
+	if (!CombatAttributes)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetCombatAttribute: CombatAttributes is null"));
+		return 0.0f;
+	}
+	
+	switch (AttributeType)
+	{
+		case ECombatAttributeType::Health:
+			return CombatAttributes->GetHealth();
+		case ECombatAttributeType::MaxHealth:
+			return CombatAttributes->GetMaxHealth();
+		case ECombatAttributeType::AC:
+			return CombatAttributes->GetAC();
+		case ECombatAttributeType::Fortitude:
+			return CombatAttributes->GetFortitude();
+		case ECombatAttributeType::Reflex:
+			return CombatAttributes->GetReflex();
+		case ECombatAttributeType::Will:
+			return CombatAttributes->GetWill();
+		case ECombatAttributeType::Perception:
+			return CombatAttributes->GetPerception();
+		case ECombatAttributeType::MovementSpeed:
+			return CombatAttributes->GetMovementSpeed();
+		case ECombatAttributeType::Initiative:
+			return CombatAttributes->GetInitiative();
+		case ECombatAttributeType::ActionsRemaining:
+			return CombatAttributes->GetActionsRemaining();
+		case ECombatAttributeType::MaxActions:
+			return CombatAttributes->GetMaxActions();
+		case ECombatAttributeType::ReactionAvailable:
+			return CombatAttributes->GetReactionAvailable();
+		case ECombatAttributeType::AttackBonus:
+			return CombatAttributes->GetAttackBonus();
+		case ECombatAttributeType::DamageBonus:
+			return CombatAttributes->GetDamageBonus();
+		case ECombatAttributeType::DamageDie:
+			return CombatAttributes->GetDamageDie();
+		case ECombatAttributeType::DamageDieCount:
+			return CombatAttributes->GetDamageDieCount();
+		case ECombatAttributeType::MaxDieRoll:
+			return CombatAttributes->GetMaxDieRoll();
+		default:
+			UE_LOG(LogTemp, Error, TEXT("GetCombatAttribute: Unknown attribute type"));
+			return 0.0f;
+	}
+}
+
+void ACombatant::InitializeCombatAttributes(const FS_CombatAttributes& CombatAttributesData)
+{
+	if (!CombatAttributes || !AbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InitializeCombatAttributes: CombatAttributes or ASC is null"));
+		return;
+	}
+	
+	// Initialize attributes properly through GAS using InitStats
+	CombatAttributes->InitMaxHealth(CombatAttributesData.MaxHealth);
+	CombatAttributes->InitHealth(CombatAttributesData.MaxHealth); // Start at full health
+	CombatAttributes->InitAC(CombatAttributesData.AC);
+	CombatAttributes->InitFortitude(CombatAttributesData.Fortitude);
+	CombatAttributes->InitReflex(CombatAttributesData.Reflex);
+	CombatAttributes->InitWill(CombatAttributesData.Will);
+	CombatAttributes->InitPerception(CombatAttributesData.Perception);
+	CombatAttributes->InitMovementSpeed(CombatAttributesData.MovementSpeed);
+	CombatAttributes->InitInitiative(CombatAttributesData.Perception); // Initiative = Perception in PF2e
+	CombatAttributes->InitMaxActions(CombatAttributesData.MaxActions);
+	CombatAttributes->InitActionsRemaining(CombatAttributesData.MaxActions); // Start with full actions
+	CombatAttributes->InitReactionAvailable(1); // Start with reaction available
+	CombatAttributes->InitAttackBonus(CombatAttributesData.AttackBonus);
+	CombatAttributes->InitDamageBonus(CombatAttributesData.DamageBonus);
+	CombatAttributes->InitDamageDie(CombatAttributesData.DamageDie);
+	CombatAttributes->InitDamageDieCount(CombatAttributesData.DamageDieCount);
+	CombatAttributes->InitMaxDieRoll(CombatAttributesData.MaxDieRoll);
+	
+	UE_LOG(LogTemp, Log, TEXT("Combat attributes initialized - Health: %f/%f, AC: %f, MaxDieRoll: %f"), 
+		CombatAttributes->GetHealth(), CombatAttributes->GetMaxHealth(), 
+		CombatAttributes->GetAC(), (float)CombatAttributes->GetMaxDieRoll());
+}
+
 #pragma endregion Blueprint-callable getters

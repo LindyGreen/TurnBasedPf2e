@@ -2,6 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/Border.h"
+#include "../GAS/CombatAttributeSet.h"
 #include "LogTypes.h"
 
 UInitiativeEntryWidget::UInitiativeEntryWidget(const FObjectInitializer& ObjectInitializer)
@@ -45,6 +46,13 @@ void UInitiativeEntryWidget::SetupEntry(ACombatant* InCombatant, float Initiativ
 	else
 	{
 		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: InitiativeValueText is null - check Blueprint binding"));
+	}
+
+	// Bind to attribute change delegates for real-time updates
+	if (InCombatant->CombatAttributes)
+	{
+		InCombatant->CombatAttributes->OnHealthChanged.AddDynamic(this, &UInitiativeEntryWidget::OnHealthChanged);
+		InCombatant->CombatAttributes->OnActionsRemainingChanged.AddDynamic(this, &UInitiativeEntryWidget::OnActionsChanged);
 	}
 
 	// Update all displays
@@ -105,6 +113,13 @@ void UInitiativeEntryWidget::SetCurrentTurn(bool bIsCurrentTurn)
 	{
 		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: EntryBorder is null - check Blueprint binding"));
 	}
+	
+	// Show/hide actions display based on current turn
+	if (ActionsRemainingText)
+	{
+		ESlateVisibility Visibility = bIsCurrentTurn ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+		ActionsRemainingText->SetVisibility(Visibility);
+	}
 }
 
 void UInitiativeEntryWidget::UpdateReactionDisplay(bool bHasReaction)
@@ -126,4 +141,22 @@ void UInitiativeEntryWidget::UpdateDisplay()
 	
 	// Update reaction status
 	UpdateReactionDisplay(CombatantRef->GetReactionAvailable());
+}
+
+void UInitiativeEntryWidget::OnHealthChanged(float Magnitude, float NewHealth)
+{
+	UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Health changed for %s - New Health: %f"), 
+		CombatantRef ? *CombatantRef->CharacterName.ToString() : TEXT("Unknown"), NewHealth);
+	UpdateHealthDisplay();
+}
+
+void UInitiativeEntryWidget::OnActionsChanged(float Magnitude, float NewActionsRemaining)
+{
+	UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Actions changed for %s - Remaining: %f"), 
+		CombatantRef ? *CombatantRef->CharacterName.ToString() : TEXT("Unknown"), NewActionsRemaining);
+	
+	if (CombatantRef)
+	{
+		UpdateActionsDisplay(NewActionsRemaining, CombatantRef->GetMaxActions());
+	}
 }

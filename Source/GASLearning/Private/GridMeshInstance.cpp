@@ -113,7 +113,7 @@ void UGridMeshInstance::AddInstance(FS_TileData TileData, int32& AddedIndex)
 
 void UGridMeshInstance::UpdateTileVisual(FS_TileData DataInput)
 {
-	UE_LOG(Log_Grid, Log,TEXT("GridMeshInstance::UpdateTileVisual - TileIndex:(%d, %d), TileType: %d, States: %d"),DataInput.Index.X, DataInput.Index.Y, (int32)DataInput.TileType,DataInput.TileStates.Num());
+//	UE_LOG(Log_Grid, Log,TEXT("GridMeshInstance::UpdateTileVisual - TileIndex:(%d, %d), TileType: %d, States: %d"),DataInput.Index.X, DataInput.Index.Y, (int32)DataInput.TileType,DataInput.TileStates.Num());
 
 
 	if (int32* MeshInstanceIndex = InstanceIndexes.Find(DataInput.Index))

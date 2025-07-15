@@ -62,6 +62,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void UpdateReactionDisplay(bool bHasReaction);
 
+	// Delegate handlers for real-time updates
+	UFUNCTION()
+	void OnHealthChanged(float Magnitude, float NewHealth);
+	
+	UFUNCTION()
+	void OnActionsChanged(float Magnitude, float NewActionsRemaining);
+
 private:
 	void UpdateDisplay();
 };

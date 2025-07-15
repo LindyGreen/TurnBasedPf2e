@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "GameplayTagContainer.h"
 #include "AbilitySystemInterface.h"
+#include "StructsAndEnums/ECombatAttributeType.h"
+#include "StructsAndEnums/FS_CombatAttributes.h"
 #include "Combatant.generated.h"
 class UTurnManagerComponent;
 class AGrid;
@@ -104,6 +106,17 @@ public:
 	float GetMaxHealth() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	int32 GetMaxDieRoll() const;
+	
+	// GAS Wrapper Functions for Blueprint Access
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void SetCombatAttribute(ECombatAttributeType AttributeType, float Value);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Attributes")
+	float GetCombatAttribute(ECombatAttributeType AttributeType) const;
+	
+	// Bulk initialization from combat attributes struct
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void InitializeCombatAttributes(const FS_CombatAttributes& CombatAttributesData);
 #pragma region CombatAttributeSet handlers
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void HandleHealthChange(float Magnitude, float NewHealth);

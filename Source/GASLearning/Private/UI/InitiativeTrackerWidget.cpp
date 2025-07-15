@@ -32,6 +32,7 @@ void UInitiativeTrackerWidget::NativeDestruct()
 	{
 		TurnManagerRef->OnCombatStarted.RemoveDynamic(this, &UInitiativeTrackerWidget::OnCombatStarted);
 		TurnManagerRef->OnTurnChanged.RemoveDynamic(this, &UInitiativeTrackerWidget::OnTurnChanged);
+		TurnManagerRef->OnCombatantActionsChanged.RemoveDynamic(this, &UInitiativeTrackerWidget::UpdateCombatantActions);
 		TurnManagerRef->OnCombatEnded.RemoveDynamic(this, &UInitiativeTrackerWidget::OnCombatEnded);
 		TurnManagerRef = nullptr;
 	}
@@ -55,6 +56,7 @@ void UInitiativeTrackerWidget::InitializeTracker(UTurnManagerComponent* InTurnMa
 	// Bind to delegates
 	TurnManagerRef->OnCombatStarted.AddDynamic(this, &UInitiativeTrackerWidget::OnCombatStarted);
 	TurnManagerRef->OnTurnChanged.AddDynamic(this, &UInitiativeTrackerWidget::OnTurnChanged);
+	TurnManagerRef->OnCombatantActionsChanged.AddDynamic(this, &UInitiativeTrackerWidget::UpdateCombatantActions);
 	TurnManagerRef->OnCombatEnded.AddDynamic(this, &UInitiativeTrackerWidget::OnCombatEnded);
 	
 	UE_LOG(LogUI, Log, TEXT("InitiativeTrackerWidget: Initialized with TurnManager"));
