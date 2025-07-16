@@ -89,6 +89,29 @@ void ACombatant::SpendReaction()
 	}
 }
 
+void ACombatant::CancelAllActiveAbilities()
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	TArray<FGameplayAbilitySpecHandle> AbilitiesToCancel;
+	
+	for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
+	{
+		if (Spec.IsActive())
+		{
+			AbilitiesToCancel.Add(Spec.Handle);
+		}
+	}
+
+	for (const FGameplayAbilitySpecHandle& HandleToCancel : AbilitiesToCancel)
+	{
+		AbilitySystemComponent->CancelAbilityHandle(HandleToCancel);
+	}
+}
+
 
 
 void ACombatant::BeginTurn()
@@ -177,6 +200,9 @@ void ACombatant::BeginTurn()
 void ACombatant::EndTurnEffects()
 {
 	InitiativeLight->SetHiddenInGame(true);
+
+	// Cancel all active abilities to clean up persistent states (tile highlights, etc.)
+	CancelAllActiveAbilities();
 
 	// Define degrading condition tags
 	FGameplayTagContainer DegradingConditions;

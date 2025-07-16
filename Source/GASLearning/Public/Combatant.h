@@ -88,6 +88,9 @@ public:
 	void SpendReaction();
 	
 	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void CancelAllActiveAbilities();
+	
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void BeginTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void EndTurnEffects();

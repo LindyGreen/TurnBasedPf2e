@@ -56,6 +56,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bCanTargetEnemies = true;
 
+	// Set to true for abilities that are part of a composite ability (like movement in Sudden Charge)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bIsSubAbility = false;
+
 	// Blueprint-callable getters for UI
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
 	FText GetAbilityDisplayName() const { return DisplayName; }
@@ -99,6 +103,10 @@ protected:
 	// Helper function to get the combatant
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	class ACombatant* GetOwningCombatant() const;
+
+	// Helper function to cancel all other active abilities
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void CancelAllOtherActiveAbilities();
 
 private:
 	// Internal helper function (not exposed to Blueprint)

@@ -25,6 +25,12 @@ UMyBaseGameplayAbility::UMyBaseGameplayAbility()
 
 void UMyBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	// Cancel all other active abilities first (unless this is a sub-ability)
+	if (!bIsSubAbility)
+	{
+		CancelAllOtherActiveAbilities();
+	}
+
 	// Check if we can afford the ability
 	if (!TrySpendActions(ActionCost))
 	{
@@ -120,4 +126,35 @@ ACombatant* UMyBaseGameplayAbility::GetCombatantFromActorInfo(const FGameplayAbi
 	}
 
 	return Cast<ACombatant>(ActorInfo->AvatarActor.Get());
+}
+
+void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
+{
+	ACombatant* Combatant = GetOwningCombatant();
+	if (!Combatant)
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = Combatant->GetAbilitySystemComponent();
+	if (!ASC)
+	{
+		return;
+	}
+
+	FGameplayAbilitySpecHandle CurrentHandle = GetCurrentAbilitySpecHandle();
+	TArray<FGameplayAbilitySpecHandle> AbilitiesToCancel;
+	
+	for (const FGameplayAbilitySpec& Spec : ASC->GetActivatableAbilities())
+	{
+		if (Spec.IsActive() && Spec.Handle != CurrentHandle)
+		{
+			AbilitiesToCancel.Add(Spec.Handle);
+		}
+	}
+
+	for (const FGameplayAbilitySpecHandle& HandleToCancel : AbilitiesToCancel)
+	{
+		ASC->CancelAbilityHandle(HandleToCancel);
+	}
 }
