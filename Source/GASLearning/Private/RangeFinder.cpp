@@ -221,7 +221,6 @@ TArray<FIntPoint> URangeFinder::GenerateBurst(FIntPoint OriginPoint, uint8 Area)
 void URangeFinder::RemoveInvalidNeighbors(FIntPoint CurrentArrayElement,
                                           TArray<FIntPoint>& NeighborsToRemove, FIntPoint Index) //removes extra points protecting from walking through walls
 {
-	UE_LOG(LogTemp, Error, TEXT("%d" "%d"),CurrentArrayElement.X, CurrentArrayElement.Y );
 	FIntPoint TempElement = CurrentArrayElement-Index;
 	if (TempElement.X == -1)
 	{
