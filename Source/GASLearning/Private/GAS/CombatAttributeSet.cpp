@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "LogTypes.h"
 #include "GAS/CombatAttributeSet.h"
+#include "LogTypes.h"
 #include "GameplayEffectExtension.h"
 
 /*UCombatAttributeSet::UCombatAttributeSet()

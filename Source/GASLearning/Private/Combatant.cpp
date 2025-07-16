@@ -90,6 +90,7 @@ void ACombatant::SpendReaction()
 }
 
 
+
 void ACombatant::BeginTurn()
 {
 	// Check if incapacitated - skip turn entirely
@@ -162,6 +163,7 @@ void ACombatant::BeginTurn()
 		// Set reaction available
 		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetReactionAvailableAttribute(),
 			EGameplayModOp::Override, ActionsToGive > 0 ? 1.0f : 0.0f);
+		CombatAttributes->OnActionsRemainingChanged.Broadcast(0, ActionsToGive);
 	}
 
 	// End turn immediately if no actions
@@ -274,8 +276,8 @@ void ACombatant::EndTurnEffects()
 	}
 }
 #pragma region CombatAttributeSet handlers
-void ACombatant::HandleHealthChange(float Magnitude, 
- float NewHealth)
+
+void ACombatant::HandleHealthChange(float Magnitude,  float NewHealth)
 {
 	if (NewHealth <= 0)
 	{
@@ -335,26 +337,6 @@ void ACombatant::HandleActionsRemainingChange(float Magnitude, float NewActionsR
 	else
 	{
 		UE_LOG(LogGAS, Error, TEXT("TurnManagerRef is null in HandleActionsRemainingChange!"));
-	}
-}
-
-void ACombatant::SpendAction(int32 ActionCost)
-{
-	UE_LOG(LogGAS, Warning, TEXT("SpendAction called - TurnManagerRef is %s"), 
-		TurnManagerRef ? TEXT("VALID") : TEXT("NULL"));
-		
-	if (CombatAttributes && AbilitySystemComponent)
-	{
-		// Get current actions
-		float CurrentActions = CombatAttributes->GetActionsRemaining();
-		float NewActions = CurrentActions - ActionCost;
-		
-		UE_LOG(LogGAS, Warning, TEXT("SpendAction: %d cost, %f current, %f new"), 
-			ActionCost, CurrentActions, NewActions);
-		
-		// Use ApplyModToAttribute to trigger delegates properly
-		AbilitySystemComponent->ApplyModToAttribute(CombatAttributes->GetActionsRemainingAttribute(),EGameplayModOp::Additive, -ActionCost);
-		
 	}
 }
 

@@ -82,28 +82,27 @@ bool UMyBaseGameplayAbility::TrySpendActions(int32 ActionsToSpend)
 	const FGameplayAbilityActorInfo* ActorInfo = GetCurrentActorInfo();
 	if (!ActorInfo)
 	{
-		UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: No ActorInfo available"));
+	//	UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: No ActorInfo available"));
 		return false;
 	}
 
 	ACombatant* Combatant = GetCombatantFromActorInfo(ActorInfo);
 	if (!Combatant)
 	{
-		UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: Cannot get combatant"));
+	//	UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: Cannot get combatant"));
 		return false;
 	}
 
 	// Check if we have enough actions
 	if (Combatant->CombatAttributes->GetActionsRemaining() < ActionsToSpend)
 	{
-		UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: Insufficient actions (Required: %d, Available: %f)"), 
-			ActionsToSpend, Combatant->CombatAttributes->GetActionsRemaining());
+//		UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: Insufficient actions (Required: %d, Available: %f)"), ActionsToSpend, Combatant->CombatAttributes->GetActionsRemaining());
 		return false;
 	}
 
 	// Spend the actions
-	Combatant->SpendAction(ActionsToSpend);
-	UE_LOG(LogGAS, Log, TEXT("MyBaseGameplayAbility: Spent %d actions"), ActionsToSpend);
+	//Combatant->SpendAction(ActionsToSpend);
+	//UE_LOG(LogGAS, Log, TEXT("MyBaseGameplayAbility: Spent %d actions"), ActionsToSpend);
 	
 	return true;
 }

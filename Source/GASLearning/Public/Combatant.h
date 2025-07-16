@@ -86,8 +86,7 @@ public:
 	float RollInitiative();
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void SpendReaction();
-	UFUNCTION(BlueprintCallable, Category = "Actions")
-	void SpendAction(int32 ActionCost = 1);
+	
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	void BeginTurn();
 	UFUNCTION(BlueprintCallable, Category = "Actions")

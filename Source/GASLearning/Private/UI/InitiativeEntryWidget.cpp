@@ -19,7 +19,7 @@ void UInitiativeEntryWidget::SetupEntry(ACombatant* InCombatant, float Initiativ
 {
 	if (!InCombatant)
 	{
-		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: SetupEntry called with null combatant"));
+//		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: SetupEntry called with null combatant"));
 		return;
 	}
 
@@ -29,11 +29,11 @@ void UInitiativeEntryWidget::SetupEntry(ACombatant* InCombatant, float Initiativ
 	if (CharacterNameText)
 	{
 		CharacterNameText->SetText(InCombatant->CharacterName);
-		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set character name to: %s"), *InCombatant->CharacterName.ToString());
+//		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set character name to: %s"), *InCombatant->CharacterName.ToString());
 	}
 	else
 	{
-		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: CharacterNameText is null - check Blueprint binding"));
+//		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: CharacterNameText is null - check Blueprint binding"));
 	}
 
 	// Set initiative value
@@ -41,7 +41,7 @@ void UInitiativeEntryWidget::SetupEntry(ACombatant* InCombatant, float Initiativ
 	{
 		FText InitText = FText::AsNumber(FMath::RoundToInt(InitiativeValue));
 		InitiativeValueText->SetText(InitText);
-		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set initiative to: %s"), *InitText.ToString());
+//		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set initiative to: %s"), *InitText.ToString());
 	}
 	else
 	{
@@ -105,9 +105,11 @@ void UInitiativeEntryWidget::SetCurrentTurn(bool bIsCurrentTurn)
 	{
 		FLinearColor BorderColor = bIsCurrentTurn ? CurrentTurnColor : NormalColor;
 		EntryBorder->SetBrushColor(BorderColor);
+		/*
 		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set current turn %s for %s"), 
 			bIsCurrentTurn ? TEXT("TRUE") : TEXT("FALSE"),
 			CombatantRef ? *CombatantRef->CharacterName.ToString() : TEXT("Unknown"));
+	*/
 	}
 	else
 	{
@@ -124,7 +126,7 @@ void UInitiativeEntryWidget::SetCurrentTurn(bool bIsCurrentTurn)
 
 void UInitiativeEntryWidget::UpdateReactionDisplay(bool bHasReaction)
 {
-	// This can be extended to show reaction status
+	// This can be extended to show reaction status, should I? Nah
 	// For now, we'll include it in the actions display
 }
 
@@ -145,15 +147,19 @@ void UInitiativeEntryWidget::UpdateDisplay()
 
 void UInitiativeEntryWidget::OnHealthChanged(float Magnitude, float NewHealth)
 {
+	/*
 	UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Health changed for %s - New Health: %f"), 
 		CombatantRef ? *CombatantRef->CharacterName.ToString() : TEXT("Unknown"), NewHealth);
+	*/
 	UpdateHealthDisplay();
 }
 
 void UInitiativeEntryWidget::OnActionsChanged(float Magnitude, float NewActionsRemaining)
 {
+	/*
 	UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Actions changed for %s - Remaining: %f"), 
 		CombatantRef ? *CombatantRef->CharacterName.ToString() : TEXT("Unknown"), NewActionsRemaining);
+		*/
 	
 	if (CombatantRef)
 	{
