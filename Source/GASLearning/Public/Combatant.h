@@ -15,6 +15,7 @@ class UPointLightComponent;
 class UCapsuleComponent;
 class UAbilitySystemComponent;
 class UCombatAttributeSet;
+class UMovementSplineComponent;
 
 UCLASS()
 class GASLEARNING_API ACombatant : public APawn, public IAbilitySystemInterface
@@ -73,6 +74,10 @@ public:
 	//Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UCapsuleComponent> Capsule;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<UMovementSplineComponent> MovementSpline;
+	
 	//GAS component
 	UPROPERTY()
 	TObjectPtr<UCombatAttributeSet> CombatAttributes;

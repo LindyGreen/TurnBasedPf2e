@@ -4,6 +4,7 @@
 #include "Combatant.h"
 #include "TurnManagerComponent.h"
 #include "Grid.h"
+#include "MovementSplineComponent.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
@@ -30,6 +31,9 @@ ACombatant::ACombatant()
 	InitiativeLight->LightColor = FColor(255, 0, 0);
 	InitiativeLight->SetRelativeLocation(FVector(0, 0, 200));
 	InitiativeLight->SetHiddenInGame(true);
+	//MovementSpline
+	MovementSpline = CreateDefaultSubobject<UMovementSplineComponent>(TEXT("MovementSpline"));
+	MovementSpline->SetupAttachment(Capsule);
 	//GAS
 	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("CombatAttributeSet"));
 }
@@ -52,6 +56,12 @@ void ACombatant::BeginPlay()
 		CombatAttributes->OnWillChanged.AddDynamic(this, &ACombatant::HandleWillChange);
 		CombatAttributes->OnActionsRemainingChanged.AddDynamic(this, &ACombatant::HandleActionsRemainingChange);
 		CombatAttributes->OnReactionAvailableChanged.AddDynamic(this, &ACombatant::HandleReactionAvailableChange);
+	}
+	
+	// Initialize MovementSpline GridRef
+	if (MovementSpline && GridRef)
+	{
+		MovementSpline->GridRef = GridRef;
 	}
 }
 

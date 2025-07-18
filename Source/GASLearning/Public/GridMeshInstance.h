@@ -18,7 +18,7 @@ public:
 	UGridMeshInstance();
 //VARIABLES
 	UPROPERTY(BlueprintReadWrite, Category="InstancedStaticMesh")
-	UInstancedStaticMeshComponent* InstancedMeshComponent;
+	TObjectPtr<UInstancedStaticMeshComponent> InstancedMeshComponent;
 	UPROPERTY(BlueprintReadWrite, Category="InstancedStaticMesh")
 	TMap<FIntPoint, int32> InstanceIndexes; 
 	UPROPERTY(BlueprintReadWrite, Category="InstancedStaticMesh")
