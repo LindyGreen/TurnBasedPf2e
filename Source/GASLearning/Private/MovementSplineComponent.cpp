@@ -13,9 +13,11 @@ UMovementSplineComponent::UMovementSplineComponent()
 	ScaleVisualizationWidth = 5.0f;
 }
 
-void UMovementSplineComponent::GeneratePathFromIndices(const TArray<FIntPoint>& PathIndices)
+void UMovementSplineComponent::GeneratePathFromIndices(const FVector& StartLocation, const TArray<FIntPoint>& PathIndices, float CapsuleHalfHeight)
 {
-	if (!GridRef)
+	// Get the Grid owner (since this component is now part of the Grid)
+	AGrid* Grid = Cast<AGrid>(GetOwner());
+	if (!Grid)
 	{
 		return;
 	}
@@ -23,8 +25,7 @@ void UMovementSplineComponent::GeneratePathFromIndices(const TArray<FIntPoint>& 
 	// Clear existing spline points
 	ClearSplinePoints();
 
-	// Add combatant's current location as starting point
-	FVector StartLocation = GetOwner()->GetActorLocation();
+	// Add starting location as first point (already at capsule half height)
 	AddSplinePoint(StartLocation, ESplineCoordinateSpace::World);
 
 	// Convert indices to world locations and add to spline
@@ -33,10 +34,12 @@ void UMovementSplineComponent::GeneratePathFromIndices(const TArray<FIntPoint>& 
 		const FIntPoint& Index = PathIndices[i];
 		
 		// Find the tile data for this index
-		if (FS_TileData* TileData = GridRef->GridTiles.Find(Index))
+		if (FS_TileData* TileData = Grid->GridTiles.Find(Index))
 		{
 			FVector WorldLocation = TileData->Transform.GetLocation();
-			AddSplinePoint(WorldLocation, ESplineCoordinateSpace::World);
+			// Elevate by capsule half height
+			FVector ElevatedWorldLocation = WorldLocation + FVector(0, 0, CapsuleHalfHeight);
+			AddSplinePoint(ElevatedWorldLocation, ESplineCoordinateSpace::World);
 		}
 	}
 

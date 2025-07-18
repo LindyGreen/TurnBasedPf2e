@@ -10,6 +10,7 @@
 #include "Grid.generated.h"
 
 class UGridMeshInstance;
+class UMovementSplineComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class GASLEARNING_API AGrid : public AActor
@@ -51,6 +52,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
 	UGridMeshInstance* GridMeshInstance;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	TObjectPtr<UMovementSplineComponent> MovementSpline;
+
 	// Functions
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Grid")
 	bool IsIndexValid(FIntPoint Index) const;
@@ -87,5 +91,8 @@ public:
 	void RemoveStateFromTile(FIntPoint TileIndex, ETileState State);
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ClearStateFromTiles(ETileState State);
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void GenerateMovementPath(const FVector& StartLocation, const TArray<FIntPoint>& PathIndices, float CapsuleHalfHeight = 50.0f);
 	
 };

@@ -15,7 +15,7 @@ class UPointLightComponent;
 class UCapsuleComponent;
 class UAbilitySystemComponent;
 class UCombatAttributeSet;
-class UMovementSplineComponent;
+class UFloatingPawnMovement;
 
 UCLASS()
 class GASLEARNING_API ACombatant : public APawn, public IAbilitySystemInterface
@@ -75,8 +75,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UCapsuleComponent> Capsule;
 	
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<UMovementSplineComponent> MovementSpline;
+	TObjectPtr<UFloatingPawnMovement> FloatingPawnMovement;
 	
 	//GAS component
 	UPROPERTY()
@@ -137,4 +138,8 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Highlighter")
 	void CallToUpdateVisualIfHoveredOrSelected();
+
+	// Movement Path Generation
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void GenerateMovementPath(const TArray<FIntPoint>& PathIndices);
 };

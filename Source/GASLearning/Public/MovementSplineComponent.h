@@ -14,11 +14,9 @@ class GASLEARNING_API UMovementSplineComponent : public USplineComponent
 public:
 	UMovementSplineComponent();
 
-	UPROPERTY(BlueprintReadWrite, Category = "Grid")
-	TObjectPtr<AGrid> GridRef = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void GeneratePathFromIndices(const TArray<FIntPoint>& PathIndices);
+	void GeneratePathFromIndices(const FVector& StartLocation, const TArray<FIntPoint>& PathIndices, float CapsuleHalfHeight = 50.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void ClearPath();

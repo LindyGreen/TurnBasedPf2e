@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GASLearning/Public/GridModifier.h"
 #include "GASLearning/Public/GridMeshInstance.h"
+#include "MovementSplineComponent.h"
 
 
 // Sets default values
@@ -22,6 +23,10 @@ AGrid::AGrid()
 	
 	MeshHandle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshHandle"));
 	MeshHandle->SetupAttachment(RootComponent);
+
+	// Create MovementSpline component
+	MovementSpline = CreateDefaultSubobject<UMovementSplineComponent>(TEXT("MovementSpline"));
+	MovementSpline->SetupAttachment(RootComponent);
 
 }
 
@@ -308,6 +313,14 @@ TArray<FIntPoint> TilesToClear=GetAllTilesWithState(State);
 	for (const FIntPoint& TileIndex : TilesToClear)//better than TilesToClear.[i] variant
 	{
 		RemoveStateFromTile(TileIndex, State);
+	}
+}
+
+void AGrid::GenerateMovementPath(const FVector& StartLocation, const TArray<FIntPoint>& PathIndices, float CapsuleHalfHeight)
+{
+	if (MovementSpline)
+	{
+		MovementSpline->GeneratePathFromIndices(StartLocation, PathIndices, CapsuleHalfHeight);
 	}
 }
 

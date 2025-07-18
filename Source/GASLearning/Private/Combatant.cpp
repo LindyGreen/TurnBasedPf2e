@@ -4,10 +4,10 @@
 #include "Combatant.h"
 #include "TurnManagerComponent.h"
 #include "Grid.h"
-#include "MovementSplineComponent.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "AbilitySystemComponent.h"
 #include "../Public/GAS/CombatAttributeSet.h"
 #include "LogTypes.h"
@@ -31,9 +31,8 @@ ACombatant::ACombatant()
 	InitiativeLight->LightColor = FColor(255, 0, 0);
 	InitiativeLight->SetRelativeLocation(FVector(0, 0, 200));
 	InitiativeLight->SetHiddenInGame(true);
-	//MovementSpline
-	MovementSpline = CreateDefaultSubobject<UMovementSplineComponent>(TEXT("MovementSpline"));
-	MovementSpline->SetupAttachment(Capsule);
+	//FloatingPawnMovement
+	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
 	//GAS
 	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("CombatAttributeSet"));
 }
@@ -58,11 +57,6 @@ void ACombatant::BeginPlay()
 		CombatAttributes->OnReactionAvailableChanged.AddDynamic(this, &ACombatant::HandleReactionAvailableChange);
 	}
 	
-	// Initialize MovementSpline GridRef
-	if (MovementSpline && GridRef)
-	{
-		MovementSpline->GridRef = GridRef;
-	}
 }
 
 UAbilitySystemComponent* ACombatant::GetAbilitySystemComponent() const
@@ -529,4 +523,17 @@ void ACombatant::InitializeCombatAttributes(const FS_CombatAttributes& CombatAtt
 	UE_LOG(LogTemp, Log, TEXT("Combat attributes initialized - Health: %f/%f, AC: %f, MaxDieRoll: %f"), 
 		CombatAttributes->GetHealth(), CombatAttributes->GetMaxHealth(), 
 		CombatAttributes->GetAC(), (float)CombatAttributes->GetMaxDieRoll());
+}
+
+void ACombatant::GenerateMovementPath(const TArray<FIntPoint>& PathIndices)
+{
+	if (!GridRef)
+	{
+		return;
+	}
+
+	FVector CurrentLocation = GetActorLocation();
+	float CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+	
+	GridRef->GenerateMovementPath(CurrentLocation, PathIndices, CapsuleHalfHeight);
 }
