@@ -3,18 +3,9 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/Texture2D.h"
+#include "StructsAndEnums/EAbilityVariantType.h"
+#include "StructsAndEnums/EAbilityCategory.h"
 #include "MyBaseGameplayAbility.generated.h"
-
-UENUM(BlueprintType)
-enum class EAbilityCategory : uint8
-{
-	Movement		UMETA(DisplayName = "Movement"),
-	Attack			UMETA(DisplayName = "Attack"),
-	Spell			UMETA(DisplayName = "Spell"),
-	Item			UMETA(DisplayName = "Item"),
-	FreeAction		UMETA(DisplayName = "Free Action"),
-	Reaction		UMETA(DisplayName = "Reaction")
-};
 
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class GASLEARNING_API UMyBaseGameplayAbility : public UGameplayAbility
@@ -59,6 +50,16 @@ public:
 	// Set to true for abilities that are part of a composite ability (like movement in Sudden Charge)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsSubAbility = false;
+
+	// Ability Variants System
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability Variants")
+	bool bHasVariants = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability Variants", meta = (EditCondition = "bHasVariants"))
+	TArray<EAbilityVariantType> SupportedVariants;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Runtime")
+	EAbilityVariantType SelectedVariant = EAbilityVariantType::OneAction;
 
 	// Blueprint-callable getters for UI
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")

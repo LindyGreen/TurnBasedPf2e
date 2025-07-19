@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "RangeFinderLibrary.h"
+#include "StructsAndEnums/E_TileType.h"
 #include "RangeFinder.generated.h"
+
+class AGrid;
 
 UCLASS(BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent))
 class GASLEARNING_API URangeFinder : public UActorComponent
@@ -65,6 +68,18 @@ UPROPERTY()
 	bool DiscoverNextNeighbor();
 	UFUNCTION(BlueprintCallable)
 	bool LoopThroughNeighbors();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsTileTypeWalkable(ETileType TileType);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsTileWalkable(FIntPoint Index);
+	
+	UFUNCTION(BlueprintCallable)
+	void CleanGeneratedData();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsInputDataValid();
 #pragma endregion Functions
 #pragma region input variables
 	UPROPERTY(BlueprintReadWrite, Category="Input")
@@ -95,6 +110,11 @@ UPROPERTY()
 	TMap<FIntPoint, FS_PathfindingData> PathfindingData;
 //	UPROPERTY(BlueprintReadWrite, Category="Tiles")
 	
+#pragma endregion 
+
+#pragma region Grid Reference
+	UPROPERTY(BlueprintReadWrite, Category="Grid")
+	TObjectPtr<AGrid> GridReference;
 #pragma endregion 
 
 };

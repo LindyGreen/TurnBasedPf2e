@@ -4,6 +4,7 @@
 #include "RangeFinder.h"
 #include "Algo/Reverse.h"
 #include "LogTypes.h"
+#include "Grid.h"
 // Sets default values for this component's properties
 URangeFinder::URangeFinder()
 {
@@ -19,7 +20,16 @@ URangeFinder::URangeFinder()
 void URangeFinder::BeginPlay()
 {
 	Super::BeginPlay();
-	// ...
+	
+	// Get Grid reference from owner
+	if (AActor* Owner = GetOwner())
+	{
+		GridReference = Cast<AGrid>(Owner);
+		if (!GridReference)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("URangeFinder::BeginPlay - Owner is not a Grid actor"));
+		}
+	}
 }
 
 
@@ -395,4 +405,58 @@ bool URangeFinder::LoopThroughNeighbors()
 		if (Result) return true;
 	}	
 	return false;
+}
+
+bool URangeFinder::IsTileTypeWalkable(ETileType TileType)
+{
+	return TileType != ETileType::None && TileType != ETileType::Obstacle;
+}
+
+bool URangeFinder::IsTileWalkable(FIntPoint Index)
+{
+	if (!GridReference)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("URangeFinder::IsTileWalkable - GridReference is null"));
+		return false;
+	}
+	
+	if (GridReference->GridTiles.Contains(Index))
+	{
+	FS_TileData TileData = GridReference->GridTiles[Index];
+	return IsTileTypeWalkable(TileData.TileType);
+	}
+		return false;
+}
+
+void URangeFinder::CleanGeneratedData()
+{
+	PathfindingData.Empty();
+	DiscoveredTileSortedCost.Empty();
+	DiscoveredTileIndexes.Empty();
+	AnalizedTileIndexes.Empty();
+}
+
+bool URangeFinder::IsInputDataValid()
+{
+	if (Target == Start)
+	{
+		return false;
+	}
+	
+	if (!IsTileWalkable(Start))
+	{
+		return false;
+	}
+	
+	if (Reachable)
+	{
+		return true;
+	}
+	
+	if (TotalCost(Start, Target) > MaxPathLength)
+	{
+		return false;
+	}
+	
+	return IsTileWalkable(Target);
 }
