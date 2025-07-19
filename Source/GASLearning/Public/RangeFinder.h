@@ -50,7 +50,7 @@ UPROPERTY()
 	TArray<FIntPoint> GenerateBurst(FIntPoint OriginPoint, uint8 Area);
 
 	UFUNCTION(BlueprintCallable) 
-	void RemoveInvalidNeighbors(FIntPoint CurrentArrayElement, TArray<FIntPoint>& NeighborsToRemove, FIntPoint Index); 
+	void RemoveInvalidNeighbors(FIntPoint CurrentArrayElement, FIntPoint Index, TArray<FIntPoint>& DiagonalsArray); 
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FIntPoint> GetNeighborIndexes(FIntPoint Index, bool bIncludeDiagonals, TArray<FIntPoint>& Diagonals);
@@ -80,6 +80,9 @@ UPROPERTY()
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsInputDataValid();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<FS_PathfindingData> GetValidTileNeighbors(FIntPoint Index, TArray<ETileType> ValidTypes);
 #pragma endregion Functions
 #pragma region input variables
 	UPROPERTY(BlueprintReadWrite, Category="Input")

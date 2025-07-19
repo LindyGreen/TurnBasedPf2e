@@ -20,18 +20,18 @@ URangeFinder::URangeFinder()
 void URangeFinder::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// Get Grid reference from owner
 	if (AActor* Owner = GetOwner())
 	{
 		GridReference = Cast<AGrid>(Owner);
 		if (!GridReference)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("URangeFinder::BeginPlay - Owner is not a Grid actor"));
+			UE_LOG(LogTemp, Warning,
+			       TEXT("URangeFinder::BeginPlay - Owner is not a Grid actor"));
 		}
 	}
 }
-
 
 
 TArray<FIntPoint> URangeFinder::GeneratePossibleArray(
@@ -55,7 +55,7 @@ TArray<FIntPoint> URangeFinder::GeneratePossibleArray(
 	case EAE_SpellPattern_Emanation:
 		return TArray<FIntPoint>(
 			GenerateEmanation(OriginPoint, Area, bIgnoreOrigin));
-	//SHOULD CHANGE TO CASTER LOCATION In DEV
+		//SHOULD CHANGE TO CASTER LOCATION In DEV
 	}
 	return TArray<FIntPoint>();
 }
@@ -229,32 +229,46 @@ TArray<FIntPoint> URangeFinder::GenerateBurst(FIntPoint OriginPoint, uint8 Area)
 }
 
 void URangeFinder::RemoveInvalidNeighbors(FIntPoint CurrentArrayElement,
-                                          TArray<FIntPoint>& NeighborsToRemove, FIntPoint Index) //removes extra points protecting from walking through walls
+                                          FIntPoint Index,
+                                          TArray<FIntPoint> &DiagonalsArray)
 {
-	FIntPoint TempElement = CurrentArrayElement-Index;
+	FIntPoint TempElement = CurrentArrayElement - Index;
+	TArray<FIntPoint> NeighborsToRemove;
+
 	if (TempElement.X == -1)
 	{
-				
-		NeighborsToRemove={FIntPoint(Index.X-1, Index.Y-1), FIntPoint(-1, +1)};
-		return;
+		NeighborsToRemove = {
+			FIntPoint(Index.X - 1, Index.Y - 1),
+			FIntPoint(Index.X - 1, Index.Y + 1)
+		};
 	}
-	if (TempElement.X == 1)
+	else if (TempElement.X == 1)
 	{
-		
-		NeighborsToRemove={FIntPoint(Index.X+1, Index.Y+1), FIntPoint(Index.X+1, Index.Y-1)};
-		return;
+		NeighborsToRemove = {
+			FIntPoint(Index.X + 1, Index.Y + 1),
+			FIntPoint(Index.X + 1, Index.Y - 1)
+		};
 	}
-	if (TempElement.Y == -1)
+	else if (TempElement.Y == -1)
 	{
-		NeighborsToRemove={FIntPoint(Index.X+1, Index.Y-1), FIntPoint(Index.X-1, Index.Y-1)};
-		return;
+		NeighborsToRemove = {
+			FIntPoint(Index.X + 1, Index.Y - 1),
+			FIntPoint(Index.X - 1, Index.Y - 1)
+		};
 	}
-	if (TempElement.Y == 1)
+	else if (TempElement.Y == 1)
 	{
-		NeighborsToRemove={FIntPoint(Index.X-1, Index.Y+1), FIntPoint(Index.X+1, Index.Y+1)};
-		// return;
+		NeighborsToRemove = {
+			FIntPoint(Index.X - 1, Index.Y + 1),
+			FIntPoint(Index.X + 1, Index.Y + 1)
+		};
 	}
 
+	// Remove invalid neighbors from diagonals array
+	for (const FIntPoint& ToRemove : NeighborsToRemove)
+	{
+		DiagonalsArray.Remove(ToRemove);
+	}
 }
 
 TArray<FIntPoint> URangeFinder::GetNeighborIndexes(
@@ -296,17 +310,19 @@ bool URangeFinder::IsDiagonal(FIntPoint Index1, FIntPoint Index2)
 void URangeFinder::InsertTileInDiscoveredArray(
 	FS_PathfindingData CurrentTileData)
 {
-	int32 SortingCost=CurrentTileData.CostFromStart+CurrentTileData.MinimumCostToTarget;
+	int32 SortingCost = CurrentTileData.CostFromStart + CurrentTileData.
+		MinimumCostToTarget;
 	if (DiscoveredTileIndexes.IsEmpty())
 	{
-//if first just add
+		//if first just add
 		DiscoveredTileSortedCost.Add(SortingCost);
 		DiscoveredTileIndexes.Add(CurrentTileData.Index);
 	}
 	else
 	{
 		//not first so checking if last index has higher sorting cost
-		if (!DiscoveredTileSortedCost.IsEmpty())//i have no idea why I put this saveguard here, I added to it, it can't be empty
+		if (!DiscoveredTileSortedCost.IsEmpty())
+		//i have no idea why I put this saveguard here, I added to it, it can't be empty
 		{
 			if (SortingCost >= DiscoveredTileSortedCost.Last())
 			{
@@ -317,93 +333,99 @@ void URangeFinder::InsertTileInDiscoveredArray(
 			else
 			{
 				if (!DiscoveredTileSortedCost.IsEmpty())
-					for (int32 i=0; i < DiscoveredTileSortedCost.Num(); i++)
+					for (int32 i = 0; i < DiscoveredTileSortedCost.Num(); i++)
 					{
-						if (SortingCost<=DiscoveredTileSortedCost[i])
+						if (SortingCost <= DiscoveredTileSortedCost[i])
 						{
 							DiscoveredTileSortedCost.Insert(SortingCost, i);
-							DiscoveredTileIndexes.Insert(CurrentTileData.Index, i);
+							DiscoveredTileIndexes.Insert(
+								CurrentTileData.Index, i);
 							break;
 							//if slower path - insert to the appropriate position
 						}
 					}
 			}
 		}
-		
 	}
 }
 
 void URangeFinder::DiscoverTile(FS_PathfindingData TilePathData)
 {
 	PathfindingData.Add(TilePathData.Index, TilePathData);
-InsertTileInDiscoveredArray(TilePathData);
+	InsertTileInDiscoveredArray(TilePathData);
 }
 
 FS_PathfindingData URangeFinder::PullCheapestTileOutOfDiscoveredList()
 {
-	FIntPoint TileIndex=DiscoveredTileIndexes[0];
-if (!DiscoveredTileSortedCost.IsEmpty())
-	DiscoveredTileSortedCost.RemoveAt(0);
-if (!AnalizedTileIndexes.IsEmpty())
-	DiscoveredTileIndexes.RemoveAt(0);
+	FIntPoint TileIndex = DiscoveredTileIndexes[0];
+	if (!DiscoveredTileSortedCost.IsEmpty())
+		DiscoveredTileSortedCost.RemoveAt(0);
+	if (!AnalizedTileIndexes.IsEmpty())
+		DiscoveredTileIndexes.RemoveAt(0);
 
-AnalizedTileIndexes.Add(TileIndex);
-return PathfindingData.FindRef(TileIndex);
+	AnalizedTileIndexes.Add(TileIndex);
+	return PathfindingData.FindRef(TileIndex);
 }
 
 TArray<FIntPoint> URangeFinder::GeneratePath()
 {
-	FIntPoint Current= Target;
-		TArray<FIntPoint> Path;
-	while (Current!=Start)
+	FIntPoint Current = Target;
+	TArray<FIntPoint> Path;
+	while (Current != Start)
 	{
 		Path.Add(Current);
-		Current=PathfindingData[Current].PreviousIndex;
+		Current = PathfindingData[Current].PreviousIndex;
 	}
 	Algo::Reverse(Path);
-		
+
 	return Path;
 }
 
 bool URangeFinder::DiscoverNextNeighbor()
 {
-	CurrentNeighbor=CurrentNeighbors[0];
+	CurrentNeighbor = CurrentNeighbors[0];
 	if (!CurrentNeighbors.IsEmpty())
-	CurrentNeighbors.RemoveAt(0);
-	int32 CostFromStart = CurrentDiscoveredTile.CostFromStart+CurrentNeighbor.CostToEnterTile;
-	
-if (AnalizedTileIndexes.Contains(CurrentNeighbor.Index))
-{
-	if (!Reachable) return false;
-	if (CostFromStart>PathfindingData[CurrentNeighbor.Index].CostFromStart) return false; 
-}
-	if (CostFromStart>MaxPathLength) return false;
-	int32 IndexInDiscovered=DiscoveredTileIndexes.Find(CurrentNeighbor.Index);
-if (IndexInDiscovered!=-1)
-{
-	CurrentNeighbor=PathfindingData[CurrentNeighbor.Index];
-	if (CostFromStart>=CurrentNeighbor.CostFromStart) return false;
-	if (CurrentNeighbors.Num()>IndexInDiscovered)CurrentNeighbors.RemoveAt(IndexInDiscovered);
-	if (DiscoveredTileSortedCost.Num()>IndexInDiscovered)DiscoveredTileSortedCost.RemoveAt(IndexInDiscovered);
-}
+		CurrentNeighbors.RemoveAt(0);
+	int32 CostFromStart = CurrentDiscoveredTile.CostFromStart + CurrentNeighbor.
+		CostToEnterTile;
+
+	if (AnalizedTileIndexes.Contains(CurrentNeighbor.Index))
+	{
+		if (!Reachable) return false;
+		if (CostFromStart > PathfindingData[CurrentNeighbor.Index].
+			CostFromStart)
+			return false;
+	}
+	if (CostFromStart > MaxPathLength) return false;
+	int32 IndexInDiscovered = DiscoveredTileIndexes.Find(CurrentNeighbor.Index);
+	if (IndexInDiscovered != -1)
+	{
+		CurrentNeighbor = PathfindingData[CurrentNeighbor.Index];
+		if (CostFromStart >= CurrentNeighbor.CostFromStart) return false;
+		if (CurrentNeighbors.Num() > IndexInDiscovered)
+			CurrentNeighbors.
+				RemoveAt(IndexInDiscovered);
+		if (DiscoveredTileSortedCost.Num() > IndexInDiscovered)
+			DiscoveredTileSortedCost.RemoveAt(IndexInDiscovered);
+	}
 	FS_PathfindingData Temp;
-	Temp.Index=CurrentNeighbor.Index;
-	Temp.CostToEnterTile=CurrentNeighbor.CostToEnterTile;
-	Temp.CostFromStart=CostFromStart;
-	Temp.MinimumCostToTarget=TotalCost(CurrentNeighbor.Index,Target);
-	Temp.PreviousIndex=CurrentDiscoveredTile.Index;
+	Temp.Index = CurrentNeighbor.Index;
+	Temp.CostToEnterTile = CurrentNeighbor.CostToEnterTile;
+	Temp.CostFromStart = CostFromStart;
+	Temp.MinimumCostToTarget = TotalCost(CurrentNeighbor.Index, Target);
+	Temp.PreviousIndex = CurrentDiscoveredTile.Index;
 	DiscoverTile(Temp);
-	if (CurrentNeighbor.Index==Target)return true;
+	if (CurrentNeighbor.Index == Target)return true;
 	return false;
 }
 
 bool URangeFinder::LoopThroughNeighbors()
 {
-	while (CurrentNeighbors.Num()>0)
+	while (CurrentNeighbors.Num() > 0)
 	{
 		bool Result = DiscoverNextNeighbor();
 		if (Result) return true;
-	}	
+	}
 	return false;
 }
 
@@ -416,16 +438,17 @@ bool URangeFinder::IsTileWalkable(FIntPoint Index)
 {
 	if (!GridReference)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("URangeFinder::IsTileWalkable - GridReference is null"));
+		UE_LOG(LogTemp, Warning,
+		       TEXT("URangeFinder::IsTileWalkable - GridReference is null"));
 		return false;
 	}
-	
+
 	if (GridReference->GridTiles.Contains(Index))
 	{
-	FS_TileData TileData = GridReference->GridTiles[Index];
-	return IsTileTypeWalkable(TileData.TileType);
+		FS_TileData TileData = GridReference->GridTiles[Index];
+		return IsTileTypeWalkable(TileData.TileType);
 	}
-		return false;
+	return false;
 }
 
 void URangeFinder::CleanGeneratedData()
@@ -442,21 +465,162 @@ bool URangeFinder::IsInputDataValid()
 	{
 		return false;
 	}
-	
+
 	if (!IsTileWalkable(Start))
 	{
 		return false;
 	}
-	
+
 	if (Reachable)
 	{
 		return true;
 	}
-	
+
 	if (TotalCost(Start, Target) > MaxPathLength)
 	{
 		return false;
 	}
-	
+
 	return IsTileWalkable(Target);
+}
+
+TArray<FS_PathfindingData> URangeFinder::GetValidTileNeighbors(
+	FIntPoint Index, TArray<ETileType> ValidTypes)
+{
+	TArray<FS_PathfindingData> Result;
+	
+	FS_TileData* IndexTileData = GridReference->GridTiles.Find(Index);
+	if (!IndexTileData)
+	{
+		UE_LOG(Log_Grid, Error, TEXT("GetValidTileNeighbors: Index (%d,%d) not found in GridTiles!"), Index.X, Index.Y);
+		return Result;
+	}
+	
+	float IndexTileHeight = IndexTileData->Transform.GetLocation().Z;
+	TArray<FIntPoint> DiagonalsArray;
+	TArray<FIntPoint> OrthogonalArray = GetNeighborIndexes(
+		Index, true, DiagonalsArray);
+		
+	//Loop for orthogonal array
+	for (auto const i : OrthogonalArray)
+	{
+		FS_TileData* LocalTileData = GridReference->GridTiles.Find(i);
+		if (!LocalTileData) continue;
+		
+		if (!ValidTypes.Contains(LocalTileData->TileType))
+		//if not valid -> remove invalid neighbor
+		{
+			RemoveInvalidNeighbors(i, Index, DiagonalsArray);
+			continue;
+		}
+		
+		if (LocalTileData->UnitOnTile) //if unit on tile - remove, break
+		{
+			RemoveInvalidNeighbors(i, Index, DiagonalsArray);
+			continue;
+		}
+		
+		//Height check if difference too high - - remove and break.
+		const float HeightDifference = FMath::Abs(LocalTileData->Transform.GetLocation().Z - IndexTileHeight);
+
+		if (HeightDifference >= GridReference->FinalTileSize.Z)
+		{
+			RemoveInvalidNeighbors(i, Index, DiagonalsArray);
+			continue;
+		}
+
+		FS_PathfindingData NewPathData;
+		NewPathData.Index = LocalTileData->Index;
+
+		// Set cost based on tile type (matching Blueprint select node logic)
+		int32 CostToEnter;
+		switch (LocalTileData->TileType)
+		{
+		case ETileType::None:
+			CostToEnter = 2;
+			break;
+		case ETileType::Normal:
+			CostToEnter = 2;
+			break;
+		case ETileType::Obstacle:
+			CostToEnter = 0;
+			break;
+		case ETileType::DifficultTerrain:
+			CostToEnter = 4;
+			break;
+		case ETileType::GreaterDiffTerrain:
+			CostToEnter = 6;
+			break;
+		case ETileType::FlyOnly:
+			CostToEnter = 2;
+			break;
+		default:
+			CostToEnter = 2;
+			break;
+		}
+
+		NewPathData.CostToEnterTile = CostToEnter;
+		NewPathData.CostFromStart = 0;
+		NewPathData.MinimumCostToTarget = 0;
+		NewPathData.PreviousIndex = Index;
+
+		Result.Add(NewPathData);
+	}
+//Loop for diagonals
+	if (DiagonalsArray.Num() == 0){return Result;}
+	
+	for (auto const i : DiagonalsArray)
+	{
+		const FS_TileData* LocalTileData = GridReference->GridTiles.Find(i);
+		if (!LocalTileData) continue;
+		
+		if (!ValidTypes.Contains(LocalTileData->TileType) || LocalTileData->UnitOnTile)//if not valid -> remove invalid neighbor
+		{
+			continue;
+		}
+
+		if (FMath::Abs(LocalTileData->Transform.GetLocation().Z - IndexTileHeight) >= GridReference->FinalTileSize.Z)
+		{
+			continue;
+		}
+
+		FS_PathfindingData NewPathData;
+		NewPathData.Index = LocalTileData->Index;
+
+		// Set cost based on tile type (matching Blueprint select node logic)
+		int32 CostToEnter;
+		switch (LocalTileData->TileType)
+		{
+		case ETileType::None:
+			CostToEnter = 3;
+			break;
+		case ETileType::Normal:
+			CostToEnter = 3;
+			break;
+		case ETileType::Obstacle:
+			CostToEnter = 0;
+			break;
+		case ETileType::DifficultTerrain:
+			CostToEnter = 6;
+			break;
+		case ETileType::GreaterDiffTerrain:
+			CostToEnter = 9;
+			break;
+		case ETileType::FlyOnly:
+			CostToEnter = 3;
+			break;
+		default:
+			CostToEnter = 3;
+			break;
+		}
+
+		NewPathData.CostToEnterTile = CostToEnter;
+		NewPathData.CostFromStart = 0;
+		NewPathData.MinimumCostToTarget = 0;
+		NewPathData.PreviousIndex = Index;
+
+		Result.Add(NewPathData);
+	} //for loop Orthogonal end.
+
+	return Result;
 }
