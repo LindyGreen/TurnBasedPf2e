@@ -1,25 +1,22 @@
 #include "UI/InitiativeTrackerWidget.h"
 #include "UI/InitiativeEntryWidget.h"
+#include "UI/AbilityWidgetEntry.h"
 #include "TurnManagerComponent.h"
 #include "Components/PanelWidget.h"
 #include "Components/VerticalBox.h"
+#include "Components/HorizontalBox.h"
 #include "Components/Button.h"
 #include "LogTypes.h"
 
 #include "GAS/CombatAttributeSet.h"
+#include "GAS/MyBaseGameplayAbility.h"
+#include "AbilitySystemComponent.h"
 
-#include "UObject/ConstructorHelpers.h"
 
 UInitiativeTrackerWidget::UInitiativeTrackerWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	// Try to set default entry class to the Blueprint version
-	// This path should match your WBP_InitiativeEntry location
-	static ConstructorHelpers::FClassFinder<UInitiativeEntryWidget> EntryClassFinder(TEXT("/Game/PF2e/UI/WBP_InitiativeEntry"));
-	if (EntryClassFinder.Succeeded())
-	{
-		InitiativeEntryClass = EntryClassFinder.Class;
-	}
+
 }
 
 void UInitiativeTrackerWidget::NativeConstruct()
@@ -121,6 +118,8 @@ void UInitiativeTrackerWidget::OnCombatStarted(const TArray<ACombatant*>& Sorted
 void UInitiativeTrackerWidget::OnTurnChanged(ACombatant* NewCurrentCombatant)
 {
 	UpdateCurrentTurn(NewCurrentCombatant);
+	
+	CreateAbilityWidgetEntry(NewCurrentCombatant);
 }
 
 void UInitiativeTrackerWidget::OnCombatEnded()
@@ -183,3 +182,57 @@ UInitiativeEntryWidget* UInitiativeTrackerWidget::FindEntryForCombatant(ACombata
 	}
 	return nullptr;
 }
+
+void UInitiativeTrackerWidget::CreateAbilityWidgetEntry(ACombatant* Combatant)
+{
+
+
+	if (!AbilityWidgetClass)
+	{
+		UE_LOG(LogUI, Warning, TEXT("AbilityWidgetClass is null - check WBP_InitiativeTracker UI section"));
+		return;
+	}
+
+	// Clear existing ability widgets
+	AbilityHotbar->ClearChildren();
+
+	// Get the combatant's Ability System Component
+	UAbilitySystemComponent* ASC = Combatant->GetAbilitySystemComponent();
+	if (!ASC)
+	{
+		UE_LOG(LogUI, Warning, TEXT("InitiativeTrackerWidget: Combatant %s has no AbilitySystemComponent"), 
+			*Combatant->CharacterName.ToString());
+		return;
+	}
+
+	// Get all abilities from the ASC
+	TArray<FGameplayAbilitySpec> AbilitySpecs = ASC->GetActivatableAbilities();
+	
+
+	// Create widgets for each ability
+	for (const FGameplayAbilitySpec& AbilitySpec : AbilitySpecs)
+	{
+		if (!AbilitySpec.Ability)continue; //SafetyCheck, 
+
+		// Cast to our base ability class to get UI data
+		UMyBaseGameplayAbility* BaseAbility = Cast<UMyBaseGameplayAbility>(AbilitySpec.Ability);
+		if (!BaseAbility) 
+		{
+			UE_LOG(LogUI, Log, TEXT("Ability you put in your spawning is not a child of MyBaseGameplayAbiltiy"));
+		continue; //SafetyTypeCheck only children of BaseGameplayAbiltiyAllowed
+		}
+		
+
+		// Create the ability widget
+		UAbilityWidgetEntry* AbilityWidget = CreateWidget<UAbilityWidgetEntry>(this, AbilityWidgetClass);
+
+		// Setup the widget with the ability
+		AbilityWidget->SetupAbilityWidget(BaseAbility);
+		// Set the ASC reference
+		AbilityWidget->OwnerASC = ASC;
+		// Add to the hotbar
+		AbilityHotbar->AddChild(AbilityWidget);
+		
+	}
+}
+

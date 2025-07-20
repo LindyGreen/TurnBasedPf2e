@@ -79,6 +79,6 @@ public:
 		DivineFont = 0;
 		MaxFocusPoints = 0;
 		SpellAttackBonus = 0;
-		SpellSaveDC = 10;
+		SpellSaveDC = SpellAttackBonus+10;
 	}
 };

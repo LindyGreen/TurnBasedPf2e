@@ -16,15 +16,20 @@ void UAbilityWidgetEntry::SetupAbilityWidget(UMyBaseGameplayAbility* InAbility)
 	}
 
 	AbilityReference = InAbility;
-	
-	// Create the widget UI first
+
+	// Create the widget UI first. This will handle the widget variation logic
 	CreateEntryWidget();
-	
 	// Then update UI elements (icon, name, action cost, etc.)
-	UpdateAbilityDisplay();
-	
-	UE_LOG(LogTemp, Log, TEXT("AbilityWidgetEntry: Setup complete for ability: %s"), 
-		*AbilityReference->GetAbilityDisplayName().ToString());
+	SetupAbilityDisplay();
+
+	// Cache ability spec and do initial button state check
+	if (OwnerASC)
+	{
+		CachedAbilitySpec = OwnerASC->FindAbilitySpecFromClass(AbilityReference->GetClass());
+
+		// Initial button state check
+		EnableDisableAbilityButton();
+	}
 }
 
 void UAbilityWidgetEntry::OnAbilityClicked()
@@ -40,8 +45,7 @@ void UAbilityWidgetEntry::OnAbilityClicked()
 	{
 		// Show variant selection UI
 		ShowVariantSelection();
-		UE_LOG(LogTemp, Log, TEXT("AbilityWidgetEntry: Showing variants for %s"), 
-			*AbilityReference->GetAbilityDisplayName().ToString());
+		UE_LOG(LogTemp, Log, TEXT("AbilityWidgetEntry: Showing variants for %s"),*AbilityReference->GetAbilityDisplayName().ToString());
 	}
 	else
 	{
@@ -52,45 +56,27 @@ void UAbilityWidgetEntry::OnAbilityClicked()
 
 void UAbilityWidgetEntry::OnVariantSelected(EAbilityVariantType Variant)
 {
-	if (!AbilityReference)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AbilityWidgetEntry: OnVariantSelected called with null ability reference"));
-		return;
-	}
-
-	// Check if the selected variant is supported
-	if (!AbilityReference->SupportedVariants.Contains(Variant))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AbilityWidgetEntry: Variant not supported by ability %s"), 
-			*AbilityReference->GetAbilityDisplayName().ToString());
-		return;
-	}
-
-	// Set the selected variant
-	AbilityReference->SelectedVariant = Variant;
-	
-	// Hide variant selection UI
+//TODO Figure out variant logic
 	HideVariantSelection();
-	
-	// Activate the ability with selected variant
 	ActivateAbility();
-	
-	UE_LOG(LogTemp, Log, TEXT("AbilityWidgetEntry: Variant selected and ability activated"));
+}
+
+void UAbilityWidgetEntry::SetupAbilityDisplay()
+{
+	AbilityIcon->SetBrushFromTexture(AbilityReference->GetAbilityIcon());
+	//set icon
+	AbilityName->SetText(AbilityReference->GetAbilityDisplayName());
+	SetToolTipText(AbilityReference->GetAbilityDescription());
+	ActionCost->SetBrushFromTexture(AbilityReference->GetAbilityIcon());
+	//TODO This has to be action cost icon,
+	//TODO --- so put action Icons into here and Select based on Action cost
 }
 
 void UAbilityWidgetEntry::ActivateAbility()
 {
 	if (!AbilityReference)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AbilityWidgetEntry: ActivateAbility called with null ability reference"));
-		return;
-	}
-
-	// Check if we can afford the ability
-	if (!CanAffordAbility())//This is failsafe. Activate ability shouldn't be pressable.
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AbilityWidgetEntry: Cannot afford ability %s"), 
-			*AbilityReference->GetAbilityDisplayName().ToString());
+		UE_LOG(LogTemp, Warning,TEXT("AbilityWidgetEntry: ActivateAbility called with null ability reference"));
 		return;
 	}
 
@@ -116,16 +102,16 @@ void UAbilityWidgetEntry::ActivateAbility()
 	}
 }
 
-bool UAbilityWidgetEntry::CanAffordAbility() const
+void UAbilityWidgetEntry::EnableDisableAbilityButton()
 {
-	if (!AbilityReference)
-	{
-		return false;
-	}
+	UE_LOG(LogGAS, Log,TEXT("EnableDisableAbilityButton called"));
 
-	// TODO: Implement actual action cost checking
-	// This should check if the current combatant has enough actions remaining
-	// For now, just return true as a placeholder
-	
-	return true; // Placeholder
+
+	// Use GAS built-in cost checking
+	bool bCanAfford = CachedAbilitySpec->Ability->CheckCost(CachedAbilitySpec->Handle, OwnerASC->AbilityActorInfo.Get());
+	if (AbilityButton)
+	{
+		AbilityButton->SetIsEnabled(bCanAfford);
+		UE_LOG(LogGAS, Log,TEXT("AbilityWidgetEntry: can afford check result %s"), bCanAfford ? TEXT("true") : TEXT("false"));
+	}
 }

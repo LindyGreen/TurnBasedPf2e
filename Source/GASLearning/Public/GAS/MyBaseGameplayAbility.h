@@ -80,10 +80,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
 	int32 GetRange() const { return Range; }
 
-	// Virtual functions for subclasses to override
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ability")
-	bool CanAffordAbility() const;
-
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ability")
 	void OnAbilityActivationSuccess();
 

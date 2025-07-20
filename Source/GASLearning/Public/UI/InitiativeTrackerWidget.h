@@ -3,11 +3,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/VerticalBox.h"
+#include "Components/HorizontalBox.h"
 #include "Combatant.h"
 #include "InitiativeTrackerWidget.generated.h"
 
 class UTurnManagerComponent;
 class UInitiativeEntryWidget;
+class UAbilityWidgetEntry;
 
 UCLASS(BlueprintType, Blueprintable)
 class GASLEARNING_API UInitiativeTrackerWidget : public UUserWidget
@@ -30,6 +32,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<class UButton> SpendActionButton;
 
+	// Ability hotbar container
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UHorizontalBox> AbilityHotbar;
+
 	// Reference to Turn Manager
 	UPROPERTY(BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<UTurnManagerComponent> TurnManagerRef;
@@ -37,6 +43,10 @@ public:
 	// Entry widget class to spawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UInitiativeEntryWidget> InitiativeEntryClass;
+
+	// Ability widget class to spawn
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UAbilityWidgetEntry> AbilityWidgetClass;
 
 	// Functions
 	UFUNCTION(BlueprintCallable, Category = "Combat")
@@ -71,4 +81,5 @@ private:
 	// Helper functions
 	void CreateEntryWidget(ACombatant* Combatant, int32 Index);
 	UInitiativeEntryWidget* FindEntryForCombatant(ACombatant* Combatant);
+	void CreateAbilityWidgetEntry(ACombatant* Combatant);
 };

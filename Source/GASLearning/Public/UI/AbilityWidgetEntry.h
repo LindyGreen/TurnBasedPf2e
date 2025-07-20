@@ -21,11 +21,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Ability")
 	TObjectPtr<UMyBaseGameplayAbility> AbilityReference;
 
-	// ASC reference - set when spawning the widget
+	// ASC reference - set in constructor
 	UPROPERTY(BlueprintReadOnly, Category = "Ability", meta = (ExposeOnSpawn = "true"))
 	TObjectPtr<UAbilitySystemComponent> OwnerASC;
 
-	// UI Component references - bind these in Blueprint
+	// Cached ability spec for performance
+	FGameplayAbilitySpec* CachedAbilitySpec;
+
+	// UI Component references - these are bound when 
 	UPROPERTY(BlueprintReadWrite, Category = "UI Components", meta = (BindWidget))
 	TObjectPtr<UButton> AbilityButton;
 
@@ -69,7 +72,10 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Ability")
 	void ActivateAbility();
 
-	// Helper function to check if combatant can afford this ability
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Ability")
-	bool CanAffordAbility() const;
+
+	//  Function to enable/disable button based on affordability
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void EnableDisableAbilityButton();
+
+	
 };

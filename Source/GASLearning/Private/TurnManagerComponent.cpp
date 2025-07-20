@@ -45,8 +45,6 @@ void UTurnManagerComponent::SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index
 }
 void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 {
-	UE_LOG(Log_TurnManager, Warning, TEXT("StartCombat called"));
-	
 	// Check if combatant's array is not empty
 	if (CombatantArray.IsEmpty()) 
 	{

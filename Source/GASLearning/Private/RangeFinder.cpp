@@ -139,8 +139,7 @@ TArray<FIntPoint> URangeFinder::GenerateCone(FIntPoint OriginPoint,
 				}
 			}
 		}
-		UE_LOG(Log_Grid, Log,
-		       TEXT("URangeFinder::GenerateCone - OriginPoint is orthogonal"));
+//		UE_LOG(Log_Grid, Log,TEXT("URangeFinder::GenerateCone - OriginPoint is orthogonal"));
 	}
 	else //diagonals
 	{
@@ -490,11 +489,7 @@ TArray<FS_PathfindingData> URangeFinder::GetValidTileNeighbors(
 	TArray<FS_PathfindingData> Result;
 	
 	FS_TileData* IndexTileData = GridReference->GridTiles.Find(Index);
-	if (!IndexTileData)
-	{
-		UE_LOG(Log_Grid, Error, TEXT("GetValidTileNeighbors: Index (%d,%d) not found in GridTiles!"), Index.X, Index.Y);
-		return Result;
-	}
+	if (!IndexTileData)return Result;
 	
 	float IndexTileHeight = IndexTileData->Transform.GetLocation().Z;
 	TArray<FIntPoint> DiagonalsArray;

@@ -26,22 +26,13 @@ void UInitiativeEntryWidget::SetupEntry(ACombatant* InCombatant, float Initiativ
 	CombatantRef = InCombatant;
 
 	// Set character name
-	if (CharacterNameText)
-	{
-		CharacterNameText->SetText(InCombatant->CharacterName);
-//		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set character name to: %s"), *InCombatant->CharacterName.ToString());
-	}
-	else
-	{
-//		UE_LOG(LogUI, Warning, TEXT("InitiativeEntryWidget: CharacterNameText is null - check Blueprint binding"));
-	}
-
+	if (CharacterNameText) CharacterNameText->SetText(InCombatant->CharacterName);
+	
 	// Set initiative value
 	if (InitiativeValueText)
 	{
 		FText InitText = FText::AsNumber(FMath::RoundToInt(InitiativeValue));
 		InitiativeValueText->SetText(InitText);
-//		UE_LOG(LogUI, Log, TEXT("InitiativeEntryWidget: Set initiative to: %s"), *InitText.ToString());
 	}
 	else
 	{
