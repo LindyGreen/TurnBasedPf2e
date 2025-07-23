@@ -7,7 +7,7 @@
 #include "Components/TextBlock.h"
 #include "StructsAndEnums/EAbilityVariantType.h"
 #include "AbilityWidgetEntry.generated.h"
-
+struct FGameplayAbilitySpec;
 class UMyBaseGameplayAbility;
 class UAbilitySystemComponent;
 
@@ -58,8 +58,8 @@ public:
 	void CreateEntryWidget();
 
 	// Blueprint implementable events for UI updates
-	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateAbilityDisplay();
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetupAbilityDisplay();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ShowVariantSelection();

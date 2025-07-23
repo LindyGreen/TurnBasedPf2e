@@ -31,14 +31,7 @@ void UMyBaseGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		CancelAllOtherActiveAbilities();
 	}
 
-	// Check if we can afford the ability
-	if (!TrySpendActions(ActionCost))
-	{
-		UE_LOG(LogGAS, Warning, TEXT("MyBaseGameplayAbility: Cannot afford ability %s - insufficient actions"), *DisplayName.ToString());
-		OnAbilityActivationFailed();
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
-		return;
-	}
+	// Let GAS handle cost checking and spending via Cost GameplayEffect
 
 	UE_LOG(LogGAS, Log, TEXT("MyBaseGameplayAbility: Activated ability %s"), *DisplayName.ToString());
 	
@@ -57,9 +50,8 @@ void UMyBaseGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-bool UMyBaseGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+/*bool UMyBaseGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	// First check parent conditions
 	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 	{
 		return false;
@@ -78,10 +70,10 @@ bool UMyBaseGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle
 		UE_LOG(LogGAS, Verbose, TEXT("MyBaseGameplayAbility: Insufficient actions for %s (Required: %d, Available: %f)"), 
 			*DisplayName.ToString(), ActionCost, Combatant->CombatAttributes->GetActionsRemaining());
 		return false;
-	}
+	}#1#
 
 	return true;
-}
+}*/
 
 bool UMyBaseGameplayAbility::TrySpendActions(int32 ActionsToSpend)
 {

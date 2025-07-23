@@ -4,6 +4,8 @@
 #include "AbilitySystemComponent.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "GameplayAbilitySpec.h"
+
 #include "Components/TextBlock.h"
 #include "LogTypes.h"
 
@@ -107,11 +109,30 @@ void UAbilityWidgetEntry::EnableDisableAbilityButton()
 	UE_LOG(LogGAS, Log,TEXT("EnableDisableAbilityButton called"));
 
 
-	// Use GAS built-in cost checking
-	bool bCanAfford = CachedAbilitySpec->Ability->CheckCost(CachedAbilitySpec->Handle, OwnerASC->AbilityActorInfo.Get());
-	if (AbilityButton)
+	// Use GAS built-in ability activation checking
+	FGameplayTagContainer FailureTags;
+	
+	// Debug: Check what cost GE the ability has
+	UMyBaseGameplayAbility* BaseAbility = Cast<UMyBaseGameplayAbility>(CachedAbilitySpec->Ability);
+	if (BaseAbility)
 	{
-		AbilityButton->SetIsEnabled(bCanAfford);
-		UE_LOG(LogGAS, Log,TEXT("AbilityWidgetEntry: can afford check result %s"), bCanAfford ? TEXT("true") : TEXT("false"));
+		UE_LOG(LogGAS, Log, TEXT("AbilityWidgetEntry: Checking ability %s"), *BaseAbility->GetAbilityDisplayName().ToString());
+		UGameplayEffect* CostGE = BaseAbility->GetCostGameplayEffect();
+		UE_LOG(LogGAS, Log, TEXT("AbilityWidgetEntry: Ability has cost GE: %s"), CostGE ? *CostGE->GetName() : TEXT("None"));
 	}
+	
+	// First check the cost separately
+	bool bCanAffordCost = CachedAbilitySpec->Ability->CheckCost(CachedAbilitySpec->Handle, OwnerASC->AbilityActorInfo.Get());
+	UE_LOG(LogGAS, Log, TEXT("AbilityWidgetEntry: CheckCost result %s"), bCanAffordCost ? TEXT("true") : TEXT("false"));
+	
+	// Then check full activation
+	bool bCanAfford = CachedAbilitySpec->Ability->CanActivateAbility(CachedAbilitySpec->Handle, OwnerASC->AbilityActorInfo.Get(), nullptr, nullptr, &FailureTags);
+	UE_LOG(LogGAS, Log, TEXT("AbilityWidgetEntry: CanActivateAbility result %s"), bCanAfford ? TEXT("true") : TEXT("false"));
+	
+	if (!FailureTags.IsEmpty())
+	{
+		UE_LOG(LogGAS, Log, TEXT("AbilityWidgetEntry: Failure tags: %s"), *FailureTags.ToString());
+	}
+	
+	AbilityButton->SetIsEnabled(bCanAfford);
 }

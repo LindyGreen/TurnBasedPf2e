@@ -223,13 +223,12 @@ void UInitiativeTrackerWidget::CreateAbilityWidgetEntry(ACombatant* Combatant)
 		}
 		
 
-		// Create the ability widget
+		// Create the ability widget with ASC parameter
 		UAbilityWidgetEntry* AbilityWidget = CreateWidget<UAbilityWidgetEntry>(this, AbilityWidgetClass);
+		AbilityWidget->OwnerASC = ASC;
 
 		// Setup the widget with the ability
 		AbilityWidget->SetupAbilityWidget(BaseAbility);
-		// Set the ASC reference
-		AbilityWidget->OwnerASC = ASC;
 		// Add to the hotbar
 		AbilityHotbar->AddChild(AbilityWidget);
 		
