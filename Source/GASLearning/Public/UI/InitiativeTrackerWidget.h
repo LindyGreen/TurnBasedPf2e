@@ -72,6 +72,9 @@ public:
 	UFUNCTION()
 	void OnCombatEnded();
 
+	// Function to refresh all ability buttons
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void RefreshAllAbilityButtons();
 
 private:
 	// Store entry widgets for updates

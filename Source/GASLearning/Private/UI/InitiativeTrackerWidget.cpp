@@ -163,6 +163,11 @@ void UInitiativeTrackerWidget::CreateEntryWidget(ACombatant* Combatant, int32 In
 	// Setup the entry
 	EntryWidget->SetupEntry(Combatant, InitiativeValue);
 	
+	// Bind to the ability refresh delegate
+	//Note, I know it creates a bunch of useless calls, when enemy AI will move,
+	// but that is a sacrifice I am willing to make
+	EntryWidget->OnActionsChangedForAbilityRefresh.AddDynamic(this, &UInitiativeTrackerWidget::RefreshAllAbilityButtons);
+	
 	// Add to the list
 	InitiativeList->AddChild(EntryWidget);
 	EntryWidgets.Add(EntryWidget);
@@ -181,6 +186,26 @@ UInitiativeEntryWidget* UInitiativeTrackerWidget::FindEntryForCombatant(ACombata
 		}
 	}
 	return nullptr;
+}
+
+void UInitiativeTrackerWidget::RefreshAllAbilityButtons()
+{
+	if (!AbilityHotbar || AbilityHotbar->GetChildrenCount() == 0) // Quit if AI
+	{ 
+		// TODO make a clear separation to not call this when it's AI's turn 
+		UE_LOG(LogUI, Warning, TEXT("InitiativeTrackerWidget: AbilityHotbar is null or no Abilities on the bar (AI)"));
+		return;
+	}
+
+	// Loop through all current ability widgets and call EnableDisableAbilityButton
+	for (int32 i = 0; i < AbilityHotbar->GetChildrenCount(); ++i)
+	{
+		UAbilityWidgetEntry* AbilityWidget = Cast<UAbilityWidgetEntry>(AbilityHotbar->GetChildAt(i));
+		if (AbilityWidget)
+		{
+			AbilityWidget->EnableDisableAbilityButton();
+		}
+	}
 }
 
 void UInitiativeTrackerWidget::CreateAbilityWidgetEntry(ACombatant* Combatant)

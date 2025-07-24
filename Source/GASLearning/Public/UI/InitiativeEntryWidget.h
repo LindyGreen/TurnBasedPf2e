@@ -2,11 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
-#include "Components/ProgressBar.h"
-#include "Components/Border.h"
 #include "Combatant.h"
 #include "InitiativeEntryWidget.generated.h"
+class UTextBlock;
+class UProgressBar;
+class UBorder;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionsChangedForAbilityRefresh);
 
 UCLASS(BlueprintType, Blueprintable)
 class GASLEARNING_API UInitiativeEntryWidget : public UUserWidget
@@ -61,6 +63,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void UpdateReactionDisplay(bool bHasReaction);
+
+	// Delegate to notify when actions change (for ability button refresh)
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnActionsChangedForAbilityRefresh OnActionsChangedForAbilityRefresh;
 
 	// Delegate handlers for real-time updates
 	UFUNCTION()

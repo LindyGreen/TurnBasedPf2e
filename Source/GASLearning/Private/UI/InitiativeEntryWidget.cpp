@@ -155,5 +155,11 @@ void UInitiativeEntryWidget::OnActionsChanged(float Magnitude, float NewActionsR
 	if (CombatantRef)
 	{
 		UpdateActionsDisplay(NewActionsRemaining, CombatantRef->CombatAttributes->GetMaxActions());
+		
+		// Broadcast delegate to notify InitiativeTrackerWidget to refresh ability buttons
+		if(NewActionsRemaining != 0 || NewActionsRemaining != CombatantRef->CombatAttributes->GetMaxActions())
+		{
+			OnActionsChangedForAbilityRefresh.Broadcast();
+		}
 	}
 }

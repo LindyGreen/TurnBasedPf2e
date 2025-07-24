@@ -67,15 +67,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void HideVariantSelection();
 
+	//  Function to enable/disable button based on affordability
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void EnableDisableAbilityButton();
 protected:
 	// Helper function to activate the ability
 	UFUNCTION(BlueprintCallable, Category = "Ability")
 	void ActivateAbility();
-
-
-	//  Function to enable/disable button based on affordability
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void EnableDisableAbilityButton();
-
-	
 };
