@@ -102,10 +102,10 @@ public:
 
 	// Animation montages
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	TObjectPtr<class UAnimMontage> PreActivationMontage;
+	TSoftObjectPtr<class UAnimMontage> PreActivationMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	TObjectPtr<class UAnimMontage> PostActivationMontage;
+	TSoftObjectPtr<class UAnimMontage> PostActivationMontage;
 
 	// Ability Variants System
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability Variants")
@@ -130,12 +130,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
 	EAbilityCategory GetAbilityCategory() const { return Category; }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Setup")
 	int32 GetActionCost() const { return ActionCost; }
 #pragma endregion Inlined Getters
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Combat")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Setup")
 	int32 GetRange() const { return Range; }
-	UFUNCTION(BlueprintCallable, Category = "Combat")
+	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void CancelAllOtherActiveAbilities();
 
 	// Universal combat functions
@@ -160,5 +160,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	int32 CalculateDistanceToTarget(class ACombatant* Target) const;
-
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void SetCPPReferences();
 };

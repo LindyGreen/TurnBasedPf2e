@@ -38,7 +38,7 @@ public:
 	FIntPoint HoveredTileIndex={-1,-1};
 	// Input handling functions
 	UFUNCTION(BlueprintCallable, Category = "Input")
-	void UpdateTileUnderCursor();
+	void UpdateTileUnderCursor(bool& WasHoverUpdated);
 	
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	AActor* GetUnitUnderCursor();

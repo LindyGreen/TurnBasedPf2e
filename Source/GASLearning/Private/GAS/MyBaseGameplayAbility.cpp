@@ -24,11 +24,14 @@ UMyBaseGameplayAbility::UMyBaseGameplayAbility()
 	// Default ability settings
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+}
+
+//Initializing parameters that are available only after character is granted.
+void UMyBaseGameplayAbility::SetCPPReferences()
+{
 	GridRef = Cast<AGrid>(UGameplayStatics::GetActorOfClass(UGameplayAbility::GetWorld(), AGrid::StaticClass()));
 	OwningCombatant = Cast<ACombatant>(GetAvatarActorFromActorInfo());
 }
-
-
 
 void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
 {
@@ -55,6 +58,7 @@ void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
 		ASC->CancelAbilityHandle(HandleToCancel);
 	}
 }
+
 
 int32 UMyBaseGameplayAbility::RollDamage() const
 {
@@ -143,6 +147,9 @@ int32 UMyBaseGameplayAbility::CalculateDistanceToTarget(ACombatant* Target) cons
 	//TODO replace with TOTAL COST function from Rangefinder
 	return FMath::Max(FMath::Abs(OwnerPos.X - TargetPos.X), FMath::Abs(OwnerPos.Y - TargetPos.Y));
 }
+
+
+
 
 bool UMyBaseGameplayAbility::IsTargetInRange(ACombatant* Target, int32& OutRangePenalty) const
 {

@@ -8,6 +8,7 @@
 #include "AbilitySystemInterface.h"
 #include "StructsAndEnums/ECombatAttributeType.h"
 #include "StructsAndEnums/FS_CombatAttributes.h"
+#include "StructsAndEnums/E_TileType.h"
 #include "Combatant.generated.h"
 class UTurnManagerComponent;
 class AGrid;
@@ -56,6 +57,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
 	FTransform NextTransform;
+
+	// Movement constraints - what tile types this combatant can move through
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	TArray<ETileType> AccessibleTiles;
 
 	// Highlighter
 	UPROPERTY(BlueprintReadWrite, Category = "Highlighter")

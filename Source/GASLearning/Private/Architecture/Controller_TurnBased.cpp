@@ -40,7 +40,7 @@ void AController_TurnBased::BeginPlay()
 	}
 }
 
-void AController_TurnBased::UpdateTileUnderCursor()
+void AController_TurnBased::UpdateTileUnderCursor(bool& WasHoverUpdated)
 {
 AActor* CurrentHover = GetUnitUnderCursor();//setting the one we connect with as current hover
 	if (CurrentHover)//check  if found anything.
@@ -106,8 +106,11 @@ else //clear HoveredCombatant
 			NewIndex=GridRef->GetTileIndexUnderCursor();
 		}
 	}
+	if (NewIndex==HoveredTileIndex){WasHoverUpdated=false;}
+
 	if (NewIndex!=HoveredTileIndex)//changing the index of the hovered tile to change it's state
 	{
+		WasHoverUpdated=true;
 //	UE_LOG(Log_Grid, Log, TEXT("we switched from one hovered tile to another"));
 		if (GridRef && HoveredTileIndex != FIntPoint(-1, -1))
 		{
