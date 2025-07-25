@@ -8,7 +8,8 @@ enum class EAbilityCategory : uint8
 {
 	Movement		UMETA(DisplayName = "Movement"),
 	Attack			UMETA(DisplayName = "Attack"),
-	Spell			UMETA(DisplayName = "Spell"),
+	SpellAttacking	UMETA(DisplayName = "SpellAttacking"),
+	SpellSave		UMETA(DisplayName = "SpellSaveRequiring"),
 	Item			UMETA(DisplayName = "Item"),
 	FreeAction		UMETA(DisplayName = "Free Action"),
 	Reaction		UMETA(DisplayName = "Reaction")
