@@ -90,9 +90,8 @@
 **Current Status:** Core turn-based combat system functional, movement working, action economy integrated with GAS, UI updating in real-time. Ready for polish phase! 🎮
 
 ## Quick Wins for Demo Video
-1. **Movement animations** - 1D blendspace with IsMoving bool
+1. **Movement animations** - 1D blendspace with IsMoving bool ++
 2. **Death animations** - montage for PC, ragdoll for AI  
-3. **Screen shake** - add to abilities for impact
 4. **Damage numbers** - floating text on hits
 5. **Clean UI** - hide dev buttons, better icons
 
