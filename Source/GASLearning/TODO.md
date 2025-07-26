@@ -1,4 +1,4 @@
-# TurnBasedPf2e TODO List (AI made, may ne outdated on time of printing)
+# TurnBasedPf2e TODO List (AI made, may be outdated on time of printing)
 
 ## High Priority (Weekend Sprint - Monday Video)
 
@@ -12,6 +12,7 @@
 
 ### Visual Polish for Demo
 - [ ] **Basic attack animations** - find montages
+- [ ] **Rotate towards Target function** - 
 - [ ] **Simple damage numbers** - floating text on hits
 - [ ] **Death animations** - PC death montage, AI ragdoll, stand up if not dead
 - [ ] **Basic spell VFX** - colored particles/spheres
@@ -24,12 +25,11 @@
 ## Medium Priority (Next Week)
 
 ### Ability Implementation
-- [ ] **Create 3 main C++ ability templates**:
-  - [ ] `UUtilityAbility` (Raise Shield, Stance, Feint)
-  - [ ] `UAttackAbility` (Melee/Ranged attacks)
-  - [ ] `USpellAbility` (Damage spells, buffs, debuffs)
-- [ ] **Implement basic melee attack** ability
-- [ ] **Implement basic spell** ability
+
+- [ ] **CreateUniversalTemplate** - In progress
+ 
+- [ ] **Implement basic melee attack** ability  - in progress
+- [ ] **Implement basic spell** ability      -    in progress
 - [ ] **Add ability cost validation** improvements
 
 ### Animation Improvements

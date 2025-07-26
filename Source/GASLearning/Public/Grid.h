@@ -94,5 +94,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void GenerateMovementPath(const FVector& StartLocation, const TArray<FIntPoint>& PathIndices, float CapsuleHalfHeight = 50.0f);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Grid")
+	FORCEINLINE AActor* GetCombatantUnderIndex(FIntPoint Index) const
+	{
+		if (const FS_TileData* TileData = GridTiles.Find(Index))
+		{
+			return TileData->UnitOnTile.Get();
+		}
+		return nullptr;
+	}
 	
 };

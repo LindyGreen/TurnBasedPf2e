@@ -60,10 +60,10 @@ void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
 }
 
 
-int32 UMyBaseGameplayAbility::RollDamage() const
+int32 UMyBaseGameplayAbility::RollAbilityDamage() const
 {
 	// For spells, use the spell's own damage dice
-	if (Category == EAbilityCategory::SpellAttacking)
+	if (Category == EAbilityCategory::SpellAttack)
 	{
 		return UPF2eCombatLibrary::RollDamage(BaseDamage, DamageDiceCount, 0);
 	}
@@ -106,7 +106,7 @@ TArray<FIntPoint> UMyBaseGameplayAbility::GetAbilityArea(FIntPoint TargetLocatio
 	
 	switch (AreaType)
 	{
-		case ESpellArea::Single:
+		case ESpellArea::SingleTarget:
 			AffectedSquares.Add(TargetLocation);
 			break;
 			
@@ -116,7 +116,7 @@ TArray<FIntPoint> UMyBaseGameplayAbility::GetAbilityArea(FIntPoint TargetLocatio
 			AffectedSquares.Add(TargetLocation);
 			break;
 			
-		case ESpellArea::Emanation:
+		case ESpellArea::SelfOrEmanation:
 			// TODO: Use RangeFinder's GenerateEmanation when available
 			// For now, simple implementation
 			AffectedSquares.Add(TargetLocation);

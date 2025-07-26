@@ -59,18 +59,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bIsSubAbility = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	bool bIsInstant = false;
-
 	// Spell properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
 	int32 SpellLevel = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
-	ESpellArea AreaType = ESpellArea::Single;
+	ESpellArea AreaType = ESpellArea::SingleTarget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
 	int32 AreaSize = 1; // Radius for burst/emanation, length for line/cone
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
+	int32 MaxTargets = 1; // Maximum number of targets for MultipleTarget spells
 
 	// Damage properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
@@ -78,11 +78,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	int32 DamageDiceCount = 2; // Number of dice (e.g., 2d6)
-
-	// Saving throw properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
-	bool bAllowsSave = true;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
 	int32 SaveDC = 15; // Spell save DC
 
@@ -140,7 +136,7 @@ public:
 
 	// Universal combat functions
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	int32 RollDamage() const;
+	int32 RollAbilityDamage() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	EDegreeOfSuccess RollAttack(int32 TargetAC, int32 RangePenalty = 0) const;

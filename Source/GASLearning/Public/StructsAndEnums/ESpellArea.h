@@ -6,10 +6,10 @@
 UENUM(BlueprintType)
 enum class ESpellArea : uint8
 {
-	Single			UMETA(DisplayName = "Single Target"),
-	MultipleTarger  UMETA(DisplayName = "MultipleTarget"),
+	SingleTarget	UMETA(DisplayName = "Single Target"),
+	MultipleTargets	UMETA(DisplayName = "Multiple Targets"),
 	Line			UMETA(DisplayName = "Line"),
 	Cone			UMETA(DisplayName = "Cone"),
 	Burst			UMETA(DisplayName = "Burst"),
-	Emanation		UMETA(DisplayName = "Emanation")
+	SelfOrEmanation	UMETA(DisplayName = "SelfOrEmanation")
 };
