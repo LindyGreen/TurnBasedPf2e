@@ -58,6 +58,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
 	FTransform NextTransform;
 
+	// Grid Spawner Name for enemy data table lookup
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ExposeOnSpawn=true), Category = "Spawning")
+	FName EnemiesOnMapRowName;
+
 	// Movement constraints - what tile types this combatant can move through
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	TArray<ETileType> AccessibleTiles;

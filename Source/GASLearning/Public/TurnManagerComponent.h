@@ -87,5 +87,5 @@ public:
 	void SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index, bool Force);
 	// Blueprint implementable event for enemy spawning
 	UFUNCTION(BlueprintImplementableEvent, Category = "Combat")
-	void SpawnEnemies();
+	void SpawnEnemies(const FName& EnemiesOnMapRowName);
 };

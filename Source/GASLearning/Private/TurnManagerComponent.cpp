@@ -17,7 +17,10 @@ AGrid* UTurnManagerComponent::GetOwningGrid() const
 
 void UTurnManagerComponent::InitializeCombat()
 {
-	SpawnEnemies(); //This is currently implemented in blueprint
+	if (AGrid* Grid = GetOwningGrid())
+	{
+		SpawnEnemies(Grid->EnemiesOnMapRowName); //This is currently implemented in blueprint
+	}
 	//TODO in blueprint add the spawn logic to make them spawn with all assets
 }
 void UTurnManagerComponent::SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index, bool Force)

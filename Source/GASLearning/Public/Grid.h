@@ -40,6 +40,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GridTileCount")
 	double GridOffsetFromGround = 2.0;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ExposeOnSpawn=true), Category = "Grid")
+	FName EnemiesOnMapRowName;
+	
 	UPROPERTY(BlueprintReadWrite, Category = "Grid")
 	TMap<FIntPoint, FS_TileData> GridTiles;
 	
