@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "RangeFinderLibrary.h"
 #include "StructsAndEnums/E_TileType.h"
+#include "StructsAndEnums/FS_IntPointArray.h"
 #include "RangeFinder.generated.h"
 
 class AGrid;
@@ -83,6 +84,9 @@ UPROPERTY()
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TArray<FS_PathfindingData> GetValidTileNeighbors(FIntPoint Index, TArray<ETileType> ValidTypes);
+	
+	UFUNCTION(BlueprintCallable)
+	TArray<FIntPoint> GetEffectAreaOrRange(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Range, EAE_SpellPattern Pattern, bool IgnoreLOS = false, bool IgnoreOrigin = false);
 #pragma endregion Functions
 #pragma region input variables
 	UPROPERTY(BlueprintReadWrite, Category="Input")

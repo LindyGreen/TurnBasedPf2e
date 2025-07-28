@@ -2,44 +2,42 @@
 #include "Grid.h"
 #include "Combatant.h"
 #include "LogTypes.h"
-#include "StructsAndEnums/FS_IntPointArray.h"
-#include "StructsAndEnums/FL_Spells_CPP.h"
-#include "RangeFinder.h"
 UTurnManagerComponent::UTurnManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-AGrid* UTurnManagerComponent::GetOwningGrid() const
+void UTurnManagerComponent::BeginPlay()
 {
-	return Cast<AGrid>(GetOwner());
+	Super::BeginPlay();
+
+	// Get Grid reference from owner
+	if (AActor* Owner = GetOwner()) GridReference = Cast<AGrid>(Owner);
 }
+
 
 void UTurnManagerComponent::InitializeCombat()
 {
-	if (AGrid* Grid = GetOwningGrid())
+	if (GridReference)
 	{
-		SpawnEnemies(Grid->EnemiesOnMapRowName); //This is currently implemented in blueprint
+		SpawnEnemies(GridReference->EnemiesOnMapRowName); //This is currently implemented in blueprint
 	}
-	//TODO in blueprint add the spawn logic to make them spawn with all assets
 }
 void UTurnManagerComponent::SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index, bool Force)
 {
-	if (!Combatant || !GetOwningGrid()) return;
+	if (!Combatant || !GridReference) return;
 	
 	// Check if we need to move the unit
 	if (Combatant->LocationIndex != Index || Force)
 	{
-		AGrid* Grid = GetOwningGrid();
-		
 		// Clear unit from current tile
-		if (FS_TileData* CurrentTile = Grid->GridTiles.Find(Combatant->LocationIndex))
+		if (FS_TileData* CurrentTile = GridReference->GridTiles.Find(Combatant->LocationIndex))
 		{
 			CurrentTile->UnitOnTile = nullptr;
 		}
 		
 		// Set unit on new tile
-		if (FS_TileData* NewTile = Grid->GridTiles.Find(Index))
+		if (FS_TileData* NewTile = GridReference->GridTiles.Find(Index))
 		{
 			NewTile->UnitOnTile = Combatant;
 			Combatant->LocationIndex = Index;
@@ -197,48 +195,7 @@ void UTurnManagerComponent::RemoveCombatant(ACombatant* CombatantToRemove)
 void UTurnManagerComponent::IncapacitateCombatant(ACombatant* CombatantToRemove)
 {//TODO after player/nonplayer characters are established
 }
-//Spells 
-TArray<FIntPoint> UTurnManagerComponent::GetSpellArea(FIntPoint Origin,
-	FIntPoint CasterLocation)
-{
-	//TODO Requires F_SpellDataTargeting which requires AREA AND PATTERN ENUMS, BECAUSE FUCK ME THATS WHY
-	//WHY THE FUCK I THOUGH MAKING A CRPG AS A SOLO WAS A GOOD IDEA? TODO MAKE AI make all those ENUMS AND STRUCTURES
-	return {};
-}
 
-TArray<FIntPoint> UTurnManagerComponent::GetEffectRange(uint8 Range,
-                                                        bool IgnoreLOS, bool IgnoreOrigin)
-{
-	AGrid* Grid = GetOwningGrid(); //probably should have made this a static property.//TODO cache GRID
-	URangeFinder* Rangefinder =
-Grid->GetComponentByClass<URangeFinder>();//TODO probably should Cache this too.
-	if (!Rangefinder)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No RangeFinder component found on Grid"));
-		return TArray<FIntPoint>();
-	}
-	//GENERATE POSSIBLE ARRAY
-	
-	FS_IntPointArray TempWrapper; //This is done because FS_IntPointArray isn't an int-point array. UGH.
-	TempWrapper.IntPointArray = Rangefinder->GeneratePossibleArray(FIntPoint(0,0),
-		CurrentCombatant->LocationIndex, Range,EAE_SpellPattern_Emanation, IgnoreOrigin);
-	//We found this way the emanation around the player, which is most abilities range.
-	
-	EffectRangeTEMP = Grid->RemoveObstacleTiles(TempWrapper);
-	//Remove Ones that are 'obstacle' or 'none' tiles.
-	//Check if LOS is ignored. Should be false because 
-	if (IgnoreLOS) //this is mostly a safety check.
-	{	UE_LOG(Log_TurnManager, Error, TEXT("GetEffectRange in Turn manager component somehow ignores LOS WTF"));
-		return{EffectRangeTEMP.IntPointArray};
-	}
-	EffectRangeTEMP =UFL_Spells_CPP::LineTraceSpells(EffectRangeTEMP, GetOwningGrid(), CurrentCombatant->LocationIndex);//
 
-	UE_LOG(Log_TurnManager, Log, TEXT("LineTraceSpells was most likely used and cleared array is about to be returned"));
-	return
-	{
-		EffectRangeTEMP.IntPointArray
-	};
-	
-}
 
 

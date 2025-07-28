@@ -19,26 +19,22 @@ AController_TurnBased::AController_TurnBased()
 void AController_TurnBased::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Find the Grid actor in the world
-	if (UWorld* World = GetWorld())
+}
+
+void AController_TurnBased::SetGridReference(AActor* NewGridActor)
+{
+	GridRef = Cast<AGrid>(NewGridActor);
+	if (GridRef)
 	{
-		GridRef = Cast<AGrid>(UGameplayStatics::GetActorOfClass(World, AGrid::StaticClass()));
-		if (!GridRef)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AController_TurnBased: Grid not found in world!"));
-		}
-		else
-		{
-			// Get TurnManager component from Grid
-			TurnManagerRef = GridRef->FindComponentByClass<UTurnManagerComponent>();
-			if (!TurnManagerRef)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("AController_TurnBased: TurnManager component not found on Grid!"));
-			}
-		}
+		TurnManagerRef =GridRef->FindComponentByClass<UTurnManagerComponent>();
+		// Any other grid-dependent setup
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetGridReference: Invalid Grid actor passed"));
 	}
 }
+
 
 void AController_TurnBased::UpdateTileUnderCursor(bool& WasHoverUpdated)
 {

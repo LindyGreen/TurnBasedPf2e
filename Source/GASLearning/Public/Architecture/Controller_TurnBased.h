@@ -36,6 +36,10 @@ public:
 	TObjectPtr<ACombatant> HoveredCombatant = nullptr;
 	UPROPERTY(BlueprintReadWrite, Category = "References")
 	FIntPoint HoveredTileIndex={-1,-1};
+	//Reference Setter
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void SetGridReference(AActor* NewGridRef);
+
 	// Input handling functions
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void UpdateTileUnderCursor(bool& WasHoverUpdated);

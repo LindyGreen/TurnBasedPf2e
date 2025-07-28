@@ -37,6 +37,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GridTileCount")
 	FVector TileSize;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ExposeOnSpawn=true), Category = "GridTileCount")
+	int32 TileCountX = 5;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ExposeOnSpawn=true), Category = "GridTileCount")
+	int32 TileCountY = 5;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GridTileCount")
 	double GridOffsetFromGround = 2.0;
 	

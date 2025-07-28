@@ -6,7 +6,7 @@
 #include "TurnManagerComponent.generated.h"
 class ACombatant;
 class URangeFinder;
-
+class AGrid;
 // Delegates for UI communication
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCombatStarted, const TArray<ACombatant*>&, SortedCombatants);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnChanged, ACombatant*, NewCurrentCombatant);
@@ -18,6 +18,11 @@ class GASLEARNING_API UTurnManagerComponent : public UActorComponent
 
 public:
 	UTurnManagerComponent();
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	TArray<TObjectPtr<ACombatant>> CombatantArray;//holds the array of all combatants in fight before sorting them in initiative, and after sorting.
 
@@ -39,11 +44,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
 	TObjectPtr<ACombatant> CurrentCombatant = nullptr;//pointer at the combatant who's the owner of Combatant Turn in Combatant Array (yes, it's overcomplicated for no reason)
 
-	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
-	FS_IntPointArray EffectRangeTEMP; //Temporary storage for effect ranges, this is used for grid mesh highlights
+	UPROPERTY(BlueprintReadWrite, Category = "Grid")
+	TObjectPtr<AGrid> GridReference;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
-	FS_IntPointArray EffectAreaTEMP; //Temporary storage for effect areas, this is used for grid mesh instance highlights
 
 	// UI Delegates
 	UPROPERTY(BlueprintAssignable, Category = "Combat Events")
@@ -55,11 +58,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Combat Events")
 	FOnCombatEnded OnCombatEnded;
-
-	// Helper to get owning Grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Grid")
-	class AGrid* GetOwningGrid() const;
-
+	
 	// Start combat and sort by initiative
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartCombat();
@@ -76,12 +75,6 @@ public:
 	void RemoveCombatant(ACombatant* CombatantToRemove);
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void IncapacitateCombatant(ACombatant* CombatantToRemove);
-//Spells
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	TArray<FIntPoint> GetEffectRange(uint8 Range, bool IgnoreLOS, bool IgnoreOrigin);
-	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	TArray<FIntPoint> GetSpellArea(FIntPoint Origin, FIntPoint CasterLocation);
 //Unit spawning
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void SetUnitOnGrid(ACombatant* Combatant, FIntPoint Index, bool Force);

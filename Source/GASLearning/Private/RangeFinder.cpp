@@ -5,6 +5,7 @@
 #include "Algo/Reverse.h"
 #include "LogTypes.h"
 #include "Grid.h"
+#include "StructsAndEnums/FL_Spells_CPP.h"
 // Sets default values for this component's properties
 URangeFinder::URangeFinder()
 {
@@ -27,7 +28,7 @@ void URangeFinder::BeginPlay()
 		GridReference = Cast<AGrid>(Owner);
 		if (!GridReference)
 		{
-			UE_LOG(LogTemp, Warning,
+			UE_LOG(LogTemp, Error,
 			       TEXT("URangeFinder::BeginPlay - Owner is not a Grid actor"));
 		}
 	}
@@ -618,4 +619,22 @@ TArray<FS_PathfindingData> URangeFinder::GetValidTileNeighbors(
 	} //for loop Orthogonal end.
 
 	return Result;
+}
+
+TArray<FIntPoint> URangeFinder::GetEffectAreaOrRange(FIntPoint OriginPoint, FIntPoint CasterLocation, uint8 Range, EAE_SpellPattern Pattern, bool IgnoreLOS, bool IgnoreOrigin)
+{
+	// Generate possible array using the specified pattern and origin
+	FS_IntPointArray TempWrapper;
+	TempWrapper.IntPointArray = GeneratePossibleArray(OriginPoint, CasterLocation, Range, Pattern, IgnoreOrigin);
+	
+	// Remove obstacle tiles
+	TempWrapper = GridReference->RemoveObstacleTiles(TempWrapper);
+	
+	// Apply line of sight filtering if not ignored (from caster's perspective)
+	if (!IgnoreLOS)
+	{
+		TempWrapper = UFL_Spells_CPP::LineTraceSpells(TempWrapper, GridReference, OriginPoint);
+	}
+
+	return TempWrapper.IntPointArray;
 }
