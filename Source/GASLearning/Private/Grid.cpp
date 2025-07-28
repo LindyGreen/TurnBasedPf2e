@@ -324,5 +324,17 @@ void AGrid::GenerateMovementPath(const FVector& StartLocation, const TArray<FInt
 	}
 }
 
+void AGrid::SetStartingArea(FIntPoint StartCornerParam, FIntPoint EndCornerParam)
+{
+	for (int32 X = StartCornerParam.X; X <= EndCornerParam.X; X++)
+	{
+		for (int32 Y = StartCornerParam.Y; Y <= EndCornerParam.Y; Y++)
+		{
+			FIntPoint CurrentTile(X, Y);
+			AddStateToTile(CurrentTile, ETileState::Selected);
+		}
+	}
+}
+
 
 

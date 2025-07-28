@@ -17,6 +17,16 @@
 - [ ] **Death animations** - PC death montage, AI ragdoll, stand up if not dead
 - [ ] **Basic spell VFX** - colored particles/spheres
 
+### SaveSystem and Spawn system
+- [ ] Create Blueprint SaveGame class with 4 individual FS_CompleteCharacterData slots (Character1, Character2, Character3, Character4)
+- [ ]Create Blueprint functions to save/load  character data to/from save slots
+- [ ] Design pre-combat initialization system that loads characters from save file
+- [ ] Create character placement logic on grid based on loaded data
+- [ ] Initialize ACombatant actors with loaded FS_CompleteCharacterData
+- [ ] Add validation for loaded character data (ensure all required fields exist)
+- [ ] Create fallback/default characters if save file doesn't exist or is corrupted
+- [ ] Add quest progress structure to SaveGame for future use
+
 ### UI/UX Polish
 - [ ] **Better ability icons** - replace placeholder art
 - [ ] **Clean up development buttons** in initiative tracker
@@ -27,7 +37,6 @@
 ### Ability Implementation
 
 - [ ] **CreateUniversalTemplate** - In progress
- 
 - [ ] **Implement basic melee attack** ability  - in progress
 - [ ] **Implement basic spell** ability      -    in progress
 - [ ] **Add ability cost validation** improvements

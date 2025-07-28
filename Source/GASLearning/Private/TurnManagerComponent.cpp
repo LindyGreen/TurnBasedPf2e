@@ -52,7 +52,8 @@ void UTurnManagerComponent::StartCombat() //StartInitiativeButtonActivates this.
 		UE_LOG(Log_TurnManager, Error, TEXT("CombatantArray is empty! Cannot start combat."));
 		return;
 	}
-	
+	//Clears Selected state from tiles
+	GridReference->ClearStateFromTiles(ETileState::Selected);
 	UE_LOG(Log_TurnManager, Display, TEXT("Starting combat with %d combatants"), CombatantArray.Num());
 	
 	// Create temporary initiative holder's MAP

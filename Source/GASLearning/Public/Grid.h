@@ -64,6 +64,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	TObjectPtr<UMovementSplineComponent> MovementSpline;
 
+	// Start and End points
+	UPROPERTY(BlueprintReadWrite, EditAnywhere,
+meta=(ExposeOnSpawn=true))
+	FIntPoint StartCorner;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere,
+	meta=(ExposeOnSpawn=true))
+	FIntPoint EndCorner;
 	// Functions
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Grid")
 	bool IsIndexValid(FIntPoint Index) const;
@@ -88,6 +96,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
 	FIntPoint GetIndexFromWorldLocation(FVector InputLocation);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void SetStartingArea(FIntPoint Start, FIntPoint End);
+
  	UFUNCTION(BlueprintCallable, Category = "Tile Indexing")
 	FIntPoint GetTileIndexUnderCursor();
 

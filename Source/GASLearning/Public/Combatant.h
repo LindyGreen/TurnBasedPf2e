@@ -78,8 +78,11 @@ public:
 	TObjectPtr<UPointLightComponent> InitiativeLight;
 	// Initiative, Actions, and Reaction are now in GAS CombatAttributeSet
 
-	UPROPERTY(BlueprintReadWrite, Category = "Initiative")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ExposeOnSpawn=true), Category = "Initiative")
 	FText CharacterName;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Initiative")
+	TObjectPtr<UTexture2D> CharacterPortrait;
 	//Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UCapsuleComponent> Capsule;
