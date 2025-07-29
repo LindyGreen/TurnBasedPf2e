@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/VerticalBox.h"
 #include "Components/HorizontalBox.h"
+#include "Components/TextBlock.h"
 #include "Combatant.h"
 #include "InitiativeTrackerWidget.generated.h"
 
@@ -31,6 +32,22 @@ public:
 	// SpendAction button
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<class UButton> SpendActionButton;
+
+	// EndTurn button
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UButton> EndTurnButton;
+
+	// RollInitiative button
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UButton> RollInitiativeButton;
+
+	// EndTurn text
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UTextBlock> TextEndTurn;
+
+	// RollInitiative text
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UTextBlock> TextRollInitiative;
 
 	// Ability hotbar container
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))

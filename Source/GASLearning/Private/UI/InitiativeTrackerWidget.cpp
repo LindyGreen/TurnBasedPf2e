@@ -6,6 +6,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "LogTypes.h"
 
 #include "GAS/CombatAttributeSet.h"
@@ -22,6 +23,17 @@ UInitiativeTrackerWidget::UInitiativeTrackerWidget(const FObjectInitializer& Obj
 void UInitiativeTrackerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	
+	// Set text for button labels
+	if (TextEndTurn)
+	{
+		TextEndTurn->SetText(FText::FromString(TEXT("End Turn")));
+	}
+	
+	if (TextRollInitiative)
+	{
+		TextRollInitiative->SetText(FText::FromString(TEXT("Roll Initiative")));
+	}
 	
 	UE_LOG(LogUI, Log, TEXT("InitiativeTrackerWidget: NativeConstruct called"));
 }
@@ -257,6 +269,12 @@ void UInitiativeTrackerWidget::CreateAbilityWidgetEntry(ACombatant* Combatant)
 		// Add to the hotbar
 		AbilityHotbar->AddChild(AbilityWidget);
 		
+	}
+	
+	// Add EndTurn button after all abilities
+	if (EndTurnButton)
+	{
+		AbilityHotbar->AddChild(EndTurnButton);
 	}
 }
 
