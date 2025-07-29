@@ -2,16 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/VerticalBox.h"
-#include "Components/HorizontalBox.h"
-#include "Components/TextBlock.h"
 #include "Combatant.h"
 #include "InitiativeTrackerWidget.generated.h"
-
+class UTextBlock;
 class UTurnManagerComponent;
 class UInitiativeEntryWidget;
 class UAbilityWidgetEntry;
-
+class UButton;
+class UHorizontalBox;
+class UVerticalBox;
 UCLASS(BlueprintType, Blueprintable)
 class GASLEARNING_API UInitiativeTrackerWidget : public UUserWidget
 {

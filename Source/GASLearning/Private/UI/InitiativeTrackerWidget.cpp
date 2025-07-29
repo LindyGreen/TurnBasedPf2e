@@ -8,7 +8,6 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "LogTypes.h"
-
 #include "GAS/CombatAttributeSet.h"
 #include "GAS/MyBaseGameplayAbility.h"
 #include "AbilitySystemComponent.h"

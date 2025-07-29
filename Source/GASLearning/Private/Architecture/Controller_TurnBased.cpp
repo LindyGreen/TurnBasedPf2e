@@ -7,6 +7,8 @@
 #include "Grid.h"
 #include "TurnManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
 
 AController_TurnBased::AController_TurnBased()
 {
@@ -19,6 +21,30 @@ AController_TurnBased::AController_TurnBased()
 void AController_TurnBased::BeginPlay()
 {
 	Super::BeginPlay();
+	{
+	EnableInput(this);
+	}
+	
+	// Set input mode to allow UI and game input
+	SetInputMode(FInputModeGameAndUI());
+	
+	// Add Input Mapping Context
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		if (InputMappingContext)
+		{
+			Subsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
+}
+
+void AController_TurnBased::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	// Call UpdateTileUnderCursor every frame
+	bool WasHoverUpdated = false;
+	UpdateTileUnderCursor(WasHoverUpdated);
 }
 
 void AController_TurnBased::SetGridReference(AActor* NewGridActor)
@@ -117,6 +143,9 @@ else //clear HoveredCombatant
 		{
 			GridRef->AddStateToTile(HoveredTileIndex, ETileState::Hovered);
 		}
+		
+		// Broadcast the tile hover change
+		OnHoveredTileUpdated.Broadcast(HoveredTileIndex);
 	}
 	
 }//end of updateTileUnderCursor
@@ -141,4 +170,42 @@ AActor* AController_TurnBased::GetUnitUnderCursor()
 		}
 	}
 	return nullptr;
+}
+
+// Enhanced Input setup
+void AController_TurnBased::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	
+	// Cast to Enhanced Input Component
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		// Bind Enhanced Input Actions
+		if (IALeftClick)
+		{
+			EnhancedInputComponent->BindAction(IALeftClick, ETriggerEvent::Triggered, this, &AController_TurnBased::OnLeftMouseButtonPressed);
+		}
+		
+		if (IARightClick) 
+		{
+			EnhancedInputComponent->BindAction(IARightClick, ETriggerEvent::Triggered, this, &AController_TurnBased::OnRightMouseButtonPressed);
+		}
+	}
+}
+
+// Enhanced Input callbacks
+void AController_TurnBased::OnLeftMouseButtonPressed(const FInputActionValue& Value)
+{
+	// Get the actor under cursor and current tile index
+	AActor* ClickedActor = GetUnitUnderCursor();
+	FIntPoint ClickedTileIndex = HoveredTileIndex;
+	
+	// Broadcast the click event with both tile and actor info
+	OnTileOrActorClicked.Broadcast(ClickedTileIndex, ClickedActor);
+}
+
+void AController_TurnBased::OnRightMouseButtonPressed(const FInputActionValue& Value)
+{
+	// Broadcast right mouse button event
+	OnRMB.Broadcast();
 }

@@ -4,6 +4,7 @@
 #include "Grid.h"
 #include "GAS/PF2eCombatLibrary.h"
 #include "GAS/CombatAttributeSet.h"
+#include "Architecture/Controller_TurnBased.h"
 #include "LogTypes.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -31,6 +32,7 @@ void UMyBaseGameplayAbility::SetCPPReferences()
 {
 	GridRef = Cast<AGrid>(UGameplayStatics::GetActorOfClass(UGameplayAbility::GetWorld(), AGrid::StaticClass()));
 	OwningCombatant = Cast<ACombatant>(GetAvatarActorFromActorInfo());
+	PlayerControllerRef = Cast<AController_TurnBased>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
 
 void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
@@ -196,4 +198,41 @@ bool UMyBaseGameplayAbility::HasLineOfSight(ACombatant* Target) const
 	// TODO: Implement line of sight checking with grid system
 	// For now, assume we always have line of sight
 	return true;
+}
+
+// Look-at system implementation
+void UMyBaseGameplayAbility::EnableCombatantLookAt()
+{
+	if (!OwningCombatant || !PlayerControllerRef)
+		return;
+		
+	// Enable look-at on combatant
+	OwningCombatant->EnableLookAt();
+	
+	// Bind to controller's tile hover delegate
+	PlayerControllerRef->OnHoveredTileUpdated.AddDynamic(this, &UMyBaseGameplayAbility::OnTileHoverChanged);
+}
+
+void UMyBaseGameplayAbility::DisableCombatantLookAt()
+{
+	if (!OwningCombatant || !PlayerControllerRef)
+		return;
+		
+	// Disable look-at on combatant
+	OwningCombatant->DisableLookAt();
+	
+	// Unbind from controller's tile hover delegate
+	PlayerControllerRef->OnHoveredTileUpdated.RemoveDynamic(this, &UMyBaseGameplayAbility::OnTileHoverChanged);
+}
+
+void UMyBaseGameplayAbility::OnTileHoverChanged(FIntPoint NewTileIndex)
+{
+	if (!OwningCombatant || !GridRef)
+		return;
+		
+	// Convert tile index to world location
+	FVector TileWorldLocation = GridRef->GridTiles.Find(NewTileIndex)->Transform.GetLocation();
+	
+	// Tell combatant to look at this location
+	OwningCombatant->SetLookAtLocation(TileWorldLocation);
 }

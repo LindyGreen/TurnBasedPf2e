@@ -154,4 +154,32 @@ public:
 	// Movement Path Generation
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void GenerateMovementPath(const TArray<FIntPoint>& PathIndices);
+
+	// Simple Look-At System (called by abilities)
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void EnableLookAt();
+	
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void DisableLookAt();
+	
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void SetLookAtLocation(FVector TargetLocation);
+
+private:
+	// Look-at variables
+	UPROPERTY()
+	bool bShouldLookAt = false;
+	
+	UPROPERTY()
+	FRotator OriginalRotation = FRotator::ZeroRotator;
+	
+	UPROPERTY()
+	FVector LookAtTargetLocation = FVector::ZeroVector;
+	
+	UPROPERTY(EditAnywhere, Category = "Targeting")
+	float LookAtSpeed = 5.0f;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 };

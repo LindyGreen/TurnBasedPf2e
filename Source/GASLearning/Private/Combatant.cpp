@@ -537,3 +537,37 @@ void ACombatant::GenerateMovementPath(const TArray<FIntPoint>& PathIndices)
 	
 	GridRef->GenerateMovementPath(CurrentLocation, PathIndices, CapsuleHalfHeight);
 }
+
+// Simple Look-At System
+void ACombatant::EnableLookAt()
+{
+	OriginalRotation = GetActorRotation();
+	bShouldLookAt = true;
+}
+
+void ACombatant::DisableLookAt()
+{
+	bShouldLookAt = false;
+}
+
+void ACombatant::SetLookAtLocation(FVector TargetLocation)
+{
+	LookAtTargetLocation = TargetLocation;
+}
+
+void ACombatant::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	// Simple look-at rotation (yaw only)
+	if (bShouldLookAt)
+	{
+		FVector Direction = (LookAtTargetLocation - GetActorLocation()).GetSafeNormal();
+		FRotator TargetRotation = Direction.Rotation();
+		TargetRotation.Pitch = 0.0f; // Only yaw rotation
+		TargetRotation.Roll = 0.0f;
+		
+		FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, LookAtSpeed);
+		SetActorRotation(NewRotation);
+	}
+}

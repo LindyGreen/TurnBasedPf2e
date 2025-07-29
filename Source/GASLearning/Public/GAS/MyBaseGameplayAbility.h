@@ -9,6 +9,7 @@
 #include "MyBaseGameplayAbility.generated.h"
 class AGrid;
 class UTexture2d;
+class AController_TurnBased;
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class GASLEARNING_API UMyBaseGameplayAbility : public UGameplayAbility
 {
@@ -16,6 +17,7 @@ class GASLEARNING_API UMyBaseGameplayAbility : public UGameplayAbility
 
 public:
 	UMyBaseGameplayAbility();
+	
 	//GridRef for ability highlighting
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	TObjectPtr<AGrid> GridRef;
@@ -158,4 +160,18 @@ public:
 	int32 CalculateDistanceToTarget(class ACombatant* Target) const;
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void SetCPPReferences();
+
+	// Look-at system for targeting
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void EnableCombatantLookAt();
+	
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void DisableCombatantLookAt();
+	// Look-at system variables
+	UPROPERTY(BlueprintReadOnly, Category = "References")
+	TObjectPtr<AController_TurnBased> PlayerControllerRef = nullptr;
+	
+	// Delegate callback for tile hover changes
+	UFUNCTION()
+	void OnTileHoverChanged(FIntPoint NewTileIndex);
 };
