@@ -42,9 +42,7 @@ TArray<FIntPoint> URangeFinder::GeneratePossibleArray(
 	switch (Enum)
 	{
 	case EAE_SpellPattern_Invalid:
-		UE_LOG(Log_Grid, Display,
-		       TEXT("URangeFinder::GeneratePossibleArray: Invalid Enum"));
-		break;
+		return TArray<FIntPoint>(GenerateCone(OriginPoint, CasterLocation, 1));
 	case EAE_SpellPattern_Burst:
 		return TArray<FIntPoint>(GenerateBurst(OriginPoint, Area));
 	case EAE_SPellPattern_Line:
@@ -56,7 +54,7 @@ TArray<FIntPoint> URangeFinder::GeneratePossibleArray(
 	case EAE_SpellPattern_Emanation:
 		return TArray<FIntPoint>(
 			GenerateEmanation(OriginPoint, Area, bIgnoreOrigin));
-		//SHOULD CHANGE TO CASTER LOCATION In DEV
+		//TODO SHOULD CHANGE TO CASTER LOCATION In DEV, low priority 
 	}
 	return TArray<FIntPoint>();
 }

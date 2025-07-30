@@ -17,7 +17,7 @@ class GASLEARNING_API UMyBaseGameplayAbility : public UGameplayAbility
 
 public:
 	UMyBaseGameplayAbility();
-	
+
 	//GridRef for ability highlighting
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	TObjectPtr<AGrid> GridRef;
@@ -131,6 +131,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Setup")
 	int32 GetActionCost() const { return ActionCost; }
 #pragma endregion Inlined Getters
+
+protected:
+	// Override to initialize references when ability is granted to ASC
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Setup")
 	int32 GetRange() const { return Range; }
 	UFUNCTION(BlueprintCallable, Category = "Setup")
@@ -158,9 +162,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	int32 CalculateDistanceToTarget(class ACombatant* Target) const;
-	UFUNCTION(BlueprintCallable, Category = "Setup")
-	void SetCPPReferences();
-
+	
 	// Look-at system for targeting
 	UFUNCTION(BlueprintCallable, Category = "Targeting")
 	void EnableCombatantLookAt();

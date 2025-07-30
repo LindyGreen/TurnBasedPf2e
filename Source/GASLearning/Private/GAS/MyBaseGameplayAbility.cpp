@@ -27,10 +27,12 @@ UMyBaseGameplayAbility::UMyBaseGameplayAbility()
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 }
 
-//Initializing parameters that are available only after character is granted.
-void UMyBaseGameplayAbility::SetCPPReferences()
+void UMyBaseGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	GridRef = Cast<AGrid>(UGameplayStatics::GetActorOfClass(UGameplayAbility::GetWorld(), AGrid::StaticClass()));
+	Super::OnGiveAbility(ActorInfo, Spec);
+	
+	// Now we can safely initialize references because the ability is granted to an ASC with a valid avatar
+	GridRef = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 	OwningCombatant = Cast<ACombatant>(GetAvatarActorFromActorInfo());
 	PlayerControllerRef = Cast<AController_TurnBased>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
@@ -231,7 +233,11 @@ void UMyBaseGameplayAbility::OnTileHoverChanged(FIntPoint NewTileIndex)
 		return;
 		
 	// Convert tile index to world location
-	FVector TileWorldLocation = GridRef->GridTiles.Find(NewTileIndex)->Transform.GetLocation();
+	const FS_TileData* FoundTile = GridRef->GridTiles.Find(NewTileIndex);
+	if (!FoundTile)
+		return;
+		
+	FVector TileWorldLocation = FoundTile->Transform.GetLocation();
 	
 	// Tell combatant to look at this location
 	OwningCombatant->SetLookAtLocation(TileWorldLocation);
