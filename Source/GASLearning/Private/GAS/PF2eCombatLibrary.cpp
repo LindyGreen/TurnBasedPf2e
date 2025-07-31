@@ -1,6 +1,8 @@
 #include "GAS/PF2eCombatLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "LogTypes.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayTagContainer.h"
 
 EDegreeOfSuccess UPF2eCombatLibrary::CalculateDegreeOfSuccess(int32 Roll, int32 DC, int32 D20Result)
 {
@@ -60,18 +62,18 @@ EDegreeOfSuccess UPF2eCombatLibrary::RollSkillCheck(int32 SkillBonus, int32 DC, 
 	return CalculateDegreeOfSuccess(TotalRoll, DC, D20Roll);
 }
 
-int32 UPF2eCombatLibrary::ApplyDamageMultiplier(int32 BaseDamage, EDegreeOfSuccess Result)
+float UPF2eCombatLibrary::ApplyDamageMultiplier(float BaseDamage, EDegreeOfSuccess Result)
 {
 	switch (Result)
 	{
 		case EDegreeOfSuccess::CriticalSuccess:
-			return 0; // No damage (for saves)
+			return 0.0f; // No damage (for saves)
 		case EDegreeOfSuccess::Success:
-			return BaseDamage / 2; // Half damage (for saves) or normal damage (for attacks)
+			return BaseDamage / 2.0f; // Half damage (for saves) or normal damage (for attacks)
 		case EDegreeOfSuccess::Failure:
 			return BaseDamage; // Full damage
 		case EDegreeOfSuccess::CriticalFailure:
-			return BaseDamage * 2; // Double damage
+			return BaseDamage * 2.0f; // Double damage
 		default:
 			return BaseDamage;
 	}
@@ -133,14 +135,17 @@ EDegreeOfSuccess UPF2eCombatLibrary::ApplyNaturalRollModifiers(EDegreeOfSuccess 
 	return BaseResult;
 }
 
-int32 UPF2eCombatLibrary::RollDamage(int32 DamageDie, int32 DamageDieCount, int32 DamageBonus)
+float UPF2eCombatLibrary::RollDamage(float DamageDie, float DamageDieCount, float DamageBonus)
 {
-	int32 TotalDamage = 0;
+	float TotalDamage = 0.0f;
 	
 	// Roll multiple dice (for striking runes, spell damage, etc.)
-	for (int32 i = 0; i < DamageDieCount; i++)
+	int32 DiceCount = FMath::RoundToInt(DamageDieCount);
+	int32 DieSize = FMath::RoundToInt(DamageDie);
+	
+	for (int32 i = 0; i < DiceCount; i++)
 	{
-		TotalDamage += UKismetMathLibrary::RandomIntegerInRange(1, DamageDie);
+		TotalDamage += static_cast<float>(UKismetMathLibrary::RandomIntegerInRange(1, DieSize));
 	}
 	
 	// Add flat damage bonus
@@ -169,4 +174,22 @@ EDegreeOfSuccess UPF2eCombatLibrary::RollAttackWithPenalty(int32 AttackBonus, in
 		D20Roll, AttackBonus, RangePenalty, TotalRoll, TargetAC, MaxDieRoll);
 	
 	return CalculateDegreeOfSuccess(TotalRoll, TargetAC, D20Roll);
+}
+
+float UPF2eCombatLibrary::CalculateMAPPenalty(UAbilitySystemComponent* ASC, bool bIsAgile)
+{
+	FGameplayTagContainer OwnedTags;
+	ASC->GetOwnedGameplayTags(OwnedTags);
+    	
+	// Check for MAP tags
+	if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2"))))
+	{
+		return bIsAgile ? 8.0f : 10.0f; // Third attack: -8 agile, -10 normal
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1"))))
+	{
+		return bIsAgile ? 4.0f : 5.0f; // Second attack: -4 agile, -5 normal
+	}
+	
+	return 0.0; // First attack: no penalty
 }

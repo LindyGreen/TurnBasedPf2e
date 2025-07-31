@@ -6,6 +6,7 @@
 #include "GAS/CombatAttributeSet.h"
 #include "Architecture/Controller_TurnBased.h"
 #include "LogTypes.h"
+#include "GameplayTagContainer.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -35,6 +36,7 @@ void UMyBaseGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Acto
 	GridRef = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 	OwningCombatant = Cast<ACombatant>(GetAvatarActorFromActorInfo());
 	PlayerControllerRef = Cast<AController_TurnBased>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	CachedASC = ActorInfo->AbilitySystemComponent.Get();
 }
 
 void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
@@ -64,37 +66,56 @@ void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
 }
 
 
-int32 UMyBaseGameplayAbility::RollAbilityDamage() const
+float UMyBaseGameplayAbility::RollAbilityDamage() const
 {
 	// For spells, use the spell's own damage dice
-	if (Category == EAbilityCategory::SpellAttack)
+	if (Category == EAbilityCategory::SpellAttack || Category == EAbilityCategory::Save)
 	{
-		return UPF2eCombatLibrary::RollDamage(BaseDamage, DamageDiceCount, 0);
+		return UPF2eCombatLibrary::RollDamage(BaseDamage, DamageDiceCount, 0.0f);
 	}
 	
-	// For attacks, use combatant's weapon damage from attributes
-	int32 DamageDie = OwningCombatant->CombatAttributes->GetDamageDie();
-	int32 DamageDieCount = OwningCombatant->CombatAttributes->GetDamageDieCount();
-	int32 DamageBonus = OwningCombatant->CombatAttributes->GetDamageBonus();
+	// For weapon attacks, start with weapon damage and apply ability modifiers
+	float WeaponDie = OwningCombatant->CombatAttributes->GetDamageDie();
+	float WeaponDiceCount = OwningCombatant->CombatAttributes->GetDamageDieCount();
+	float WeaponBonus = OwningCombatant->CombatAttributes->GetDamageBonus();
 	
-	return UPF2eCombatLibrary::RollDamage(DamageDie, DamageDieCount, DamageBonus);
+	// Apply ability damage modifiers
+	float TotalDiceCount = WeaponDiceCount + BonusDamageDice; // Extra dice (Power Attack)
+	float TotalBonus = WeaponBonus + BonusDamageFlat;        // Flat bonus
+	return UPF2eCombatLibrary::RollDamage(WeaponDie, TotalDiceCount, TotalBonus);
 }
 
-EDegreeOfSuccess UMyBaseGameplayAbility::RollAttack(int32 TargetAC, int32 RangePenalty) const
+EDegreeOfSuccess UMyBaseGameplayAbility::RollAbilityAttack(AActor* Target, float RangePenalty) const
 {
-	// Get attack bonus from combatant's attributes
+	// Calculate MAP penalty (need to pass bIsAgile parameter)
+	float MAPPenalty = UPF2eCombatLibrary::CalculateMAPPenalty(CachedASC, bIsAgile); // TODO: Add agile weapon support
+	UE_LOG(Log_Combat, Log, TEXT("MAP penalty: %f"), MAPPenalty);
+	// Get target's AC
+	ACombatant* TargetCombatant = Cast<ACombatant>(Target);
+	int32 TargetAC = static_cast<int32>(TargetCombatant->GetAbilitySystemComponent()->GetNumericAttribute(UCombatAttributeSet::GetACAttribute()));
+	//Add ternary operator to use spell attacks instead of physical ones
 	int32 AttackBonus = OwningCombatant->CombatAttributes->GetAttackBonus();
 	int32 MaxDieRoll = OwningCombatant->CombatAttributes->GetMaxDieRoll();
 	
-	// Use appropriate library function based on whether there's a range penalty
-	if (RangePenalty > 0)
+	// Combine range penalty and MAP penalty
+	int32 TotalPenalty = static_cast<int32>(RangePenalty + MAPPenalty);
+	
+	// Roll the attack
+	EDegreeOfSuccess Result;
+	if (TotalPenalty > 0)
 	{
-		return UPF2eCombatLibrary::RollAttackWithPenalty(AttackBonus, TargetAC, RangePenalty, MaxDieRoll);
+		Result = UPF2eCombatLibrary::RollAttackWithPenalty(AttackBonus, static_cast<int32>(TargetAC), TotalPenalty, MaxDieRoll);
 	}
 	else
 	{
-		return UPF2eCombatLibrary::RollAttack(AttackBonus, TargetAC, MaxDieRoll);
+		Result = UPF2eCombatLibrary::RollAttack(AttackBonus, static_cast<int32>(TargetAC), MaxDieRoll);
 	}
+	
+	// Apply MAP tags after rolling attack
+	ApplyMAPTags();
+	
+	
+	return Result;
 }
 
 EDegreeOfSuccess UMyBaseGameplayAbility::RollSavingThrow(int32 TargetSaveBonus) const
@@ -241,4 +262,27 @@ void UMyBaseGameplayAbility::OnTileHoverChanged(FIntPoint NewTileIndex)
 	
 	// Tell combatant to look at this location
 	OwningCombatant->SetLookAtLocation(TileWorldLocation);
+}
+
+void UMyBaseGameplayAbility::ApplyMAPTags() const
+{
+	if (!CachedASC)
+		return;
+	
+	FGameplayTagContainer OwnedTags;
+	CachedASC->GetOwnedGameplayTags(OwnedTags);
+	
+	// Add MAP tags based on current state
+	if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1"))))
+	{
+		// Already have MAP.1, upgrade to MAP.2
+		CachedASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1")));
+		CachedASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2")));
+	}
+	else if (!OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2"))))
+	{
+		// First attack, add MAP.1
+		CachedASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1")));
+	}
+	// If already have MAP.2, don't add more tags
 }

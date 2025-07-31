@@ -228,79 +228,83 @@ void ACombatant::EndTurnEffects()
 		FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
 	DegradingConditions.AddTag(
 		FGameplayTag::RequestGameplayTag("Conditions.Frightened.3"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.MAP.1"));
+	DegradingConditions.AddTag(
+		FGameplayTag::RequestGameplayTag("Conditions.MAP.2"));
 
-	// Check if combatant has any degrading conditions
-	if (Conditions.HasAny(DegradingConditions))
+	// Check ASC for degrading conditions and handle them
+	if (AbilitySystemComponent)
 	{
+		FGameplayTagContainer OwnedTags;
+		AbilitySystemComponent->GetOwnedGameplayTags(OwnedTags);
+		
+		// MAP removal from ASC
+		if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.MAP.1")))
+			AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("Conditions.MAP.1"));
+		if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.MAP.2")))
+			AbilitySystemComponent->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag("Conditions.MAP.2"));
+		
 		// Clumsy conditions
-		if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1")))
+		if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
 		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2")))
+		else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
-			Conditions.AddTag(
+			AbilitySystemComponent->AddLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.1"));
 		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3")))
+		else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.3"));
-			Conditions.AddTag(
+			AbilitySystemComponent->AddLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Clumsy.2"));
 		}
 
 		// Enfeebled conditions
-		if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1")))
+		if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
 		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2")))
+		else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
-			Conditions.AddTag(
+			AbilitySystemComponent->AddLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.1"));
 		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3")))
+		else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.3"));
-			Conditions.AddTag(
+			AbilitySystemComponent->AddLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Enfeebled.2"));
 		}
 
 		// Frightened conditions
-		if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Frightened.1")))
+		if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Frightened.1")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
 		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Frightened.2")))
+		else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Frightened.2")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
-			Conditions.AddTag(
+			AbilitySystemComponent->AddLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Frightened.1"));
 		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Frightened.3")))
+		else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Frightened.3")))
 		{
-			Conditions.RemoveTag(
+			AbilitySystemComponent->RemoveLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Frightened.3"));
-			Conditions.AddTag(
+			AbilitySystemComponent->AddLooseGameplayTag(
 				FGameplayTag::RequestGameplayTag("Conditions.Frightened.2"));
 		}
 	}

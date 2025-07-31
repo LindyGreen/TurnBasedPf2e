@@ -37,13 +37,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
 	static EDegreeOfSuccess RollAttackWithPenalty(int32 AttackBonus, int32 TargetAC, int32 RangePenalty, int32 MaxDieRoll = 20);
 
+	// Multiple Attack Penalty calculation
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")
+	static float CalculateMAPPenalty(class UAbilitySystemComponent* ASC, bool bIsAgile);
+
 	// Damage calculation helpers
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")
-	static int32 ApplyDamageMultiplier(int32 BaseDamage, EDegreeOfSuccess Result);
+	static float ApplyDamageMultiplier(float BaseDamage, EDegreeOfSuccess Result);
 
 	// General damage rolling function
 	UFUNCTION(BlueprintCallable, Category = "PF2e Combat")
-	static int32 RollDamage(int32 DamageDie, int32 DamageDieCount, int32 DamageBonus = 0);
+	static float RollDamage(float DamageDie, float DamageDieCount, float DamageBonus = 0.0f);
 
 	// Difficulty control - MaxDieRoll for controlling crits
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PF2e Combat")

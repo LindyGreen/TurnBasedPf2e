@@ -25,6 +25,10 @@ public:
 	// Cached owning combatant reference
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	TObjectPtr<class ACombatant> OwningCombatant;
+
+	// Cached ASC reference
+	UPROPERTY(BlueprintReadOnly, Category = "References")
+	TObjectPtr<UAbilitySystemComponent> CachedASC;
 	// UI Data for ability widgets
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	FText DisplayName;
@@ -75,20 +79,32 @@ public:
 	int32 MaxTargets = 1; // Maximum number of targets for MultipleTarget spells
 
 	// Damage properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 BaseDamage = 6; // Base damage die
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	int32 DamageDiceCount = 2; // Number of dice (e.g., 2d6)
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
+	int32 BaseDamage = 6; // Base damage die (for spells)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
 	int32 SaveDC = 15; // Spell save DC
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
+	int32 DamageDiceCount = 2; // Number of dice (for spells, e.g., 2d6)
+	
+	// Weapon ability modifiers
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Martial")
+	int32 BonusDamageDice = 0; // Extra damage dice (e.g., Power Attack)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Martial")
+	int32 BonusDamageFlat = 0; // Flat damage bonus
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Martial")
+	bool bCanSneakAttack = false; // Can this ability sneak attack?
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Martial")
+	bool bIsAgile = false;
+	
 	// Ranged attack properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
 	int32 MaxRange = 30; // Maximum range in squares
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
 	int32 LongRangeThreshold = 10; // Range where penalties start
 
 	// Targeting system
@@ -142,10 +158,10 @@ protected:
 
 	// Universal combat functions
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	int32 RollAbilityDamage() const;
+	float RollAbilityDamage() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	EDegreeOfSuccess RollAttack(int32 TargetAC, int32 RangePenalty = 0) const;
+	EDegreeOfSuccess RollAbilityAttack(AActor* Target, float RangePenalty = 0) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	EDegreeOfSuccess RollSavingThrow(int32 TargetSaveBonus = 5) const;
@@ -176,4 +192,12 @@ protected:
 	// Delegate callback for tile hover changes
 	UFUNCTION()
 	void OnTileHoverChanged(FIntPoint NewTileIndex);
+
+	// Multiple Attack Penalty system
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ApplyMAPTags() const;
+
+
+	// Cached target AC for attack rolls (set by implementation)
+	mutable float TargetAC = 10;
 };
