@@ -272,17 +272,18 @@ void UMyBaseGameplayAbility::ApplyMAPTags() const
 	FGameplayTagContainer OwnedTags;
 	CachedASC->GetOwnedGameplayTags(OwnedTags);
 	
-	// Add MAP tags based on current state
-	if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1"))))
+	// Add MAP tags based on current state - this sets up penalty for NEXT attack
+	if (!OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1"))) && 
+		!OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2"))))
 	{
-		// Already have MAP.1, upgrade to MAP.2
+		// No MAP tags present, this is first attack - add MAP.1 for second attack
+		CachedASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1")));
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1"))))
+	{
+		// MAP.1 present, this is second attack - upgrade to MAP.2 for third attack
 		CachedASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1")));
 		CachedASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2")));
 	}
-	else if (!OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2"))))
-	{
-		// First attack, add MAP.1
-		CachedASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.1")));
-	}
-	// If already have MAP.2, don't add more tags
+	// If MAP.2 is present, this is third+ attack - leave MAP.2 (max penalty reached)
 }
