@@ -120,9 +120,12 @@ void ACombatant::CancelAllActiveAbilities()
 
 void ACombatant::BeginTurn()
 {
+
+	FGameplayTagContainer OwnedTags;
+	AbilitySystemComponent->GetOwnedGameplayTags(OwnedTags);
+
 	// Check if incapacitated - skip turn entirely
-	if (Conditions.HasTag(
-		FGameplayTag::RequestGameplayTag("Conditions.Incapacitated")))
+	if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Incapacitated")))
 	{
 		//TODO Put Death Saving Throws Here, when those will be designed
 		EndTurnEffects();
@@ -132,51 +135,36 @@ void ACombatant::BeginTurn()
 	// Default actions per turn
 	int32 ActionsToGive = 3;
 
-	// Check for condition modifiers
-	FGameplayTagContainer ActionMods;
-	ActionMods.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
-	ActionMods.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Slowed"));
-	ActionMods.AddTag(FGameplayTag::RequestGameplayTag("Conditions.Quickened"));
-
-	if (Conditions.HasAny(ActionMods))
+	// Check for condition modifiers using ASC
+	if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Stunned.1")))
 	{
-		// Check specific conditions and modify actions
-		if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Stunned.1")))
-		{
-			ActionsToGive = 2;
-			Conditions.RemoveTag(
-				FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
-		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Stunned.2")))
-		{
-			ActionsToGive = 1;
-			Conditions.RemoveTag(
-				FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
-		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Stunned.3")))
-		{
-			ActionsToGive = 0;
-			Conditions.RemoveTag(
-				FGameplayTag::RequestGameplayTag("Conditions.Stunned"));
-		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Slowed.1")))
-		{
-			ActionsToGive = 2;
-		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Slowed.2")))
-		{
-			ActionsToGive = 1;
-		}
-		else if (Conditions.HasTag(
-			FGameplayTag::RequestGameplayTag("Conditions.Quickened")))
-		{
-			ActionsToGive = 4;
-		}
+		ActionsToGive = 2;
+		AbilitySystemComponent->RemoveLooseGameplayTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Stunned.1"));
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Stunned.2")))
+	{
+		ActionsToGive = 1;
+		AbilitySystemComponent->RemoveLooseGameplayTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Stunned.2"));
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Stunned.3")))
+	{
+		ActionsToGive = 0;
+		AbilitySystemComponent->RemoveLooseGameplayTag(
+			FGameplayTag::RequestGameplayTag("Conditions.Stunned.3"));
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Slowed.1")))
+	{
+		ActionsToGive = 2;
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Slowed.2")))
+	{
+		ActionsToGive = 1;
+	}
+	else if (OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Quickened")))
+	{
+		ActionsToGive = 4;
 	}
 
 	// Set actions in GAS - TurnManager will be informed via delegate
@@ -193,9 +181,8 @@ void ACombatant::BeginTurn()
 		CombatAttributes->OnActionsRemainingChanged.Broadcast(0, ActionsToGive);
 	}
 
-	// End turn immediately if no actions
-	if (ActionsToGive == 0 || Conditions.HasTag(
-		FGameplayTag::RequestGameplayTag("Conditions.Stunned")))
+	// End turn immediately if no actions or stunned
+	if (ActionsToGive == 0 || OwnedTags.HasTagExact(FGameplayTag::RequestGameplayTag("Conditions.Stunned.3")))
 	{
 		EndTurnEffects();
 	}
