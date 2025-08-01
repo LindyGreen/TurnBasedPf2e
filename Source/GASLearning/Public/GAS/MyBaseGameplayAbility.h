@@ -5,6 +5,8 @@
 #include "StructsAndEnums/EAbilityVariantType.h"
 #include "StructsAndEnums/EAbilityCategory.h"
 #include "StructsAndEnums/ESpellArea.h"
+#include "StructsAndEnums/E_TileState.h"
+#include "RangeFinderLibrary.h"
 #include "GAS/PF2eCombatLibrary.h"
 #include "MyBaseGameplayAbility.generated.h"
 class AGrid;
@@ -29,6 +31,10 @@ public:
 	// Cached ASC reference
 	UPROPERTY(BlueprintReadOnly, Category = "References")
 	TObjectPtr<UAbilitySystemComponent> CachedASC;
+	
+	// Cached RangeFinder reference
+	UPROPERTY(BlueprintReadOnly, Category = "References")
+	TObjectPtr<class URangeFinder> RangeFinderRef;
 	// UI Data for ability widgets
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	FText DisplayName;
@@ -79,6 +85,9 @@ public:
 	int32 MaxTargets = 1; // Maximum number of targets for MultipleTarget spells
 
 	// Damage properties
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage")
+	FGameplayTag DamageType; // Damage type like "Damage.Physical.Slashing", onle 1 per abiltiy for simplicity
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
 	int32 BaseDamage = 6; // Base damage die (for spells)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spell")
@@ -100,6 +109,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Martial")
 	bool bIsAgile = false;
 	
+	// Weapon traits
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Traits")
+	bool bHasDeadlyTrait = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Traits", meta = (EditCondition = "bHasDeadlyTrait"))
+	int32 DeadlyDieSize = 6; // d6, d8, d10, d12
+	
 	// Ranged attack properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
 	int32 MaxRange = 30; // Maximum range in squares
@@ -113,6 +129,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Targeting")
 	FIntPoint CurrentHoveredTile = FIntPoint(-1, -1);
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Targeting")
+	TArray<FIntPoint> TargetedTiles;
 
 	// Animation montages
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
@@ -197,6 +216,20 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ApplyMAPTags() const;
 
+	// New damage system using ExecutionCalculation
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ApplyDamageToTarget(class ACombatant* Target, float DamageAmount, bool bIsCriticalHit = false);
+	
+	// Aiming/Targeting system
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void StartAimingStage();
+	
+	UFUNCTION(BlueprintCallable, Category = "Targeting")
+	void GenerateAffectedTilesForAIEAndSingleSpells(FIntPoint OriginPoint);
+
+	// Reference to the damage GameplayEffect class (set in Blueprint)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<class UGameplayEffect> DamageGameplayEffectClass;
 
 	// Cached target AC for attack rolls (set by implementation)
 	mutable float TargetAC = 10;

@@ -7,6 +7,7 @@
 #include "Architecture/Controller_TurnBased.h"
 #include "LogTypes.h"
 #include "GameplayTagContainer.h"
+#include "RangeFinder.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -37,6 +38,12 @@ void UMyBaseGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Acto
 	OwningCombatant = Cast<ACombatant>(GetAvatarActorFromActorInfo());
 	PlayerControllerRef = Cast<AController_TurnBased>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	CachedASC = ActorInfo->AbilitySystemComponent.Get();
+	
+	// Get RangeFinder from Grid (Blueprint adds this component)
+	if (GridRef)
+	{
+		RangeFinderRef = GridRef->FindComponentByClass<URangeFinder>();
+	}
 }
 
 void UMyBaseGameplayAbility::CancelAllOtherActiveAbilities()
@@ -286,4 +293,164 @@ void UMyBaseGameplayAbility::ApplyMAPTags() const
 		CachedASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Conditions.MAP.2")));
 	}
 	// If MAP.2 is present, this is third+ attack - leave MAP.2 (max penalty reached)
+}
+
+void UMyBaseGameplayAbility::ApplyDamageToTarget(ACombatant* Target, float DamageAmount, bool bIsCriticalHit)
+{
+	if (!Target || !DamageGameplayEffectClass)
+	{
+		UE_LOG(Log_Combat, Warning, TEXT("ApplyDamageToTarget: Missing target or damage GameplayEffect class"));
+		return;
+	}
+
+	UAbilitySystemComponent* TargetASC = Target->GetAbilitySystemComponent();
+	if (!TargetASC)
+	{
+		UE_LOG(Log_Combat, Warning, TEXT("ApplyDamageToTarget: Target has no AbilitySystemComponent"));
+		return;
+	}
+
+	// Create the damage effect spec
+	FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageGameplayEffectClass);
+	if (!DamageSpecHandle.IsValid())
+	{
+		UE_LOG(Log_Combat, Error, TEXT("ApplyDamageToTarget: Failed to create GameplayEffect spec"));
+		return;
+	}
+
+	FGameplayEffectSpec* DamageSpec = DamageSpecHandle.Data.Get();
+	
+	// Set damage amount via SetByCaller
+	const FGameplayTag DamageDataTag = FGameplayTag::RequestGameplayTag(FName("Data.Damage"));
+	DamageSpec->SetSetByCallerMagnitude(DamageDataTag, DamageAmount);
+	
+	// Add damage type tag
+	if (DamageType.IsValid())
+	{
+		DamageSpec->AddDynamicAssetTag(DamageType);
+	}
+	else
+	{
+		// Default to untyped if no damage type set
+		DamageSpec->AddDynamicAssetTag(FGameplayTag::RequestGameplayTag(FName("Damage.Untyped")));
+	}
+	
+	
+	// Add critical hit tag if this is a crit
+	if (bIsCriticalHit)
+	{
+		const FGameplayTag CritTag = FGameplayTag::RequestGameplayTag(FName("Effect.CriticalHit"));
+		DamageSpec->AddDynamicAssetTag(CritTag);
+	}
+	
+	// Add deadly trait if weapon has it
+	if (bHasDeadlyTrait)
+	{
+		FGameplayTag DeadlyTag;
+		switch (DeadlyDieSize)
+		{
+			case 6:
+				DeadlyTag = FGameplayTag::RequestGameplayTag(FName("Weapon.Trait.Deadly.d6"));
+				break;
+			case 8:
+				DeadlyTag = FGameplayTag::RequestGameplayTag(FName("Weapon.Trait.Deadly.d8"));
+				break;
+			case 10:
+				DeadlyTag = FGameplayTag::RequestGameplayTag(FName("Weapon.Trait.Deadly.d10"));
+				break;
+			case 12:
+				DeadlyTag = FGameplayTag::RequestGameplayTag(FName("Weapon.Trait.Deadly.d12"));
+				break;
+			default:
+				DeadlyTag = FGameplayTag::RequestGameplayTag(FName("Weapon.Trait.Deadly.d6")); // Default to d6
+				break;
+		}
+		
+		if (DeadlyTag.IsValid())
+		{
+			DamageSpec->AddDynamicAssetTag(DeadlyTag);
+		}
+	}
+	
+	// Apply the damage effect to the target
+	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DamageSpec, TargetASC);
+	
+	UE_LOG(Log_Combat, Log, TEXT("Applied %f %s damage to %s (Crit: %s)"), 
+		DamageAmount, 
+		DamageType.IsValid() ? *DamageType.ToString() : TEXT("Untyped"),
+		*Target->GetName(), 
+		bIsCriticalHit ? TEXT("Yes") : TEXT("No"));
+}
+
+void UMyBaseGameplayAbility::StartAimingStage()
+{
+
+	
+	// Clear previous "IsInRange" states from all tiles
+	GridRef->ClearStateFromTiles(ETileState::IsInRange);
+	
+	// Get valid tiles for this ability using emanation pattern
+	FIntPoint CasterLocation = OwningCombatant->LocationIndex;
+	TArray<FIntPoint> ValidTiles = RangeFinderRef->GetEffectAreaOrRange(
+		CasterLocation,           // OriginPoint
+		CasterLocation,           // CasterLocation
+		Range,                    // Range
+		EAE_SpellPattern_Emanation, // Pattern - always emanation
+		!bRequiresTarget,         // IgnoreLOS
+		!bCanTargetSelf           // IgnoreOrigin
+	);
+	
+	// Mark all valid tiles as "IsInRange"
+	for (const FIntPoint& TileIndex : ValidTiles)
+	{
+		GridRef->AddStateToTile(TileIndex, ETileState::IsInRange);
+	}
+	
+	// Set targeting flag
+	bIsTargeting = true;
+	
+	UE_LOG(LogTemp, Log, TEXT("StartAimingStage: Highlighted %d tiles for ability %s"), 
+		ValidTiles.Num(), *GetAbilityDisplayName().ToString());
+	EnableCombatantLookAt();
+}
+
+void UMyBaseGameplayAbility::GenerateAffectedTilesForAIEAndSingleSpells(FIntPoint OriginPoint)
+{
+	// Determine spell pattern based on AreaType
+	EAE_SpellPattern SpellPattern;
+	switch (AreaType)
+	{
+		case ESpellArea::SingleTarget:
+		case ESpellArea::MultipleTargets:
+			SpellPattern = EAE_SpellPattern_Invalid; // Debug pattern for single/multi target
+			break;
+		case ESpellArea::Line:
+			SpellPattern = EAE_SPellPattern_Line;
+			break;
+		case ESpellArea::Cone:
+			SpellPattern = EAE_SpellPattern_Cone;
+			break;
+		case ESpellArea::Burst:
+			SpellPattern = EAE_SpellPattern_Burst;
+			break;
+		case ESpellArea::SelfOrEmanation:
+			SpellPattern = EAE_SpellPattern_Emanation;
+			break;
+		default:
+			SpellPattern = EAE_SpellPattern_Invalid;
+			break;
+	}
+	
+	// Get caster location
+	FIntPoint CasterLocation = OwningCombatant->LocationIndex;
+	
+	// Call RangeFinder to get affected tiles and store in member variable
+	TargetedTiles = RangeFinderRef->GetEffectAreaOrRange(
+		OriginPoint,     // Origin
+		CasterLocation,  // Caster location
+		AreaSize,        // Use AreaSize as Range
+		SpellPattern,    // Pattern based on AreaType
+		false,           // IgnoreLOS = false
+		false            // IgnoreOrigin = false
+	);
 }

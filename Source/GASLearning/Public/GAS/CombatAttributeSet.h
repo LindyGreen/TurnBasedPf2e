@@ -129,4 +129,122 @@ public:
 	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, MaxDieRoll);
 
 #pragma endregion AttackAndDamage
+
+#pragma region MetaAttributes
+	// Meta Attributes for damage processing (not replicated)
+	// These are temporary values processed in PostGameplayEffectExecute
+	UPROPERTY()
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, IncomingDamage);
+
+	UPROPERTY()
+	FGameplayAttributeData IncomingHealing;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, IncomingHealing);
+
+#pragma endregion MetaAttributes
+
+#pragma region ResistancesAndWeaknesses
+	// Physical Damage Resistances
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceBludgeoning;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceBludgeoning);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistancePiercing;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistancePiercing);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceSlashing;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceSlashing);
+
+	// Energy Damage Resistances
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceFire;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceFire);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceCold;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceCold);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceElectricity;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceElectricity);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceAcid;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceAcid);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceSonic;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceSonic);
+
+	// Other Damage Resistances
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceForce;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceForce);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceNecrotic;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceNecrotic);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistancePoison;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistancePoison);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData ResistanceMental;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, ResistanceMental);
+
+	// Physical Damage Weaknesses
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessBludgeoning;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessBludgeoning);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessPiercing;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessPiercing);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessSlashing;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessSlashing);
+
+	// Energy Damage Weaknesses
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessFire;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessFire);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessCold;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessCold);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessElectricity;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessElectricity);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessAcid;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessAcid);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessSonic;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessSonic);
+
+	// Other Damage Weaknesses
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessForce;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessForce);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessNecrotic;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessNecrotic);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessPoison;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessPoison);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FGameplayAttributeData WeaknessMental;
+	ATTRIBUTE_ACCESSORS(UCombatAttributeSet, WeaknessMental);
+
+#pragma endregion ResistancesAndWeaknesses
 };

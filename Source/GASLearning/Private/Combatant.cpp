@@ -4,6 +4,7 @@
 #include "Combatant.h"
 #include "TurnManagerComponent.h"
 #include "Grid.h"
+#include "GAS/MyBaseGameplayAbility.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
@@ -514,6 +515,42 @@ void ACombatant::InitializeCombatAttributes(const FS_CombatAttributes& CombatAtt
 	UE_LOG(LogTemp, Log, TEXT("Combat attributes initialized - Health: %f/%f, AC: %f, MaxDieRoll: %f"), 
 		CombatAttributes->GetHealth(), CombatAttributes->GetMaxHealth(), 
 		CombatAttributes->GetAC(), (float)CombatAttributes->GetMaxDieRoll());
+}
+
+void ACombatant::InitStartingEffectsAndAbilities(const TArray<TSubclassOf<UMyBaseGameplayAbility>>& StartingAbilities, const TArray<TSubclassOf<UGameplayEffect>>& StartingEffects)
+{
+	if (!AbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InitStartingEffectsAndAbilities: ASC is null"));
+		return;
+	}
+
+	// Grant starting abilities
+	for (const TSubclassOf<UMyBaseGameplayAbility>& AbilityClass : StartingAbilities)
+	{
+		if (AbilityClass)
+		{
+			FGameplayAbilitySpec AbilitySpec(TSubclassOf<UGameplayAbility>(AbilityClass), 1, INDEX_NONE);
+			AbilitySystemComponent->GiveAbility(AbilitySpec);
+		}
+	}
+
+	// Apply starting effects (resistances, buffs, etc.)
+	for (const TSubclassOf<UGameplayEffect>& EffectClass : StartingEffects)
+	{
+		if (EffectClass)
+		{
+			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+			EffectContext.AddSourceObject(this);
+			
+			FGameplayEffectSpecHandle EffectSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.0f, EffectContext);
+			if (EffectSpecHandle.IsValid())
+			{
+				AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+				UE_LOG(LogTemp, Log, TEXT("Applied starting effect: %s"), *EffectClass->GetName());
+			}
+		}
+	}
 }
 
 void ACombatant::GenerateMovementPath(const TArray<FIntPoint>& PathIndices)

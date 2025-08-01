@@ -51,5 +51,42 @@ void UCombatAttributeSet::PostGameplayEffectExecute(
 		SetReactionAvailable(FMath::Clamp(GetReactionAvailable(), 0, 1));
 		OnReactionAvailableChanged.Broadcast(Data.EvaluatedData.Magnitude, GetReactionAvailable());
 	}
+	//META ATTRIBUTES
+	else if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		// IncomingDamage Meta Attribute - process and apply to Health
+		const float DamageAmount = GetIncomingDamage();
+		
+		// Apply damage to health (could subtract from shields first if we had them)
+		const float NewHealth = FMath::Max(0.0f, GetHealth() - DamageAmount);
+		SetHealth(NewHealth);
+		
+		// Reset the meta attribute
+		SetIncomingDamage(0.0f);
+		
+		// Broadcast health change
+		OnHealthChanged.Broadcast(-DamageAmount, NewHealth);
+		
+		UE_LOG(Log_Combat, Log, TEXT("Applied %f damage. Health: %f -> %f"), 
+			DamageAmount, GetHealth() + DamageAmount, NewHealth);
+	}
+	else if (Data.EvaluatedData.Attribute == GetIncomingHealingAttribute())
+	{
+		// IncomingHealing Meta Attribute - process and apply to Health
+		const float HealAmount = GetIncomingHealing();
+		
+		// Apply healing to health (clamped to MaxHealth)
+		const float NewHealth = FMath::Min(GetMaxHealth(), GetHealth() + HealAmount);
+		SetHealth(NewHealth);
+		
+		// Reset the meta attribute
+		SetIncomingHealing(0.0f);
+		
+		// Broadcast health change
+		OnHealthChanged.Broadcast(HealAmount, NewHealth);
+		
+		UE_LOG(Log_Combat, Log, TEXT("Applied %f healing. Health: %f -> %f"), 
+			HealAmount, GetHealth() - HealAmount, NewHealth);
+	}
 
 }

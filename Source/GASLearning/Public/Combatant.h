@@ -17,6 +17,8 @@ class UCapsuleComponent;
 class UAbilitySystemComponent;
 class UCombatAttributeSet;
 class UFloatingPawnMovement;
+class UMyBaseGameplayAbility;
+class UGameplayEffect;
 
 UCLASS()
 class GASLEARNING_API ACombatant : public APawn, public IAbilitySystemInterface
@@ -124,6 +126,11 @@ public:
 	// Bulk initialization from combat attributes struct
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	void InitializeCombatAttributes(const FS_CombatAttributes& CombatAttributesData);
+
+	// Initialize starting GameplayAbilities and GameplayEffects for this combatant
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void InitStartingEffectsAndAbilities(const TArray<TSubclassOf<UMyBaseGameplayAbility>>& StartingAbilities, const TArray<TSubclassOf<UGameplayEffect>>& StartingEffects);
+
 #pragma region CombatAttributeSet handlers
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void HandleHealthChange(float Magnitude, float NewHealth);
