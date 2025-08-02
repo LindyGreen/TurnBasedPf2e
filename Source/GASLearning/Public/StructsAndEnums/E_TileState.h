@@ -12,6 +12,8 @@ enum class ETileState : uint8
 	Hovered      UMETA(DisplayName = "Hovered"),
 	Selected     UMETA(DisplayName = "Selected"),
 	IsReachable  UMETA(DisplayName = "Is Reachable"),
+	IsReachable2 UMETA(DisplayName = "Is 2A Reachable"),
 	IsInRange    UMETA(DisplayName = "Is In Range"),
+	IsInRange2   UMETA(DisplayName = "Is In 2n Range"),
 	IsSpellAOE   UMETA(DisplayName = "Is Spell AOE")
 };

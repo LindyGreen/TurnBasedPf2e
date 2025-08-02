@@ -115,13 +115,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Traits", meta = (EditCondition = "bHasDeadlyTrait"))
 	int32 DeadlyDieSize = 6; // d6, d8, d10, d12
-	
-	// Ranged attack properties
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
-	int32 MaxRange = 30; // Maximum range in squares
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ranged")
-	int32 LongRangeThreshold = 10; // Range where penalties start
 
 	// Targeting system
 	UPROPERTY(BlueprintReadWrite, Category = "Targeting")
@@ -189,8 +182,6 @@ protected:
 	TArray<FIntPoint> GetAbilityArea(FIntPoint TargetLocation) const;
 
 	// Range and targeting utilities
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	bool IsTargetInRange(class ACombatant* Target, int32& OutRangePenalty) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	bool HasLineOfSight(class ACombatant* Target) const;

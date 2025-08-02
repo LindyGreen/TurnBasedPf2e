@@ -193,45 +193,7 @@ int32 UMyBaseGameplayAbility::CalculateDistanceToTarget(ACombatant* Target) cons
 
 
 
-bool UMyBaseGameplayAbility::IsTargetInRange(ACombatant* Target, int32& OutRangePenalty) const
-{
-	OutRangePenalty = 0;
-	
-	if (!Target)
-		return false;
-	
-	int32 Distance = CalculateDistanceToTarget(Target);
-	if (Distance < 0)
-		return false;
-	
-	// For melee attacks (Category == Attack, Range <= 1)
-	if (Category == EAbilityCategory::Attack && Range <= 1)
-	{
-		return Distance <= Range;
-	}
-	
-	// For ranged attacks and spells
-	int32 EffectiveMaxRange = (MaxRange > 0) ? MaxRange : Range;
-	
-	// Check if within maximum range
-	if (Distance > EffectiveMaxRange)
-		return false;
-	
-	// Apply range penalty for ranged attacks (not spells)
-	if (Category == EAbilityCategory::Attack && LongRangeThreshold > 0)
-	{
-		if (Distance > LongRangeThreshold * 2)
-		{
-			OutRangePenalty = 4; // -4 penalty for third weapon increment
-		}
-		else if (Distance > LongRangeThreshold)
-		{
-			OutRangePenalty = 2; // -2 penalty for second increment
-		}
-	}
-	
-	return true;
-}
+
 
 bool UMyBaseGameplayAbility::HasLineOfSight(ACombatant* Target) const
 {
