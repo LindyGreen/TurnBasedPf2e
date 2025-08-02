@@ -8,9 +8,12 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
-#include "GameFramework/FloatingPawnMovement.h"
 #include "AbilitySystemComponent.h"
 #include "../Public/GAS/CombatAttributeSet.h"
+#include "../Public/GAS/SkillsAttributeSet.h"
+#include "../Public/GAS/SpellsAttributeSet.h"
+#include "StructsAndEnums/FS_Skills.h"
+#include "StructsAndEnums/FS_SpellResources.h"
 #include "LogTypes.h"
 
 #include "Kismet/KismetMathLibrary.h"
@@ -32,10 +35,10 @@ ACombatant::ACombatant()
 	InitiativeLight->LightColor = FColor(255, 0, 0);
 	InitiativeLight->SetRelativeLocation(FVector(0, 0, 200));
 	InitiativeLight->SetHiddenInGame(true);
-	//FloatingPawnMovement
-	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
-	//GAS
+	//GAS - All combatants get all attribute sets (unused ones stay at 0)
 	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("CombatAttributeSet"));
+	SkillsAttributes = CreateDefaultSubobject<USkillsAttributeSet>(TEXT("SkillsAttributeSet"));
+	SpellsAttributes = CreateDefaultSubobject<USpellsAttributeSet>(TEXT("SpellsAttributeSet"));
 }
 
 // Called when the game starts or when spawned
@@ -485,15 +488,15 @@ float ACombatant::GetCombatAttribute(ECombatAttributeType AttributeType) const
 	}
 }
 
-void ACombatant::InitializeCombatAttributes(const FS_CombatAttributes& CombatAttributesData)
+void ACombatant::InitializeAttributes(const FS_CombatAttributes& CombatAttributesData, const FS_Skills& SkillsData, const FS_SpellResourcesAndAttributes& SpellsData)
 {
-	if (!CombatAttributes || !AbilitySystemComponent)
+	if (!CombatAttributes || !SkillsAttributes || !SpellsAttributes || !AbilitySystemComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("InitializeCombatAttributes: CombatAttributes or ASC is null"));
+		UE_LOG(LogTemp, Error, TEXT("InitializeAttributes: One or more attribute sets or ASC is null"));
 		return;
 	}
 	
-	// Initialize attributes properly through GAS using InitStats
+	// Initialize Combat attributes
 	CombatAttributes->InitMaxHealth(CombatAttributesData.MaxHealth);
 	CombatAttributes->InitHealth(CombatAttributesData.MaxHealth); // Start at full health
 	CombatAttributes->InitAC(CombatAttributesData.AC);
@@ -512,9 +515,56 @@ void ACombatant::InitializeCombatAttributes(const FS_CombatAttributes& CombatAtt
 	CombatAttributes->InitDamageDieCount(CombatAttributesData.DamageDieCount);
 	CombatAttributes->InitMaxDieRoll(CombatAttributesData.MaxDieRoll);
 	
-	UE_LOG(LogTemp, Log, TEXT("Combat attributes initialized - Health: %f/%f, AC: %f, MaxDieRoll: %f"), 
+	// Initialize Skills attributes (all PF2e skills)
+	SkillsAttributes->InitAcrobatics(SkillsData.Acrobatics);
+	SkillsAttributes->InitArcana(SkillsData.Arcana);
+	SkillsAttributes->InitAthletics(SkillsData.Athletics);
+	SkillsAttributes->InitCrafting(SkillsData.Crafting);
+	SkillsAttributes->InitDeception(SkillsData.Deception);
+	SkillsAttributes->InitDiplomacy(SkillsData.Diplomacy);
+	SkillsAttributes->InitIntimidation(SkillsData.Intimidation);
+	SkillsAttributes->InitMedicine(SkillsData.Medicine);
+	SkillsAttributes->InitNature(SkillsData.Nature);
+	SkillsAttributes->InitOccultism(SkillsData.Occultism);
+	SkillsAttributes->InitPerformance(SkillsData.Performance);
+	SkillsAttributes->InitReligion(SkillsData.Religion);
+	SkillsAttributes->InitSociety(SkillsData.Society);
+	SkillsAttributes->InitStealth(SkillsData.Stealth);
+	SkillsAttributes->InitSurvival(SkillsData.Survival);
+	SkillsAttributes->InitThievery(SkillsData.Thievery);
+	
+	// Initialize Spells attributes (spell slots, focus points, etc.)
+	SpellsAttributes->InitSpellAttackBonus(SpellsData.SpellAttackBonus);
+	SpellsAttributes->InitSpellSaveDC(SpellsData.SpellSaveDC);
+	SpellsAttributes->InitIsSpontaneous(SpellsData.bIsSpontaneous ? 1.0f : 0.0f);
+	SpellsAttributes->InitPreparableCantrips(SpellsData.PreperableCantrips);
+	
+	// Level 1 slots
+	SpellsAttributes->InitLevel1Slots(SpellsData.Level1Slots);
+	SpellsAttributes->InitLevel1Slot1(SpellsData.Level1Slot1 ? 1.0f : 0.0f);
+	SpellsAttributes->InitLevel1Slot2(SpellsData.Level1Slot2 ? 1.0f : 0.0f);
+	SpellsAttributes->InitLevel1Slot3(SpellsData.Level1Slot3 ? 1.0f : 0.0f);
+	
+	// Level 2 slots
+	SpellsAttributes->InitLevel2Slots(SpellsData.Level2Slots);
+	SpellsAttributes->InitLevel2Slot1(SpellsData.Level2Slot1 ? 1.0f : 0.0f);
+	SpellsAttributes->InitLevel2Slot2(SpellsData.Level2Slot2 ? 1.0f : 0.0f);
+	SpellsAttributes->InitLevel2Slot3(SpellsData.Level2Slot3 ? 1.0f : 0.0f);
+	
+	// Level 3 slots
+	SpellsAttributes->InitLevel3Slots(SpellsData.Level3Slots);
+	SpellsAttributes->InitLevel3Slot1(SpellsData.Level3Slot1 ? 1.0f : 0.0f);
+	SpellsAttributes->InitLevel3Slot2(SpellsData.Level3Slot2 ? 1.0f : 0.0f);
+	SpellsAttributes->InitLevel3Slot3(SpellsData.Level3Slot3 ? 1.0f : 0.0f);
+	
+	// Divine/Focus
+	SpellsAttributes->InitDivineFont(SpellsData.DivineFont);
+	SpellsAttributes->InitMaxFocusPoints(SpellsData.MaxFocusPoints);
+	SpellsAttributes->InitCurrentFocusPoints(SpellsData.MaxFocusPoints); // Start at max focus points
+	
+	UE_LOG(LogTemp, Log, TEXT("All attributes initialized - Health: %f/%f, AC: %f, Stealth: %f, Spell DC: %f"), 
 		CombatAttributes->GetHealth(), CombatAttributes->GetMaxHealth(), 
-		CombatAttributes->GetAC(), (float)CombatAttributes->GetMaxDieRoll());
+		CombatAttributes->GetAC(), SkillsAttributes->GetStealth(), SpellsAttributes->GetSpellSaveDC());
 }
 
 void ACombatant::InitStartingEffectsAndAbilities(const TArray<TSubclassOf<UMyBaseGameplayAbility>>& StartingAbilities, const TArray<TSubclassOf<UGameplayEffect>>& StartingEffects)

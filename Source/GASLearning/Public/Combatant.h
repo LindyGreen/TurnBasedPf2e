@@ -8,6 +8,8 @@
 #include "AbilitySystemInterface.h"
 #include "StructsAndEnums/ECombatAttributeType.h"
 #include "StructsAndEnums/FS_CombatAttributes.h"
+#include "StructsAndEnums/FS_Skills.h"
+#include "StructsAndEnums/FS_SpellResources.h"
 #include "StructsAndEnums/E_TileType.h"
 #include "Combatant.generated.h"
 class UTurnManagerComponent;
@@ -16,7 +18,8 @@ class UPointLightComponent;
 class UCapsuleComponent;
 class UAbilitySystemComponent;
 class UCombatAttributeSet;
-class UFloatingPawnMovement;
+class USkillsAttributeSet;
+class USpellsAttributeSet;
 class UMyBaseGameplayAbility;
 class UGameplayEffect;
 
@@ -89,13 +92,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UCapsuleComponent> Capsule;
 	
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<UFloatingPawnMovement> FloatingPawnMovement;
-	
-	//GAS component
+	//GAS components - All combatants get all attribute sets
 	UPROPERTY()
 	TObjectPtr<UCombatAttributeSet> CombatAttributes;
+	
+	UPROPERTY()
+	TObjectPtr<USkillsAttributeSet> SkillsAttributes;
+	
+	UPROPERTY()
+	TObjectPtr<USpellsAttributeSet> SpellsAttributes;
 
 	// Conditions
 	UPROPERTY(BlueprintReadWrite, Category = "Conditions")
@@ -123,9 +128,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Attributes")
 	float GetCombatAttribute(ECombatAttributeType AttributeType) const;
 	
-	// Bulk initialization from combat attributes struct
+	// Bulk initialization from complete character data (combat, skills, spells)
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	void InitializeCombatAttributes(const FS_CombatAttributes& CombatAttributesData);
+	void InitializeAttributes(const FS_CombatAttributes& CombatAttributesData, const FS_Skills& SkillsData, const FS_SpellResourcesAndAttributes& SpellsData);
 
 	// Initialize starting GameplayAbilities and GameplayEffects for this combatant
 	UFUNCTION(BlueprintCallable, Category = "Attributes")

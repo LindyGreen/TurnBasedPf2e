@@ -9,6 +9,8 @@
 #include "GameplayTagContainer.h"
 #include "RangeFinder.h"
 
+#include "GAS/SpellsAttributeSet.h"
+
 #include "Kismet/GameplayStatics.h"
 
 UMyBaseGameplayAbility::UMyBaseGameplayAbility()
@@ -101,7 +103,15 @@ EDegreeOfSuccess UMyBaseGameplayAbility::RollAbilityAttack(AActor* Target, float
 	ACombatant* TargetCombatant = Cast<ACombatant>(Target);
 	int32 TargetAC = static_cast<int32>(TargetCombatant->GetAbilitySystemComponent()->GetNumericAttribute(UCombatAttributeSet::GetACAttribute()));
 	//Add ternary operator to use spell attacks instead of physical ones
-	int32 AttackBonus = OwningCombatant->CombatAttributes->GetAttackBonus();
+	int32 AttackBonus;
+	if (GetAbilityCategory()==EAbilityCategory::SpellAttack)
+	{
+	AttackBonus = OwningCombatant->SpellsAttributes->GetSpellAttackBonus();
+	}
+	else
+	{
+	AttackBonus = OwningCombatant->CombatAttributes->GetAttackBonus();
+	}
 	int32 MaxDieRoll = OwningCombatant->CombatAttributes->GetMaxDieRoll();
 	
 	// Combine range penalty and MAP penalty
