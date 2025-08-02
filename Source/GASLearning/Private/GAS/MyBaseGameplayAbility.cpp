@@ -356,10 +356,9 @@ void UMyBaseGameplayAbility::ApplyDamageToTarget(ACombatant* Target, float Damag
 
 void UMyBaseGameplayAbility::StartAimingStage()
 {
-
-	
 	// Clear previous "IsInRange" states from all tiles
 	GridRef->ClearStateFromTiles(ETileState::IsInRange);
+	GridRef->ClearStateFromTiles(ETileState::IsInRange2);
 	
 	// Get valid tiles for this ability using emanation pattern
 	FIntPoint CasterLocation = OwningCombatant->LocationIndex;
@@ -378,11 +377,37 @@ void UMyBaseGameplayAbility::StartAimingStage()
 		GridRef->AddStateToTile(TileIndex, ETileState::IsInRange);
 	}
 	
+	// Check if second range increment should be implemented (only for non-spell attacks)
+	if (Category == EAbilityCategory::Attack && Range > 2)
+	{
+		// Get tiles for second range increment (Range*2)
+		TArray<FIntPoint> ValidRange2Tiles = RangeFinderRef->GetEffectAreaOrRange(
+			CasterLocation,           // OriginPoint
+			CasterLocation,           // CasterLocation
+			Range * 2,                // Range*2 for second increment
+			EAE_SpellPattern_Emanation, // Pattern - always emanation
+			!bRequiresTarget,         // IgnoreLOS
+			!bCanTargetSelf           // IgnoreOrigin
+		);
+		
+		// Remove tiles that are already in first range (closer tiles)
+		ValidRange2Tiles.RemoveAll([&ValidTiles](const FIntPoint& Tile) {
+			return ValidTiles.Contains(Tile);
+		});
+		
+		// Mark farther tiles as "IsInRange2"
+		for (const FIntPoint& TileIndex : ValidRange2Tiles)
+		{
+			GridRef->AddStateToTile(TileIndex, ETileState::IsInRange2);
+		}
+	}
+	
 	// Set targeting flag
 	bIsTargeting = true;
 	
-	UE_LOG(LogTemp, Log, TEXT("StartAimingStage: Highlighted %d tiles for ability %s"), 
+	UE_LOG(LogTemp, Log, TEXT("StartAimingStage: Highlighted %d close tiles for ability %s"), 
 		ValidTiles.Num(), *GetAbilityDisplayName().ToString());
+	
 	EnableCombatantLookAt();
 }
 
