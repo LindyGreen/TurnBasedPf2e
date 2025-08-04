@@ -7,24 +7,26 @@
 ### Animation System
 - [x] **Create 1D Blendspace** (Idle → Walk → Run)
 - [x] **Implement IsMoving bool** in Animation Blueprint
-- [ ] **Set up montage system** for abilities
+- [x] **Set up montage system** for abilities
 - [x] **Test movement speed consistency** with new animation system
 
-### Visual Polish for Demo
+### Visual Polish for Linkedin Post
 - [ ] **Basic attack animations** - find montages
-- [ ] **Rotate towards Target function** - 
+- [x] **Basic dodge animations** - find montages
+- [x] **Rotate towards Target function** - 
+- [x] **Rotate towards Attacker function** - 
 - [ ] **Simple damage numbers** - floating text on hits
 - [ ] **Death animations** - PC death montage, AI ragdoll, stand up if not dead
 - [ ] **Basic spell VFX** - colored particles/spheres
 
 ### SaveSystem and Spawn system
-- [ ] Create Blueprint SaveGame class with 4 individual FS_CompleteCharacterData slots (Character1, Character2, Character3, Character4)
-- [ ]Create Blueprint functions to save/load  character data to/from save slots
-- [ ] Design pre-combat initialization system that loads characters from save file
-- [ ] Create character placement logic on grid based on loaded data
+- [x] Create Blueprint SaveGame class with 4 individual FS_CompleteCharacterData slots (Character1, Character2, Character3, Character4)
+- [x]Create Blueprint(made c++) functions to save/load  character data to/from save slots
+- [x] Design pre-combat initialization system that loads characters from save file
+- [x] Create character placement logic on grid based on loaded data
 - [ ] Initialize ACombatant actors with loaded FS_CompleteCharacterData
 - [ ] Add validation for loaded character data (ensure all required fields exist)
-- [ ] Create fallback/default characters if save file doesn't exist or is corrupted
+- [x] Create fallback/default characters if save file doesn't exist or is corrupted
 - [ ] Add quest progress structure to SaveGame for future use
 
 ### UI/UX Polish
@@ -36,8 +38,8 @@
 
 ### Ability Implementation
 
-- [ ] **CreateUniversalTemplate** - In progress
-- [ ] **Implement basic melee attack** ability  - in progress
+- [ ] **CreateUniversalTemplate** - In progress 60%
+- [ ] **Implement basic melee attack** ability  - in progress 80% anim left
 - [ ] **Implement basic spell** ability      -    in progress
 - [ ] **Add ability cost validation** improvements
 
@@ -77,11 +79,6 @@
 - [ ] **Background music** for combat
 - [ ] **UI sound effects** (button clicks, etc.)
 - [ ] **Environmental audio** (footsteps on different surfaces)
-
-### Level Design
-- [ ] **Create additional test maps** with varied terrain
-- [ ] **Environmental obstacles** and interactive elements
-- [ ] **Lighting improvements** for atmosphere
 
 ## Documentation Updates
 - [ ] **Update CLAUDE.local.md** with animation system decisions

@@ -401,7 +401,6 @@ void UMyBaseGameplayAbility::StartAimingStage()
 			GridRef->AddStateToTile(TileIndex, ETileState::IsInRange2);
 		}
 	}
-	
 	// Set targeting flag
 	bIsTargeting = true;
 	

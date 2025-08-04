@@ -187,8 +187,8 @@ private:
 	
 	UPROPERTY()
 	FVector LookAtTargetLocation = FVector::ZeroVector;
-	
-	UPROPERTY(EditAnywhere, Category = "Targeting")
+protected:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targeting")
 	float LookAtSpeed = 5.0f;
 
 public:
