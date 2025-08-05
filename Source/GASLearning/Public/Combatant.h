@@ -22,6 +22,8 @@ class USkillsAttributeSet;
 class USpellsAttributeSet;
 class UMyBaseGameplayAbility;
 class UGameplayEffect;
+class UDamageNumberWidget;
+class UWidgetComponent;
 
 UCLASS()
 class GASLEARNING_API ACombatant : public APawn, public IAbilitySystemInterface
@@ -176,6 +178,16 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Targeting")
 	void SetLookAtLocation(FVector TargetLocation);
+
+	// Damage Numbers
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> DamageNumberComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UDamageNumberWidget> DamageNumberWidgetClass;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowDamageNumber(float DamageAmount);
 
 private:
 	// Look-at variables

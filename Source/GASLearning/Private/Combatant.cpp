@@ -17,6 +17,9 @@
 #include "LogTypes.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/DamageNumberWidget.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 ACombatant::ACombatant()
@@ -39,6 +42,15 @@ ACombatant::ACombatant()
 	CombatAttributes = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("CombatAttributeSet"));
 	SkillsAttributes = CreateDefaultSubobject<USkillsAttributeSet>(TEXT("SkillsAttributeSet"));
 	SpellsAttributes = CreateDefaultSubobject<USpellsAttributeSet>(TEXT("SpellsAttributeSet"));
+	
+	//Damage Number Widget Component
+	DamageNumberComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("DamageNumberComponent"));
+	DamageNumberComponent->SetupAttachment(Capsule);
+	DamageNumberComponent->SetRelativeLocation(FVector(0, 0, 100)); // 100 units above
+	DamageNumberComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	DamageNumberComponent->SetTwoSided(true);
+	DamageNumberComponent->SetDrawSize(FVector2D(200, 100));
+	DamageNumberComponent->SetVisibility(false); // Hidden by default
 }
 
 // Called when the game starts or when spawned
@@ -59,6 +71,12 @@ void ACombatant::BeginPlay()
 		CombatAttributes->OnWillChanged.AddDynamic(this, &ACombatant::HandleWillChange);
 		CombatAttributes->OnActionsRemainingChanged.AddDynamic(this, &ACombatant::HandleActionsRemainingChange);
 		CombatAttributes->OnReactionAvailableChanged.AddDynamic(this, &ACombatant::HandleReactionAvailableChange);
+	}
+	
+	// Initialize damage number widget component if class is set
+	if (DamageNumberComponent && DamageNumberWidgetClass)
+	{
+		DamageNumberComponent->SetWidgetClass(DamageNumberWidgetClass);
 	}
 	
 }
@@ -304,6 +322,12 @@ void ACombatant::EndTurnEffects()
 
 void ACombatant::HandleHealthChange(float Magnitude,  float NewHealth)
 {
+	// Show damage number if there was health change
+	if (Magnitude != 0.0f)
+	{
+		ShowDamageNumber(Magnitude);
+	}
+	
 	if (NewHealth <= 0)
 	{
 		//TODO Handle death
@@ -648,4 +672,40 @@ void ACombatant::Tick(float DeltaTime)
 		FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, LookAtSpeed);
 		SetActorRotation(NewRotation);
 	}
+}
+
+void ACombatant::ShowDamageNumber(float DamageAmount)
+{
+	if (!DamageNumberComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DamageNumberComponent is null on %s"), *GetName());
+		return;
+	}
+
+	// Get the widget from the component
+	UDamageNumberWidget* DamageWidget = Cast<UDamageNumberWidget>(DamageNumberComponent->GetWidget());
+	if (!DamageWidget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DamageNumberWidget is null on %s"), *GetName());
+		return;
+	}
+
+	// Show the component and update damage
+	DamageNumberComponent->SetVisibility(true);
+	
+	// Get world location (the component is already positioned correctly)
+	FVector WorldLocation = DamageNumberComponent->GetComponentLocation();
+	DamageWidget->ShowDamage(DamageAmount, WorldLocation);
+
+	// Set up auto-hide timer
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+	{
+		if (DamageNumberComponent && IsValid(DamageNumberComponent))
+		{
+			DamageNumberComponent->SetVisibility(false);
+		}
+	}, 2.0f, false);
+
+	UE_LOG(LogTemp, Log, TEXT("Showed damage number: %f for %s"), DamageAmount, *GetName());
 }
